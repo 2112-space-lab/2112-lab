@@ -1,0 +1,21 @@
+[tool.ariadne-codegen]
+schema_path = "../schemas/"  # Path to the GraphQL schema directory
+target_package_name = "generated"  # Package name for the generated client
+files_to_include = ["models/health_status.py"]
+
+# Enable advanced features
+enable_custom_operations = true  # Enables structured query/mutation building
+async_client = true  # Generates an async GraphQL client
+include_comments = "stable"  # Adds comments in the generated files
+convert_to_snake_case = true  # Ensures field names are in snake_case
+include_all_inputs = true  # Includes all input types in models
+include_all_enums = true  # Includes all enum values in models
+opentelemetry_client = true  # Enable OpenTelemetry for tracing
+
+[tool.ariadne-codegen.extract_operations]
+operations_module_name = "custom_operations"
+
+[tool.ariadne-codegen.scalars.HealthStatus]
+type = ".health_status.HealthStatus"
+parse = ".health_status.parse_health_status"
+serialize = ".health_status.serialize_health_status"

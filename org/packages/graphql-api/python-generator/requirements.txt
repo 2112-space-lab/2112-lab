@@ -1,3 +1,6 @@
 fastapi
 uvicorn
-graphql-core==3.2.3
+ariadne
+ariadne-codegen
+ariadne-codegen[subscriptions]
+

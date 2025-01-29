@@ -1,4 +1,35 @@
+# Core dependencies
+flask
 fastapi
-uvicorn
+uvicorn[standard]
+
+# Caching & Messaging
 redis
+pika  # For RabbitMQ
+
+# Satellite Tracking
 skyfield
+
+# Data Validation & Models
+pydantic
+
+# OpenTelemetry for tracing
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-flask
+opentelemetry-instrumentation-redis
+opentelemetry-instrumentation-pika
+opentelemetry-exporter-otlp
+
+# GraphQL
+ariadne
+ariadne-codegen
+graphql-core
+
+# Logging & Observability
+structlog
+python-json-logger
+
+# Async support
+asyncio

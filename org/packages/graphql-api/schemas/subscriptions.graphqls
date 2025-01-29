@@ -1,0 +1,12 @@
+type Subscription {
+  # Real-time position updates for a specific user
+  satellitePositionUpdated(uid: String!, id: ID!): SatellitePosition
+
+  # Real-time updates for satellite visibilities in a user-defined zone for a specific user
+  satelliteVisibilityUpdated(
+    uid: String!
+    userLocation: UserLocationInput!
+    startTime: String!
+    endTime: String!
+  ): [SatelliteVisibility!]!
+}

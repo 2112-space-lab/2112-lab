@@ -1,0 +1,19 @@
+"""
+Represents the status of a single dependency like Redis or RabbitMQ.
+"""
+type DependencyStatus {
+    name: String!
+    status: String!
+    message: String
+}
+
+"""
+Represents the overall health of the service.
+"""
+type HealthStatus {
+    serviceName: String!
+    status: String!
+    dependencies: [DependencyStatus!]!
+    traceId: String
+    timestamp: String!
+}

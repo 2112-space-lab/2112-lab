@@ -2,15 +2,16 @@ from setuptools import setup, find_packages
 
 setup(
     name="generator_graphql_api",
-    version="0.0.1",
+    version="0.0.2",
     description="GraphQL API Python Client",
     author="Elbujito",
-    author_email="adrien.roques.31@outlook.fr",
-    url="https://github.com/Elbujito/2112-lab",
+    author_email="adrien.roques@icloud.com",
+    url="https://github.com/2112-space-lab/2112-lab",
     packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
     install_requires=[
-        "graphql-core==3.2.3",
+        "ariadne",
+        "ariadne-codegen",
         "fastapi",
         "uvicorn",
     ],

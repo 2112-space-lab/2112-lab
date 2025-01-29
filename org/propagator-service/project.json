@@ -4,13 +4,31 @@
         "install": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "pip install -r propagator-service/requirements.txt"
+                "commands": [
+                    "[ -d propagator-service/venv ] || python3 -m venv propagator-service/venv",
+                    "( . propagator-service/venv/bin/activate && pip install --upgrade pip )",
+                    "( . propagator-service/venv/bin/activate && pip install -r propagator-service/requirements.txt )"
+                ]
             }
         },
         "serve": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "python propagator-service/main.py"
+                "command": "( . propagator-service/venv/bin/activate && FLASK_ENV=${FLASK_ENV:-development} python propagator-service/app/main.py )"
+            }
+        },
+        "update-graphql-models": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "nx run graphql-api:generate",
+                    "rm -rf propagator-service/app/generated",
+                    "mkdir -p propagator-service/app/generated",
+                    "cp -r packages/graphql-api/python-generator/generated/* propagator-service/app/generated/",
+                    "rm -rf propagator-service/app/graphql_schemas",
+                    "mkdir -p propagator-service/app/graphql_schemas",
+                    "cp -r packages/graphql-api/schemas/* propagator-service/app/graphql_schemas/"
+                ]
             }
         }
     }

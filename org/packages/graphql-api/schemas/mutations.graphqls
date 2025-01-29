@@ -1,0 +1,9 @@
+type Mutation {
+  # Request visibilities for satellites within a specific user location and time range
+  requestSatelliteVisibilities(
+    uid: String!
+    userLocation: UserLocationInput!
+    startTime: String!
+    endTime: String!
+  ): Boolean!
+}

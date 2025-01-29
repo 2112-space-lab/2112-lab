@@ -10,7 +10,13 @@
         "generate": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "cd packages/graphql-api/go-generator && go run github.com/99designs/gqlgen generate"
+                "commands": [
+                    "cd packages/graphql-api/python-generator && [ -d venv ] || python3 -m venv venv",
+                    "cd packages/graphql-api/python-generator && ./venv/bin/python -m pip install --upgrade pip",
+                    "cd packages/graphql-api/python-generator && ./venv/bin/pip install -r requirements.txt",
+                    "cd packages/graphql-api/go-generator && go run github.com/99designs/gqlgen generate",
+                    "cd packages/graphql-api/python-generator && ./venv/bin/python -m ariadne_codegen client --config pyproject.toml"
+                ]
             }
         }
     }
