@@ -1,0 +1,17 @@
+{
+    "name": "propagator-service",
+    "targets": {
+        "install": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "pip install -r propagator-service/requirements.txt"
+            }
+        },
+        "serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "python propagator-service/main.py"
+            }
+        }
+    }
+}

@@ -1,0 +1,65 @@
+{
+  "npmScope": "org",
+  "implicitDependencies": {
+    "app-service": [
+      "go-utils",
+      "graphql-api"
+    ],
+    "gateway-service": [
+      "go-utils",
+      "graphql-api"
+    ],
+    "propagator-service": [
+      "graphql-api"
+    ],
+    "web": [
+      "graphql-api"
+    ]
+  },
+  "projects": {
+    "app-service": {
+      "tags": [
+        "backend",
+        "golang"
+      ],
+      "type": "application"
+    },
+    "gateway-service": {
+      "tags": [
+        "backend",
+        "golang"
+      ],
+      "type": "application"
+    },
+    "go-utils": {
+      "tags": [
+        "backend",
+        "golang",
+        "library"
+      ],
+      "type": "library"
+    },
+    "graphql-api": {
+      "tags": [
+        "backend",
+        "graphql",
+        "schema"
+      ],
+      "type": "library"
+    },
+    "propagator-service": {
+      "tags": [
+        "backend",
+        "python"
+      ],
+      "type": "library"
+    },
+    "web": {
+      "tags": [
+        "frontend",
+        "react"
+      ],
+      "type": "application"
+    }
+  }
+}

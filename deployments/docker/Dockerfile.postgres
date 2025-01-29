@@ -1,0 +1,19 @@
+FROM postgis/postgis:latest
+
+# Add Go tools to PATH
+ENV PATH="$PATH:/go/bin"
+
+# Switch to the postgres user
+USER postgres
+
+# Set environment variables for the default database, user, and password
+ENV POSTGRES_DB=2112
+ENV POSTGRES_USER=2112
+ENV POSTGRES_PASSWORD=2112
+
+# Add custom initialization scripts
+# COPY ./init-scripts /docker-entrypoint-initdb.d/
+
+# The docker-entrypoint.sh script initializes the database and runs any scripts in /docker-entrypoint-initdb.d/
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["postgres"]

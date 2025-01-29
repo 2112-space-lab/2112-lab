@@ -1,0 +1,15 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "react/no-unescaped-entities": [
+      "error",
+      {
+        "forbid": [
+          ">",
+          "}"
+        ]
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "off"
+  }
+}

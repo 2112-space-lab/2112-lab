@@ -1,0 +1,48 @@
+# Temp Folders and files #
+tmp
+sqlite.db
+ci/data/sqlite/*
+ci/data/mysql/*
+ci/data/postgres/*
+ci/data/postgres
+ci/data/
+
+# Logs #
+*.log
+
+# SENSITVE DATA #
+.gitconfig
+.env
+service.env
+
+# Binaries "
+service-skeleton
+./service
+./2112
+
+web/node_modules/*
+web/node_modules/
+web/node_modules
+web/node_modules/***** */
+web/dist/
+venv/
+
+python/satellite_server/__pycache__/*
+backend/vendor/*
+backend/vendor/
+
+templates/ci/data
+templates/go-server/vendor/*
+templates/go-server/vendor/
+tempaltes/python-server/__pycache__/*
+
+lib/fx/vendor/
+lib/fx/vendor/*
+
+.husky
+
+2112
+
+src/templates/ci/data/** 
+deployments/data/** 
+deployments/data/postgres/** 

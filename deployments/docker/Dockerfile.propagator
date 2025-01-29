@@ -1,0 +1,31 @@
+# Use an official Python image as a base
+FROM python:3.9
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Copy the requirements file into the container
+COPY src/propagator-service/requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install uvicorn for FastAPI
+RUN pip install uvicorn
+
+# Install Redis client for Python
+RUN pip install redis
+
+# Copy the rest of the application code into the container
+COPY src/propagator-service/server/ server/
+
+# Expose the FastAPI app port
+EXPOSE 5000
+
+# Set environment variables for FastAPI
+ENV FASTAPI_APP=server.main:app
+ENV FASTAPI_HOST=0.0.0.0
+ENV FASTAPI_PORT=5000
+
+# Default command to run FastAPI using uvicorn
+CMD ["uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "5000"]

@@ -1,0 +1,23 @@
+server:
+  http_listen_port: 4100
+
+memberlist:
+  abort_if_cluster_join_fails: false
+  join_members:
+    - periscope
+
+compactor:
+  data_dir: /tmp/periscope/compactor
+
+distributor:
+  ring:
+    kvstore:
+      store: memberlist
+
+ingester:
+  lifecycler:
+    ring:
+      kvstore:
+        store: memberlist
+      replication_factor: 1
+    final_sleep: 0s

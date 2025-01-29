@@ -1,0 +1,17 @@
+{
+    "name": "graphql-api",
+    "targets": {
+        "validate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd packages/graphql-api/go-generator && go run github.com/99designs/gqlgen validate"
+            }
+        },
+        "generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd packages/graphql-api/go-generator && go run github.com/99designs/gqlgen generate"
+            }
+        }
+    }
+}

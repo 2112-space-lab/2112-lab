@@ -1,0 +1,14 @@
+APP_PORT=8081
+REDIS_HOST=redis-service
+REDIS_PORT=6379
+DB_HOST=host.docker.internal
+DB_PORT=5440
+DB_USER=2112
+DB_PASSWORD=2112
+DB_NAME=2112
+DB_PLATFORM=postgres
+DB_SSL_MODE=disable
+LOG_LEVEL=debug
+DISABLE_FEATURES=ory_keto,ory_kratos,redis
+PROPAGATOR_URL=http://propagator-service:5000/satellite/propagate
+CLERK_API_KEY=sk_test_GkqI0OhxlxMiywMZ2zgoNhGZ5H4RYymSdfDfdiTPBc

@@ -1,0 +1,31 @@
+# Use the cargo-chef image for dependency preparation
+FROM lukemathwalker/cargo-chef:latest-rust-alpine as chef
+WORKDIR /app
+
+# Prepare the dependency recipe
+FROM chef AS planner
+COPY src/tle-propagator-service/Cargo.toml src/tle-propagator-service/Cargo.lock ./
+COPY src/tle-propagator-service/src ./src
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Build dependencies
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Copy the project files and build the application
+COPY src/tle-propagator-service ./src/tle-propagator-service
+WORKDIR /app/src/tle-propagator-service
+RUN cargo build --release
+RUN mv ./target/release/tle-propagator-service /app/tle-propagator-service
+
+# Use a minimal base image for runtime
+FROM scratch AS runtime
+WORKDIR /app
+COPY --from=builder /app/tle-propagator-service /usr/local/bin/tle-propagator-service
+
+# Expose the service port
+EXPOSE 5000
+
+# Set the entry point to the application binary
+ENTRYPOINT ["/usr/local/bin/tle-propagator-service"]

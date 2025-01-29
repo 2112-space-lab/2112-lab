@@ -1,0 +1,17 @@
+{
+    "name": "go-utils",
+    "targets": {
+        "verify": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd packages/go-utils && go vet ./..."
+            }
+        },
+        "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd packages/go-utils && go test -v ./..."
+            }
+        }
+    }
+}

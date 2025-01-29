@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - ./assets/rabbitmq/data:/var/lib/rabbitmq
+      - ./assets/rabbitmq/log:/var/log/rabbitmq
+
+networks:
+  default:
+    name: 2112_net
+    external: true

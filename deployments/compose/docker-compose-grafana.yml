@@ -1,0 +1,74 @@
+version: '3.8'
+services:
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:10.2.0 # Alpine version (lightweight), enterprise can be used for free, paid features are locked
+    environment:
+      - GF_FEATURE_TOGGLES_ENABLE=flameGraph
+      - GF_INSTALL_PLUGINS=gapit-htmlgraphics-panel
+    ports:
+      - 3001:3000
+    volumes:
+      - ./assets/grafana/provisioning/grafana.ini:/etc/grafana/grafana.ini
+      - ./assets/grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources/
+      - ./assets/grafana/provisioning/dashboards/default.yaml:/etc/grafana/provisioning/dashboards/default.yaml
+      - ./assets/grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+
+  loki:
+    user: "0:0"
+    container_name: loki
+    image: grafana/loki:latest
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./assets/grafana/provisioning/loki-config.yaml:/etc/loki/loki-config.yaml
+
+  tempo:
+    container_name: tempo
+    image: grafana/tempo:latest
+    command: -config.file=/etc/tempo.yaml
+    volumes:
+      - ./assets/grafana/provisioning/tempo-config.yaml:/etc/tempo.yaml
+    ports:
+      - "14268:14268" 
+      - "3200:3200"
+      - "4317:4317" 
+      - "4318:4318" 
+      - "9411:9411"
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./assets/grafana/provisioning/prometheus-config.yaml:/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+
+  periscope:
+    container_name: periscope
+    image: grafana/pyroscope:latest
+    ports:
+      - "4100:4100"
+    command: -config.file=/etc/periscope/config.yaml
+    volumes:
+      - ./assets/grafana/provisioning/periscope.yaml:/etc/periscope/config.yaml
+
+  blackbox-exporter:
+    container_name: blackbox-exporter
+    image: prom/blackbox-exporter:latest
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./assets/grafana/provisioning/blackbox.yml:/etc/blackbox_exporter/config.yml
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+
+networks:
+  default:
+    name: 2112_net
+    external: true

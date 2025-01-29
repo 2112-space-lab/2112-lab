@@ -1,0 +1,17 @@
+{
+    "name": "web",
+    "targets": {
+        "build": {
+            "executor": "@nrwl/web:build",
+            "options": {
+                "outputPath": "dist/org/web"
+            }
+        },
+        "serve": {
+            "executor": "@nrwl/web:dev-server",
+            "options": {
+                "port": 4200
+            }
+        }
+    }
+}

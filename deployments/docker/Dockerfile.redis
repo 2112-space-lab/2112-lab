@@ -1,0 +1,8 @@
+# Base image from the official Redis image
+FROM redis:latest
+
+# Copy the Redis configuration file into the container
+COPY deployments/config/redis/redis.conf /usr/local/etc/redis/redis.conf
+
+# Command to start Redis with the custom configuration file
+CMD ["redis-server", "/usr/local/etc/redis/redis.conf"]
