@@ -7,6 +7,15 @@ input UserLocationInput {
   horizon: Float! # Horizon angle in degrees
 }
 
+input PropagationRequestInput {
+  noradId: Int!  # NORAD ID of the satellite
+  tleLine1: String!  # First line of the Two-Line Element set (TLE)
+  tleLine2: String!  # Second line of the Two-Line Element set (TLE)
+  startTime: String!  # Start time for propagation (ISO 8601 format)
+  durationMinutes: Int = 90  # Duration of propagation in minutes (default: 90)
+  intervalSeconds: Int = 15  # Time interval for position updates (default: 15)
+}
+
 # Satellite position and visibility information
 type SatellitePosition {
   id: ID!

@@ -6,4 +6,6 @@ type Mutation {
     startTime: String!
     endTime: String!
   ): Boolean!
+
+  propagateSatellitePosition(request: PropagationRequestInput!): [SatellitePosition]
 }

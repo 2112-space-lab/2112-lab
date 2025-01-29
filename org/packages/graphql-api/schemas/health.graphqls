@@ -1,9 +1,17 @@
+# Define the HealthStatusEnum
+enum HealthStatusEnum {
+    HEALTHY
+    DEGRADED
+    UNAVAILABLE
+    CONNECTED
+}
+
 """
 Represents the status of a single dependency like Redis or RabbitMQ.
 """
 type DependencyStatus {
     name: String!
-    status: String!
+    status: HealthStatusEnum!
     message: String
 }
 
@@ -12,7 +20,7 @@ Represents the overall health of the service.
 """
 type HealthStatus {
     serviceName: String!
-    status: String!
+    status: HealthStatusEnum!
     dependencies: [DependencyStatus!]!
     traceId: String
     timestamp: String!

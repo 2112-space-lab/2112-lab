@@ -1,10 +1,9 @@
 import os
 import logging
 import json
-from fastapi import FastAPI
-from flask import Flask, Response, jsonify
-from ariadne.asgi import GraphQL
-from ariadne import make_executable_schema, gql
+from flask import Flask, request, jsonify
+from ariadne import graphql_sync, make_executable_schema, gql
+from ariadne.explorer import ExplorerGraphiQL
 from dependencies import Dependencies
 from routes.health_router import HealthRouter 
 from config import config_class
@@ -21,18 +20,17 @@ deps = Dependencies()
 flask_app = Flask(__name__)
 
 # Register Flask routes
-health_router = HealthRouter(deps)  # Initialize health router
+health_router = HealthRouter(deps) 
 flask_app.register_blueprint(health_router.router, url_prefix="/health")
 
 # Read schema directory from environment variable or use default
-schema_directory = getattr(config_class, "SCHEMA_DIRECTORY", os.getenv("SCHEMA_DIRECTORY", "./graphql_schemas/"))
+schema_directory = getattr(config_class, "SCHEMA_DIRECTORY", os.getenv("SCHEMA_DIRECTORY", "./propagator-service/app/graphql_schemas/"))
 
 # Ensure schema directory exists
 if not os.path.exists(schema_directory):
     logger.warning(f"Schema directory not found: {schema_directory}. GraphQL API may not work correctly.")
-    type_defs = ""  # Empty schema
+    type_defs = ""
 else:
-    # Load and combine multiple GraphQL schemas
     schema_files = [os.path.join(schema_directory, f) for f in os.listdir(schema_directory) if f.endswith(".graphqls")]
 
     if not schema_files:
@@ -52,14 +50,16 @@ else:
     schema = None
     logger.warning("GraphQL schema is empty. The GraphQL API may not function as expected.")
 
-# FastAPI GraphQL setup
-fastapi_app = FastAPI()
-
-if schema:
-    fastapi_app.add_route("/graphql", GraphQL(schema, debug=True))
-    logger.info("GraphQL route added at /graphql")
-else:
-    logger.warning("GraphQL route was not added because the schema is missing.")
+# Setup GraphQL route with Flask
+@flask_app.route("/graphql", methods=["GET", "POST"])
+def graphql_server():
+    if request.method == "GET":
+        return ExplorerGraphiQL().html(None)
+    
+    data = request.get_json()
+    success, result = graphql_sync(schema, data, context_value={"request": request})
+    status_code = 200 if success else 400
+    return jsonify(result), status_code
 
 # Running the service with Flask
 if __name__ == "__main__":

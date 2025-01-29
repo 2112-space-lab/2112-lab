@@ -9,7 +9,6 @@ except ImportError:
     get_current_span = None
 
 class Dependencies:
-    """Handles initialization of application dependencies like Redis, RabbitMQ, and Logging."""
 
     def __init__(self):
         self.logger = self.setup_logger()
@@ -17,7 +16,6 @@ class Dependencies:
         self.rabbitmq_connection = self.setup_rabbitmq()
 
     def setup_logger(self):
-        """Configures structured logging."""
         logger = logging.getLogger("propagator-service")
         log_level = os.getenv("LOG_LEVEL", "INFO").upper()
         logger.setLevel(getattr(logging, log_level, logging.INFO))
@@ -29,7 +27,6 @@ class Dependencies:
         return logger
 
     def setup_redis(self):
-        """Initializes Redis connection."""
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
         try:
             client = redis.Redis.from_url(redis_url, decode_responses=True)
@@ -41,7 +38,6 @@ class Dependencies:
             return None
 
     def setup_rabbitmq(self):
-        """Initializes RabbitMQ connection."""
         rabbitmq_url = os.getenv("RABBITMQ_URL", f"amqp://{os.getenv('RABBITMQ_USER', 'guest')}:{os.getenv('RABBITMQ_PASSWORD', 'guest')}@{os.getenv('RABBITMQ_HOST', 'localhost')}:{os.getenv('RABBITMQ_PORT', 5672)}/")
         try:
             params = pika.URLParameters(rabbitmq_url)
@@ -53,7 +49,6 @@ class Dependencies:
         return None
 
     def get_trace_id(self):
-        """Extracts OpenTelemetry trace ID if available."""
         if get_current_span:
             span = get_current_span()
             if span and span.get_span_context():

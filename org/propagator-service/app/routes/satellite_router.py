@@ -1,40 +1,58 @@
-from fastapi import APIRouter, HTTPException, Request
-from services.satellite_service import propagate_satellite_position
-from dependencies import Dependencies
-from models import SatellitePosition
 import logging
+import json
+from flask import Blueprint, request, jsonify, Response
+from dependencies import Dependencies
+from services.satellite_service import propagate_satellite_position
+from generated.models import PropagationRequestInput
 
-logger = logging.getLogger(__name__)
-
-router = APIRouter()
-
-@router.post("/satellite/propagate")
-async def propagate_endpoint(request: Request) -> Dict[str, List[Dict]]:
+class SatelliteRouter:
     """
-    Propagate satellite positions and return them wrapped in a JSON object.
+    A dedicated router for handling satellite propagation requests.
     """
-    try:
-        data = await request.json()
-        logger.info(f"Received payload: {data}")
 
-        tle_line1 = data.get("tle_line1")
-        tle_line2 = data.get("tle_line2")
-        start_time = data.get("start_time")
-        duration_minutes = data.get("duration_minutes", 90)
-        interval_seconds = data.get("interval_seconds", 15)
-        satellite_id = data.get("norad_id")
+    def __init__(self, dependencies: Dependencies):
+        """
+        Initializes the SatelliteRouter with dependencies.
+        """
+        self.router = Blueprint("satellite_router", __name__)
+        self.dependencies = dependencies
+        self.logger = logging.getLogger("satellite-router")
 
-        if not tle_line1 or not tle_line2 or not start_time:
-            raise HTTPException(status_code=400, detail="TLE data and start time are required")
+        self._register_routes()
 
-        logger.info(f"Propagating satellite {satellite_id} from {start_time}")
+    def _register_routes(self):
+        """
+        Registers all satellite-related routes.
+        """
 
-        positions = propagate_satellite_position(
-            satellite_id, tle_line1, tle_line2, start_time, duration_minutes, interval_seconds
-        )
+        @self.router.route("/satellite/propagate", methods=["POST"])
+        def propagate():
+            """
+            Endpoint to propagate satellite positions based on TLE data.
+            """
+            try:
+                request_data = request.get_json()
+                self.logger.info(f"Received payload: {json.dumps(request_data, indent=4)}")
 
-        return {"positions": positions}
+                try:
+                    propagation_request = PropagationRequestInput(**request_data)
+                except Exception as e:
+                    self.logger.error(f"Invalid request data: {str(e)}")
+                    return jsonify({"error": f"Invalid request data: {str(e)}"}), 400
 
-    except Exception as e:
-        logger.error(f"Error propagating satellite positions: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error propagating satellite positions: {str(e)}")
+                self.logger.info(f"Propagating satellite {propagation_request.norad_id} from {propagation_request.start_time}")
+
+                positions = propagate_satellite_position(
+                    propagation_request.norad_id,
+                    propagation_request.tle_line_1,
+                    propagation_request.tle_line_2,
+                    propagation_request.start_time,
+                    propagation_request.duration_minutes,
+                    propagation_request.interval_seconds,
+                )
+
+                return Response(json.dumps({"positions": positions}, indent=4), mimetype="application/json"), 200
+
+            except Exception as e:
+                self.logger.error(f"Error propagating satellite positions: {str(e)}")
+                return jsonify({"error": f"Error propagating satellite positions: {str(e)}"}), 500

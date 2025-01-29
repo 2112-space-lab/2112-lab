@@ -1,6 +1,5 @@
 # Core dependencies
 flask
-fastapi
 uvicorn[standard]
 
 # Caching & Messaging

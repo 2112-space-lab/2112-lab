@@ -1,9 +1,9 @@
 import json
 from skyfield.api import EarthSatellite, load, wgs84
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from typing import List
 from dependencies import Dependencies
-from models import SatellitePositionFields
+from generated.models import PropagationRequestInput, SatellitePosition  # Importing generated models
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,6 +13,9 @@ class Propagator:
         self.dependencies = dependencies
 
     def normalize_and_parse_iso_date(self, iso_date: str) -> datetime:
+        """
+        Normalize and parse ISO 8601 date string to datetime object.
+        """
         try:
             if iso_date.endswith("Z"):
                 iso_date = iso_date[:-1] + "+00:00"
@@ -33,16 +36,17 @@ class Propagator:
             logger.error(f"Error parsing ISO date {iso_date}: {e}")
             raise ValueError(f"Error parsing ISO date {iso_date}: {e}")
 
-    def propagate(self, satellite_id: str, tle_line1: str, tle_line2: str, start_time: str, duration_minutes: int, interval_seconds: int) -> List[Dict[str, Any]]:
+    def propagate(self, request: PropagationRequestInput) -> List[SatellitePosition]:
+        """
+        Propagate satellite positions based on TLE data.
+        """
         try:
-            init_start_time = start_time
-
-            start_time = self.normalize_and_parse_iso_date(start_time)
+            start_time = self.normalize_and_parse_iso_date(request.start_time)
 
             ts = load.timescale()
-            satellite = EarthSatellite(tle_line1, tle_line2, satellite_id, ts)
+            satellite = EarthSatellite(request.tle_line_1, request.tle_line_2, str(request.norad_id), ts)
 
-            end_time = start_time + timedelta(minutes=duration_minutes)
+            end_time = start_time + timedelta(minutes=request.duration_minutes)
             current_time = start_time
             positions = []
 
@@ -54,19 +58,21 @@ class Propagator:
                            current_time.hour, current_time.minute, current_time.second)
                 geocentric = satellite.at(t)
                 subpoint = wgs84.subpoint(geocentric)
-                position = SatellitePositionFields(field_name="satellitePosition")
-                position.fields(
-                    position.id.alias(satellite_id),
-                    position.name.alias(satellite_id),
-                    position.latitude.alias(subpoint.latitude.degrees),
-                    position.longitude.alias(subpoint.longitude.degrees),
-                    position.altitude.alias(subpoint.elevation.km),
-                    position.timestamp.alias(current_time.isoformat()),
+
+                position = SatellitePosition(
+                    id=str(request.norad_id),
+                    name=f"Satellite {request.norad_id}",
+                    latitude=subpoint.latitude.degrees,
+                    longitude=subpoint.longitude.degrees,
+                    altitude=subpoint.elevation.km,
+                    timestamp=current_time.isoformat(),
                 )
-                positions.append(position)
-                current_time += timedelta(seconds=interval_seconds)
+                
+                positions.append(position.dict())
+                current_time += timedelta(seconds=request.interval_seconds)
 
             return positions
 
         except Exception as e:
+            logger.error(f"Error propagating satellite position: {e}")
             raise ValueError(f"Error propagating satellite position: {e}")
