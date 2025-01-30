@@ -818,7 +818,6 @@ List of run-time dependencies:
 - [Viper](https://github.com/spf13/viper) v1.18.2
 - [Echo](https://echo.labstack.com) v4.11.3
 - [Gorm](https://gorm.io) v1.25.6
-- [MySQL](https://github.com/go-gorm/mysql) v1.5.2
 - [PostgreSQL](https://github.com/go-gorm/postgres) v1.25.6
 - [GoMigrate](https://github.com/go-gormigrate/gormigrate) v2.1.1
 - [Redis](https://github.com/redis/go-redis)
@@ -845,9 +844,6 @@ List of development dependencies:
 - [ ] Redis client
 - [ ] Forward HTTP client
 - [ ] Enhanced error handling
-- [ ] Quick start examples
-	- [ ] Example with Kratos for authentication
-	- [ ] Example with Keto for authorisation
 - [ ] Code cleanup and in-line documentation
 - [ ] Swagger integration
 - [ ] Postman collection
