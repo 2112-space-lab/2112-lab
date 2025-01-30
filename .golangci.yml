@@ -1,0 +1,24 @@
+linters:
+  disable-all: false
+  enable:
+    - revive
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - "unused-parameter: parameter '(.+)' seems to be unused, consider removing or renaming it as _"
+    - "package-comments: should have a package comment"
+    - "var-declaration: should drop = (.+) from declaration of var (.+); it is the zero value"
+    - "var-naming: var (.+) should be (.+)"
+    - "var-naming: const (.+) should be (.+)"
+    - "var-naming: method (.+) should be (.+)"
+    - "var-naming: func parameter (.+) should be (.+)"
+    - "exported (.+) should have comment(.+)? or be unexported"
+
+linters-settings:
+  staticcheck:
+    # Select the Go version to target.
+    # Default: 1.13
+    go: "1.21"
+    # https://staticcheck.io/docs/options#checks
+    checks: ["all"]
