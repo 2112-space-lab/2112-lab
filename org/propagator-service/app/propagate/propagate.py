@@ -3,7 +3,7 @@ from skyfield.api import EarthSatellite, load, wgs84
 from datetime import datetime, timedelta
 from typing import List
 from dependencies import Dependencies
-from generated.models import PropagationRequestInput, SatellitePosition  # Importing generated models
+from generated.models import PropagationRequestInput, SatellitePosition
 import logging
 
 logger = logging.getLogger(__name__)

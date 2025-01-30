@@ -1,6 +1,8 @@
 # Project 2112
 # Getting Started
 
+![alt text](architecure.png)
+
 1. Clone this repository `git clone git@github.com:elbujito/2112.git`
 2. Run `cd 2112`
 3. Run `go get`
