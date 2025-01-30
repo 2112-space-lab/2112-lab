@@ -1,44 +1,83 @@
 # Project 2112
+
 # Getting Started
 
 ![2112 Architecture Overview](docs/img/architecture.png)
 
-1. Clone this repository `git clone git@github.com:elbujito/2112.git`
-2. Run `cd 2112`
-3. Run `go get`
-4. Run `go run . db migrate`
-5. Run `go run . db seed`
-6. Run `go run . start` to start the server, you should see the following:
-```
-⇨ http server started on [::]:8081
-⇨ http server started on [::]:8080
-```
-7. List available routes using `go run . info protected-api-routes` and use your favourite API client to test. or use the following to get started and make sure you're up and running.
-```bash
-curl -H "Accept: application/json" http://127.0.0.1:8081/health/alive
-curl -H "Accept: application/json" http://127.0.0.1:8081/health/ready
-```
+## Project Overview
 
-> Recommended: run `go run .` and explore all available options, it should be straightforward.
-
-For more details on running and using the service, scroll down to "[Operations](#operations)" section. 
-
-
-   ```bash
-   git clone git@github.com:elbujito/2112.git
-   cd 2112
-
-# GraphQL Gateway Setup
-
-This repository sets up a **GraphQL Gateway** service implemented in Go, which interacts with a **Redis** service for Pub/Sub messaging. The setup is containerized using **Docker** and managed with **Docker Compose**.
+Project 2112 is a comprehensive system designed to track and visualize the positions of satellites and debris in real-time. The architecture leverages a combination of microservices, a GraphQL gateway, and a frontend application to provide a seamless user experience.
 
 ## Project Structure
 
-- **GraphQL Gateway (Go)**: A GraphQL API for querying satellite position data.
-- **Redis Service**: Used for Pub/Sub messaging between services.
-- **Docker Compose**: Manages and orchestrates the services.
+This project is managed using **Nx**, a set of Extensible Dev Tools for Monorepos, which helps in managing the dependencies and build processes efficiently.
+
+### Nx Workspace
+
+The Nx workspace is organized into several projects, each with its specific role and dependencies:
+
+- **app-service**: A backend application responsible for handling core business logic.
+  - Dependencies: `go-utils`, `graphql-api`
+- **gateway-service**: A backend application that serves as the GraphQL gateway.
+  - Dependencies: `go-utils`, `graphql-api`
+- **go-utils**: A library containing utility functions for backend services.
+  - Tags: `backend`, `golang`, `library`
+- **graphql-api**: A library containing the GraphQL schema and resolvers.
+  - Tags: `backend`, `graphql`, `schema`
+- **propagator-service**: A backend library responsible for propagating satellite positions.
+  - Dependencies: `graphql-api`
+  - Tags: `backend`, `python`
+- **web**: A frontend application built with React for visualizing satellite data.
+  - Dependencies: `graphql-api`
+  - Tags: `frontend`, `react`
 
 ## Prerequisites
 
 - **Docker** and **Docker Compose** installed on your machine.
-- **Go** installed (if you plan to modify the Go code locally).
+- **Node.js** and **npm** installed (for running Nx commands).
+
+## Getting Started
+
+1. Clone this repository:
+   ```bash
+   git clone git@github.com\:elbujito/2112.git
+   cd org
+   ```
+
+2. Install the dependencies:
+
+   ```bash
+   npm install
+   Run the development server:
+
+   nx serve web
+   Run the backend services:
+
+   nx serve app-service
+   nx serve gateway-service
+   Run the propagator service:
+
+
+   nx serve propagator-service
+   List available routes using:
+
+   nx info protected-api-routes
+   ```
+
+3.Use your favorite API client to test the endpoints or use the following commands to get started and ensure everything is up and running:
+
+   ```bash
+   curl -H "Accept: application/json" http://127.0.0.1:8081/health/alive
+   curl -H "Accept: application/json" http://127.0.0.1:8081/health/ready
+   ```
+
+## GraphQL Gateway Setup
+This repository sets up a GraphQL Gateway service implemented in Go, which interacts with a Redis service for Pub/Sub messaging. The setup is containerized using Docker and managed with Docker Compose.
+
+## Project Structure
+- GraphQL Gateway (Go): A GraphQL API for querying satellite position data.
+- Redis Service: Used for Pub/Sub messaging between services.
+- Docker Compose: Manages and orchestrates the services.
+
+## Operations
+For more details on running and using the service, scroll down to the "Operations" section.
