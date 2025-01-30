@@ -16,41 +16,13 @@ This project is managed using **Nx**, a set of Extensible Dev Tools for Monorepo
 
 - **assets/grafana/provisioning**: Contains configuration files for Grafana provisioning, including dashboards and data sources.
   - **dashboards**: Configuration files for various Grafana dashboards.
-    - `blackbox.yml`
-    - `grafana.ini`
-    - `loki-config.yml`
-    - `periscope.yml`
-    - `prometheus-config.yml`
-    - `tempo-config.yml`
 
 - **deployments**: Contains Docker Compose files and configurations for deploying the services.
   - **compose**: Docker Compose files for different services.
-    - `docker-compose-grafana.yml`
-    - `docker-compose-middleware.yml`
-    - `docker-compose-web.yml`
-    - `docker-compose.yml`
-    - `local-dev.yml`
-    - `postgres.yml`
-    - `web.yml`
   - **config/docker**: Dockerfiles for different services.
-    - `Dockerfile.app`
-    - `Dockerfile.dev`
-    - `Dockerfile.gateway`
-    - `Dockerfile.postgres`
-    - `Dockerfile.propagator`
-    - `Dockerfile.redis`
-    - `Dockerfile.tle-propagator`
-    - `Dockerfile.web`
 
 - **docs**: Contains documentation for the project.
-  - **img**: Images used in the documentation.
-    - `architecture.md`
-    - `architecture.png`
-  - **lab/tle-propagator-service**: Source code and configuration for the TLE propagator service.
-    - `src`: Source code directory.
-      - `.gitignore`
-      - `Cargo.lock`
-      - `Cargo.toml`
+  - **lab/tle-propagator-service**: Source code and configuration for POC.
 
 - **org**: The Nx workspace directory containing the different projects and their dependencies.
   - **nx**: Nx configuration and workspace files.

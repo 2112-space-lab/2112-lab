@@ -1,0 +1,55 @@
+openapi: 3.0.2
+info:
+  version: 0.4.0
+  title: App Reader Service Models
+paths: {}
+components:
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+      description: Unique identifier of type UUIDv4
+
+    UUIDv7:
+      type: string
+      format: uuid
+      description: Unique identifier of type UUIDv7
+
+    RFC3339Date:
+      type: string
+      format: date-time
+
+    VersionInfo:
+      type: object
+      required:
+        - version
+        - buildNumber
+      properties:
+        version:
+          type: string
+        buildNumber:
+          type: string
+
+    EServiceHealthStatus:
+      type: string
+      enum:
+        - Reachable
+        - Unreachable
+
+    ServiceHealth:
+      type: object
+      properties:
+        serviceName:
+          type: string
+        serviceStatus:
+          $ref: "#/components/schemas/EServiceHealthStatus"
+        uptimeSinceUtc:
+          $ref: "#/components/schemas/RFC3339Date"
+
+    CommonError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string

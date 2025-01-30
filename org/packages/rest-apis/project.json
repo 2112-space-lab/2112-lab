@@ -1,0 +1,19 @@
+{
+    "name": "rest-apis",
+    "targets": {
+        "lint": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "make lint"
+            }
+        },
+        "generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "make generate"
+                ]
+            }
+        }
+    }
+}

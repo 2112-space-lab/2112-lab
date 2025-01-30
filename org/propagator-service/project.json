@@ -21,13 +21,13 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "nx run graphql-api:generate",
+                    "nx run graphql-apis:generate",
                     "rm -rf propagator-service/app/generated",
                     "mkdir -p propagator-service/app/generated",
-                    "cp -r packages/graphql-api/python-generator/generated/* propagator-service/app/generated/",
+                    "cp -r packages/graphql-apis/python-generator/generated/* propagator-service/app/generated/",
                     "rm -rf propagator-service/app/graphql_schemas",
                     "mkdir -p propagator-service/app/graphql_schemas",
-                    "cp -r packages/graphql-api/schemas/* propagator-service/app/graphql_schemas/"
+                    "cp -r packages/graphql-apis/schemas/* propagator-service/app/graphql_schemas/"
                 ]
             }
         }

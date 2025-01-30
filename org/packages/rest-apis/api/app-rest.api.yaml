@@ -1,0 +1,93 @@
+openapi: 3.0.2
+info:
+  version: 0.4.0
+  title: App Reader Service
+  description: The API definition of the propagator reader service
+servers:
+  - url: https://not-defined
+    description: Production server
+tags:
+  - name: Health
+    description: Endpoints for getting the information related to service health and version
+paths:
+  /app/api/v1/version:
+    get:
+      summary: Get version info
+      description: Get the version information of the Propagator Reader Service
+      tags:
+        - Health
+      operationId: getVersion
+      responses:
+        "200":
+          description: The request completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionInfo"
+        "400":
+          $ref: "#/components/responses/N400BadRequest"
+        "500":
+          $ref: "#/components/responses/N500InternalError"
+  
+  /app/health:
+    get:
+      summary: Get health info
+      description: Get the health of the service
+      tags:
+        - Health
+      operationId: getHealth
+      responses:
+        "200":
+          description: The request completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthInfo"
+        "400":
+          $ref: "#/components/responses/N400BadRequest"
+        "500":
+          $ref: "#/components/responses/N500InternalError"
+
+components:
+  schemas:
+    VersionInfo:
+      type: object
+      required:
+        - version
+        - buildNumber
+      properties:
+        version:
+          type: string
+        buildNumber:
+          type: string
+
+    HealthInfo:
+      type: object
+      properties:
+        serviceName:
+          type: string
+        serviceStatus:
+          type: string
+        uptimeSinceUtc:
+          type: string
+          format: date-time
+
+  responses:
+    N400BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    N500InternalError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string

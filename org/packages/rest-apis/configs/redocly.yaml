@@ -1,0 +1,12 @@
+# See https://redocly.com/docs/cli/configuration/
+
+extends:
+- recommended
+
+rules:
+  info-license: off
+  security-defined: off
+  no-empty-servers: warn
+apis:
+  app@1:
+    root: /api/app-rest.api.yaml
