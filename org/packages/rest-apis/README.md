@@ -12,7 +12,7 @@ The codegen folder shall contain a go module. With go.mod and pkg folder that co
 
 #### Typescript
 
-The codegen shall create a npm package that contains all the models and client/server code which is published to the Azure Artifacts
+The codegen shall create a npm package that contains all the models and client/server code
 
 ### Folder Structure
 
