@@ -1,7 +1,7 @@
 # Project 2112
 # Getting Started
 
-![alt text](architecure.png)
+![2112 Architecture Overview](docs/img/architecure.png)
 
 1. Clone this repository `git clone git@github.com:elbujito/2112.git`
 2. Run `cd 2112`
