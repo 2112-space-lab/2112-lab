@@ -48,23 +48,30 @@ The Nx workspace is organized into several projects, each with its specific role
 
    ```bash
    npm install
-   Run the development server:
+   ```
 
+3. Run the development server:
+   ```bash
    nx serve web
-   Run the backend services:
+   ```
 
+4. Run the backend services:
+   ```bash
    nx serve app-service
    nx serve gateway-service
-   Run the propagator service:
+   ```
 
-
+5. Run the propagator service:
+   ```bash
    nx serve propagator-service
-   List available routes using:
+    ```
 
+6. List available routes using:
+   ```bash
    nx info protected-api-routes
    ```
 
-3.Use your favorite API client to test the endpoints or use the following commands to get started and ensure everything is up and running:
+7. Use your favorite API client to test the endpoints or use the following commands to get started and ensure everything is up and running:
 
    ```bash
    curl -H "Accept: application/json" http://127.0.0.1:8081/health/alive
