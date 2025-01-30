@@ -46,6 +46,8 @@ The Nx workspace is organized into several projects, each with its specific role
   - Dependencies: `graphql-api`
   - Tags: `frontend`, `react`
 
+![2112 APIs Overview](docs/img/api-overview.png)
+
 ## Prerequisites
 
 - **Docker** and **Docker Compose** installed on your machine.
