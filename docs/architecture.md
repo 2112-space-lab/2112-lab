@@ -1,13 +1,3 @@
-
-[![Go Build](https://github.com/Elbujito/2112/actions/workflows/go.yml/badge.svg)](https://github.com/Elbujito/2112/actions/workflows/go.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/Elbujito/2112)](https://goreportcard.com/report/github.com/Elbujito/2112)
-[![CodeQL](https://github.com/Elbujito/2112/actions/workflows/codeql.yml/badge.svg)](https://github.com/Elbujito/2112/actions/workflows/codeql.yml)
-[![Codacy Security Scan](https://github.com/Elbujito/2112/actions/workflows/codacy.yml/badge.svg)](https://github.com/Elbujito/2112/actions/workflows/codacy.yml)
-[![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
-
-2112 is a modern backend framework designed to accelerate API development while maintaining scalability, modularity, and security. Built on `GoLang v1.22` and leveraging powerful tools like Echo and Gorm, this framework is ideal for rapidly developing robust backend systems.
----
-
 ## Features
 
 ### Multi-Router Architecture
@@ -18,8 +8,6 @@
 
 ### Modular and Extensible
 Seamlessly integrates with:
-- **Authentication**: Supports Ory Kratos but can be adapted for alternatives.
-- **Authorization**: Optimized for Ory Keto but allows easy customization.
 - **Database Management**: Compatible with MySQL, Postgres, and SQLite.
 
 ### Developer-Friendly
@@ -825,18 +813,14 @@ There are only 2 optional dependencies that can be installed separately. The fir
 
 List of run-time dependencies:
 
-- [GoLang](https://go.dev) v1.20
+- [GoLang](https://go.dev) v1.23
 - [Cobra](https://github.com/spf13/cobra) v1.8.0
 - [Viper](https://github.com/spf13/viper) v1.18.2
 - [Echo](https://echo.labstack.com) v4.11.3
 - [Gorm](https://gorm.io) v1.25.6
 - [MySQL](https://github.com/go-gorm/mysql) v1.5.2
 - [PostgreSQL](https://github.com/go-gorm/postgres) v1.25.6
-- [SQLite](https://github.com/go-gorm/sqlite) v1.5.4
 - [GoMigrate](https://github.com/go-gormigrate/gormigrate) v2.1.1
-- [Playground Validator](https://github.com/go-playground/validator) v10.17.0
-- [Ory Kratos](https://github.com/ory/kratos-client-go) v1.0.0
-- [Ory Keto](https://github.com/ory/keto-client-go) v0.5.2
 - [Redis](https://github.com/redis/go-redis)
 
 List of development dependencies: 
@@ -850,8 +834,6 @@ List of development dependencies:
 <details open>
 <summary><b>Known Issues</b></summary>
 
-- Gorm v1.25.6 and v1.25.7 are known to cause issues with PostgreSQL database. If you experience an error `this driver does not support LastInsertID()`, try downgrading Gorm to v1.25.5
-
 </details>
 
 
@@ -860,7 +842,6 @@ List of development dependencies:
 
 - [ ] Enhanced routers
 - [ ] Feature toggle for [`hiddenApi`, `protectedApi`, `publicApi`]
-- [ ] Keto client
 - [ ] Redis client
 - [ ] Forward HTTP client
 - [ ] Enhanced error handling

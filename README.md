@@ -1,5 +1,12 @@
 # Project 2112
 
+
+[![Go Build](https://github.com/Elbujito/2112/actions/workflows/go.yml/badge.svg)](https://github.com/Elbujito/2112/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Elbujito/2112)](https://goreportcard.com/report/github.com/Elbujito/2112)
+[![CodeQL](https://github.com/Elbujito/2112/actions/workflows/codeql.yml/badge.svg)](https://github.com/Elbujito/2112/actions/workflows/codeql.yml)
+[![Codacy Security Scan](https://github.com/Elbujito/2112/actions/workflows/codacy.yml/badge.svg)](https://github.com/Elbujito/2112/actions/workflows/codacy.yml)
+[![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
+
 # Getting Started
 
 ![2112 Architecture Overview](docs/img/architecture.png)
