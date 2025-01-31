@@ -1,21 +1,20 @@
 {
-    "name": "graphql-api",
+    "name": "graphql-apis",
     "targets": {
         "validate": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "cd packages/graphql-api/go-generator && go run github.com/99designs/gqlgen validate"
+                "command": "cd packages/graphql-apis/go-generator && go run github.com/99designs/gqlgen validate"
             }
         },
         "generate": {
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "cd packages/graphql-api/python-generator && [ -d venv ] || python3 -m venv venv",
-                    "cd packages/graphql-api/python-generator && ./venv/bin/python -m pip install --upgrade pip",
-                    "cd packages/graphql-api/python-generator && ./venv/bin/pip install -r requirements.txt",
-                    "cd packages/graphql-api/go-generator && go run github.com/99designs/gqlgen generate",
-                    "cd packages/graphql-api/python-generator && ./venv/bin/python -m ariadne_codegen client --config pyproject.toml"
+                    "cd packages/graphql-apis/python-generator && python -m pip install --upgrade pip",
+                    "cd packages/graphql-apis/python-generator && pip install -r requirements.txt",
+                    "cd packages/graphql-apis/go-generator && go run github.com/99designs/gqlgen generate",
+                    "cd packages/graphql-apis/python-generator && python -m ariadne_codegen client --config pyproject.toml"
                 ]
             }
         }

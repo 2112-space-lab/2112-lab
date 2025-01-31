@@ -1,7 +1,14 @@
 [tool.ariadne-codegen]
-schema_path = "../schemas/"  # Path to the GraphQL schema directory
-target_package_name = "generated"  # Package name for the generated client
-files_to_include = ["models/health_status.py"]
+schema_path = "../schemas/"
+target_package_name = "generated"
+files_to_include = [
+    "models/health_status.py",
+    "models/user_location.py",
+    "models/satellite_position.py",
+    "models/satellite_tle.py",
+    "models/satellite_visibility.py",
+    "models/propagation_request.py"
+]
 
 # Enable advanced features
 enable_custom_operations = true  # Enables structured query/mutation building
@@ -19,3 +26,33 @@ operations_module_name = "custom_operations"
 type = ".health_status.HealthStatus"
 parse = ".health_status.parse_health_status"
 serialize = ".health_status.serialize_health_status"
+
+[tool.ariadne-codegen.scalars.UserLocation]
+type = ".user_location.UserLocation"
+parse = ".user_location.parse_user_location"
+serialize = ".user_location.serialize_user_location"
+
+[tool.ariadne-codegen.scalars.SatellitePosition]
+type = ".satellite_position.SatellitePosition"
+parse = ".satellite_position.parse_satellite_position"
+serialize = ".satellite_position.serialize_satellite_position"
+
+[tool.ariadne-codegen.scalars.SatelliteTle]
+type = ".satellite_tle.SatelliteTle"
+parse = ".satellite_tle.parse_satellite_tle"
+serialize = ".satellite_tle.serialize_satellite_tle"
+
+[tool.ariadne-codegen.scalars.SatelliteVisibility]
+type = ".satellite_visibility.SatelliteVisibility"
+parse = ".satellite_visibility.parse_satellite_visibility"
+serialize = ".satellite_visibility.serialize_satellite_visibility"
+
+[tool.ariadne-codegen.scalars.UserLocationInput]
+type = ".user_location.UserLocationInput"
+parse = ".user_location.parse_user_location_input"
+serialize = ".user_location.serialize_user_location_input"
+
+[tool.ariadne-codegen.scalars.PropagationRequestInput]
+type = ".propagation_request.PropagationRequestInput"
+parse = ".propagation_request.parse_propagation_request_input"
+serialize = ".propagation_request.serialize_propagation_request_input"

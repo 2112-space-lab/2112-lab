@@ -15,7 +15,6 @@ class LokiJSONFormatter(logging.Formatter):
     """Custom JSON log formatter for Grafana Loki / Tempo."""
 
     def format(self, record):
-        # Standard log fields
         log_record = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "level": record.levelname,

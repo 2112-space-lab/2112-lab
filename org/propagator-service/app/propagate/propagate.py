@@ -1,10 +1,11 @@
 import json
+import logging
 from skyfield.api import EarthSatellite, load, wgs84
 from datetime import datetime, timedelta
 from typing import List
 from dependencies import Dependencies
-from generated.models import PropagationRequestInput, SatellitePosition
-import logging
+from generated.propagation_request import PropagationRequestInput
+from generated.satellite_position import SatellitePosition
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class Propagator:
             logger.error(f"Error parsing ISO date {iso_date}: {e}")
             raise ValueError(f"Error parsing ISO date {iso_date}: {e}")
 
-    def propagate(self, request: PropagationRequestInput) -> List[SatellitePosition]:
+    def propagate(self, request: PropagationRequestInput) -> List[dict]:
         """
         Propagate satellite positions based on TLE data.
         """
@@ -54,8 +55,10 @@ class Propagator:
                 if not isinstance(current_time, datetime):
                     raise ValueError(f"current_time is not a datetime object: {type(current_time)}")
 
-                t = ts.utc(current_time.year, current_time.month, current_time.day,
-                           current_time.hour, current_time.minute, current_time.second)
+                t = ts.utc(
+                    current_time.year, current_time.month, current_time.day,
+                    current_time.hour, current_time.minute, current_time.second
+                )
                 geocentric = satellite.at(t)
                 subpoint = wgs84.subpoint(geocentric)
 
@@ -68,7 +71,7 @@ class Propagator:
                     timestamp=current_time.isoformat(),
                 )
                 
-                positions.append(position.dict())
+                positions.append(position.model_dump())  # Pydantic V2 serialization fix
                 current_time += timedelta(seconds=request.interval_seconds)
 
             return positions

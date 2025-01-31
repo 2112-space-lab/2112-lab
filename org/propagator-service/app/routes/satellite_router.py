@@ -2,21 +2,19 @@ import logging
 import json
 from flask import Blueprint, request, jsonify, Response
 from dependencies import Dependencies
-from services.satellite_service import propagate_satellite_position
-from generated.models import PropagationRequestInput
+from propagate.propagate import Propagator
+from generated.input_types import PropagationRequestInput
 
 class SatelliteRouter:
     """
-    A dedicated router for handling satellite propagation requests.
+    Router for handling satellite propagation requests.
     """
 
     def __init__(self, dependencies: Dependencies):
-        """
-        Initializes the SatelliteRouter with dependencies.
-        """
         self.router = Blueprint("satellite_router", __name__)
         self.dependencies = dependencies
         self.logger = logging.getLogger("satellite-router")
+        self.propagator = Propagator(dependencies)
 
         self._register_routes()
 
@@ -25,10 +23,10 @@ class SatelliteRouter:
         Registers all satellite-related routes.
         """
 
-        @self.router.route("/satellite/propagate", methods=["POST"])
+        @self.router.route("/propagate", methods=["POST"])
         def propagate():
             """
-            Endpoint to propagate satellite positions based on TLE data.
+            API endpoint to propagate satellite positions.
             """
             try:
                 request_data = request.get_json()
@@ -42,16 +40,9 @@ class SatelliteRouter:
 
                 self.logger.info(f"Propagating satellite {propagation_request.norad_id} from {propagation_request.start_time}")
 
-                positions = propagate_satellite_position(
-                    propagation_request.norad_id,
-                    propagation_request.tle_line_1,
-                    propagation_request.tle_line_2,
-                    propagation_request.start_time,
-                    propagation_request.duration_minutes,
-                    propagation_request.interval_seconds,
-                )
+                positions = self.propagator.propagate(propagation_request)
 
-                return Response(json.dumps({"positions": positions}, indent=4), mimetype="application/json"), 200
+                return jsonify({"positions": positions}), 200
 
             except Exception as e:
                 self.logger.error(f"Error propagating satellite positions: {str(e)}")

@@ -6,14 +6,8 @@ from services.visibility_service import compute_single_visibility
 from generated.models import VisibilityEvent
 
 class VisibilityRouter:
-    """
-    A dedicated router for handling satellite visibility computations.
-    """
 
     def __init__(self, dependencies: Dependencies):
-        """
-        Initializes the VisibilityRouter with dependencies.
-        """
         self.router = Blueprint("visibility_router", __name__)
         self.dependencies = dependencies
         self.logger = logging.getLogger("visibility-router")
@@ -21,15 +15,9 @@ class VisibilityRouter:
         self._register_routes()
 
     def _register_routes(self):
-        """
-        Registers all visibility-related routes.
-        """
 
         @self.router.route("/visibility/compute", methods=["POST"])
         def compute_visibility():
-            """
-            Endpoint to compute satellite visibility for a given location.
-            """
             try:
                 request_data = request.get_json()
                 self.logger.info(f"Received payload: {json.dumps(request_data, indent=4)}")

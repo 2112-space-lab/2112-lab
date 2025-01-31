@@ -1,18 +1,15 @@
 import os
 import logging
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# RabbitMQ configuration
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq-service")
 RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", 5672))
 RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "guest")
 RABBITMQ_QUEUE = os.getenv("RABBITMQ_QUEUE", "satellite_positions")
 
-# Flask configuration
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "default-secret-key")
     FLASK_ENV = os.getenv("FLASK_ENV", "development")
@@ -34,7 +31,6 @@ class TestingConfig(Config):
     FLASK_ENV = "testing"
     SERVER_NAME = None
 
-# Dynamically select the correct configuration
 config_class = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
