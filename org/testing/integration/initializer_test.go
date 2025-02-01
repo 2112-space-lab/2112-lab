@@ -113,7 +113,6 @@ func prepareScenarioInitializer(baseCtx context.Context, runLogger *slog.Logger,
 
 			}
 			// teardown containers
-			// scenarioState.CancelAllV2Stream()
 			appContainers := fx.Values(scenarioState.GetScenarioAppServiceContainers())
 			errAppTeardown := xtestcontainer.TeardownAllContainers(ctx, scenarioLogger, appContainers...)
 
