@@ -10,33 +10,29 @@ import (
 )
 
 const AppServiceHttpPort models_cont.ContainerPort = 8090
-const AppServiceGrpcPort models_cont.ContainerPort = 61007
-
-const GemMockHttpPort models_cont.ContainerPort = 8087
-const GemMockWssPort models_cont.ContainerPort = 8443
-const GemMockGrpcPort models_cont.ContainerPort = 10001
+const PropagatorServiceHttpPort models_cont.ContainerPort = 5000
 
 type ServiceContainerManager struct {
-	AppServiceDockerImage models_cont.DockerContainerImage
-	GemMockDockerImage    models_cont.DockerContainerImage
-	dbConf                models_db.DatabaseConnectionInfo
-	networkName           models_cont.NetworkName
-	testRunningEnv        models_common.TestRunningEnv
+	AppServiceDockerImage        models_cont.DockerContainerImage
+	PropagatorServiceDockerImage models_cont.DockerContainerImage
+	dbConf                       models_db.DatabaseConnectionInfo
+	networkName                  models_cont.NetworkName
+	testRunningEnv               models_common.TestRunningEnv
 }
 
 func NewServiceContainerManager(
 	appServiceDockerImage models_cont.DockerContainerImage,
-	gemMockDockerImage models_cont.DockerContainerImage,
+	propagatorServiceDockerImage models_cont.DockerContainerImage,
 	dbConf models_db.DatabaseConnectionInfo,
 	networkName models_cont.NetworkName,
 	testRunningEnv models_common.TestRunningEnv,
 ) *ServiceContainerManager {
 	m := &ServiceContainerManager{
-		AppServiceDockerImage: appServiceDockerImage,
-		GemMockDockerImage:    gemMockDockerImage,
-		dbConf:                dbConf,
-		networkName:           networkName,
-		testRunningEnv:        testRunningEnv,
+		AppServiceDockerImage:        appServiceDockerImage,
+		PropagatorServiceDockerImage: propagatorServiceDockerImage,
+		dbConf:                       dbConf,
+		networkName:                  networkName,
+		testRunningEnv:               testRunningEnv,
 	}
 	return m
 }

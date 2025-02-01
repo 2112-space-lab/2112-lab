@@ -2,7 +2,6 @@ package testservicecontainer
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/org/2112-space-lab/org/testing/pkg/fx"
@@ -13,42 +12,31 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-func (m *ServiceContainerManager) SpawnServiceAppService(
+func (m *ServiceContainerManager) SpawnServicePropagatorService(
 	ctx context.Context,
 	scenarioState GatewwayContainerScenarioState,
 	serviceName models_service.ServiceName,
 	serviceEnvOverrides models_cont.EnvVarKeyValueMap,
 ) error {
-	appDB, err := scenarioState.GetServiceAppDatabase(ctx, serviceName)
-	if err != nil {
-		return err
-	}
-	appContName, appSvcName := prepareServiceContainerNames(scenarioState, serviceName, models_service.AppName)
+	appContName, appSvcName := prepareServiceContainerNames(scenarioState, serviceName, models_service.PropagatorAppName)
 
 	env := fx.MergeMapOverrides(
 		GetAppDefaultEnv(),                         // defaults
 		scenarioState.GetAppEnvScenarioOverrides(), // overrides for all services in scenario
 		serviceEnvOverrides,                        // service specific overrides
 		map[string]string{ // technical env vars
-			"BIND_ADDRESS": AppServiceHttpPort.ToBindAddress(),
-			"SERVER_TLS":   "false",
-
-			"DB_NAME": string(appDB.Info.DatabaseName),
-			"DB_HOST": string(m.dbConf.HostNameDocker),
-			"DB_PORT": fmt.Sprintf("%d", m.dbConf.PortDocker),
-			"DB_USER": m.dbConf.OwnerUser,
-			"DB_PASS": m.dbConf.OwnerPassword,
+			"BIND_ADDRESS": PropagatorServiceHttpPort.ToBindAddress(),
 		},
 	)
 	req := testcontainers.ContainerRequest{
-		Image: string(m.AppServiceDockerImage),
+		Image: string(m.PropagatorServiceDockerImage),
 		Name:  string(appContName),
 		ExposedPorts: []string{
-			AppServiceHttpPort.ToDockerTcpExposedPort(),
+			PropagatorServiceHttpPort.ToDockerTcpExposedPort(),
 		},
 		Networks: []string{string(m.networkName)},
 		WaitingFor: wait.ForAll(
-			wait.ForListeningPort(nat.Port(AppServiceHttpPort.ToDockerTcpExposedPort())),
+			wait.ForListeningPort(nat.Port(PropagatorServiceHttpPort.ToDockerTcpExposedPort())),
 		),
 		Env: env,
 	}

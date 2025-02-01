@@ -3,9 +3,9 @@ import logging
 from skyfield.api import EarthSatellite, load, wgs84
 from datetime import datetime, timedelta
 from typing import List
-from dependencies import Dependencies
-from generated.propagation_request import PropagationRequestInput
-from generated.satellite_position import SatellitePosition
+from app.dependencies import Dependencies
+from app.generated.propagation_request import PropagationRequestInput
+from app.generated.satellite_position import SatellitePosition
 
 logger = logging.getLogger(__name__)
 

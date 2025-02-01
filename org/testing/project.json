@@ -4,7 +4,13 @@
         "install": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "go mod tidy && go mod vendor"
+                "command": "cd testing && go mod tidy && go mod vendor"
+            }
+        },
+        "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd testing && make test-it"
             }
         }
     }

@@ -1,9 +1,9 @@
 import logging
 import json
 from flask import Blueprint, request, jsonify, Response
-from dependencies import Dependencies
-from propagate.propagate import Propagator
-from generated.input_types import PropagationRequestInput
+from app.dependencies import Dependencies
+from app.propagate.propagate import Propagator
+from app.generated.input_types import PropagationRequestInput
 
 class SatelliteRouter:
     """

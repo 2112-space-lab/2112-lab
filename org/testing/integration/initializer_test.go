@@ -167,6 +167,7 @@ func prepareScenarioInitializer(baseCtx context.Context, runLogger *slog.Logger,
 
 		steps.RegisterAppDatabaseSteps(sc, scenarioState, resourceManager.AppDatabaseManager)
 		steps.RegisterAppServiceSteps(sc, scenarioState, resourceManager.ServiceContainerManager)
+		steps.RegisterPropagatorServiceSteps(sc, scenarioState, resourceManager.ServiceContainerManager)
 		steps.RegisterTimeCheckpointSteps(sc, scenarioState)
 	}
 }

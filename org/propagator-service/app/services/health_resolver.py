@@ -1,7 +1,7 @@
 from ariadne import QueryType
-from services.health_service import HealthService
-from dependencies import Dependencies
-from generated.health_status import serialize_health_status
+from app.services.health_service import HealthService
+from app.dependencies import Dependencies
+from app.generated.health_status import serialize_health_status
 
 query = QueryType()
 

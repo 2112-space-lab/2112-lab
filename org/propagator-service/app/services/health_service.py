@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 from typing import List
-from dependencies import Dependencies
-from generated.health_status import HealthStatus, DependencyStatus, HealthStatusEnum
+from app.dependencies import Dependencies
+from app.generated.health_status import HealthStatus, DependencyStatus, HealthStatusEnum
 
 class HealthService:
 

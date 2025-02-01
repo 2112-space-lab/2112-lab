@@ -45,8 +45,8 @@ var testCfg struct {
 func InitTestDatabaseConfig() {
 	// rand.Seed(time.Now().UTC().UnixNano()) //! deprecated and apparently not needed
 	flag.StringVar(&testCfg.migrationSubFolder, "test-migration-subfolder", "", "folder containing migrations for test DB")
-	flag.StringVar(&testCfg.dbUser, "test-db-user", "mpower_app", "database user for testing")
-	flag.StringVar(&testCfg.dbPass, "test-db-pass", "mpower_app", "database password for testing")
+	flag.StringVar(&testCfg.dbUser, "test-db-user", "2112_app", "database user for testing")
+	flag.StringVar(&testCfg.dbPass, "test-db-pass", "2112_app", "database password for testing")
 	flag.StringVar(&testCfg.dbHost, "test-db-host", "localhost", "database IP address for testing")
 	flag.IntVar(&testCfg.dbPort, "test-db-port", 5432, "database port for testing")
 	flag.StringVar(&testCfg.dbName, "test-db-name", "postgres", "database name for testing")
@@ -137,7 +137,6 @@ func NewTestDB(t *testing.T, connFunc func(database.DBConfig) string, subfolder 
 		}
 	}
 
-	// run migrations based on ses17 or mpower subfolder
 	db, err := migrateDB(conn, subfolder)
 	if err != nil {
 		cleanup()
@@ -157,7 +156,7 @@ func NewTestDB(t *testing.T, connFunc func(database.DBConfig) string, subfolder 
 		}
 }
 
-// migrateDB migrates the DB. Subfolder is used to address ses17 or mpower migrations
+// migrateDB migrates the DB. Subfolder is used to address differents migrations
 func migrateDB(conn, subfolder string) (*sql.DB, error) {
 	// Create db connection for tests to run against.
 	if !strings.HasPrefix(subfolder, "/") {

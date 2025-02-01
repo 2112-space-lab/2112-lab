@@ -23,4 +23,7 @@ type GatewwayContainerScenarioState interface {
 
 	GetAppEnvScenarioOverrides() models_cont.EnvVarKeyValueMap
 	RegisterAppEnvScenarioOverrides(models_cont.EnvVarKeyValueMap)
+
+	RegisterPropagatorServiceContainer(ctx context.Context, serviceName models_service.ServiceName, container *xtestcontainer.BaseContainer)
+	GetPropagatorServiceContainer(ctx context.Context, serviceName models_service.ServiceName) (*xtestcontainer.BaseContainer, error)
 }

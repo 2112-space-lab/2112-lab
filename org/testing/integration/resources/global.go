@@ -38,8 +38,8 @@ func InitGlobalResourceManager(
 	configDB models_db.DatabaseConnectionInfo,
 	appRootPath string,
 	appMigrationsFolder models_db.DatabaseMigrationPath,
-	gemMockDockerImage models_cont.DockerContainerImage,
 	appServiceDockerImage models_cont.DockerContainerImage,
+	propagatorServiceDockerImage models_cont.DockerContainerImage,
 	dockerNetwork models_cont.NetworkName,
 	testRunningEnv models_common.TestRunningEnv,
 ) (func(context.Context) error, error) {
@@ -61,13 +61,13 @@ func InitGlobalResourceManager(
 		AppDatabaseManager:  appDbm,
 		ServiceContainerManager: testservicecontainer.NewServiceContainerManager(
 			models_cont.DockerContainerImage(appServiceDockerImage),
-			models_cont.DockerContainerImage(gemMockDockerImage),
+			models_cont.DockerContainerImage(propagatorServiceDockerImage),
 			configDB,
 			dockerNetwork,
 			testRunningEnv,
 		),
 	}
-	errRoles := resourceManager.RootDatabaseManager.CreateRolesDB(ctx, runLogger, "mpower_app")
+	errRoles := resourceManager.RootDatabaseManager.CreateRolesDB(ctx, runLogger, "service_app")
 	teardown := func(ctx context.Context) error {
 		resourceManager.RootDatabaseManager.CloseManagementDatabaseConnectionPool(ctx, runLogger)
 		return nil

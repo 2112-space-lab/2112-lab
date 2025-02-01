@@ -25,7 +25,7 @@ var CLI struct {
 		DatabaseServer struct {
 			Host         string        `default:"localhost" env:"TEST_DB_HOST"`
 			Port         int           `default:"5432" env:"TEST_DB_PORT"`
-			HostDocker   string        `default:"mpower-service.db" env:"TEST_DB_HOST_DOCKER"`
+			HostDocker   string        `default:"app-service.db" env:"TEST_DB_HOST_DOCKER"`
 			PortDocker   int           `default:"5432" env:"TEST_DB_PORT_DOCKER"`
 			UserName     string        `default:"postgres" env:"TEST_DB_USER"`
 			Password     string        `default:"postgres" env:"TEST_DB_PASS"`
@@ -37,14 +37,14 @@ var CLI struct {
 		} `embed:"" prefix:"db."`
 		Options struct {
 			TestRunningEnv        string `default:"host" env:"TEST_IT_RUNNING_ENV" enum:"host,docker" help:"whether tests are being executed on host or in docker container"`
-			DockerNetwork         string `default:"mpower_net" env:"TEST_IT_DOCKER_NETWORK" help:"Existing Docker network on which containers should be started"`
+			DockerNetwork         string `default:"2112_net" env:"TEST_IT_DOCKER_NETWORK" help:"Existing Docker network on which containers should be started"`
 			AppWorkspacePath      string `default:"../.." aliases:"root-path" type:"path" help:"Root folder of App codebase"`
 			ArtifactsPath         string `default:"./_artifacts" type:"path" help:"Folder where test artifacts per scenario are located"`
 			AppMigrationsPath     string `default:"../../assets/migrations" type:"path" help:"Folder containing App database SQL migrations"`
 			PreserveDatabases     bool   `default:"false"`
 			PreserveContainers    bool   `default:"false"`
-			AppServiceDockerImage string `default:"mpowerservicedevoci.azurecr.io/mpower-app:latest"`
-			GemMockDockerImage    string `default:"mpowerservicedevoci.azurecr.io/gem-mock:latest"`
+			AppServiceDockerImage string `default:"app-service:latest"`
+			PropagatorDockerImage string `default:"propagator-service:latest"`
 		} `embed:"" prefix:"options."`
 	} `embed:"" prefix:"tapp."`
 }

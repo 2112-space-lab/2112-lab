@@ -2,8 +2,8 @@ import json
 from skyfield.api import EarthSatellite, load, wgs84
 from datetime import datetime, timedelta
 from typing import List, Dict
-from dependencies import Dependencies
-from models import VisibilityEvent
+from app.dependencies import Dependencies
+from app.models import VisibilityEvent
 import logging
 
 logger = logging.getLogger(__name__)

@@ -45,8 +45,8 @@ func TestMain(m *testing.M) {
 		GetDatabaseConnectionInfo(),
 		CLI.FlagWrapper.Options.AppWorkspacePath,
 		models_db.DatabaseMigrationPath(CLI.FlagWrapper.Options.AppMigrationsPath),
-		models_cont.DockerContainerImage(CLI.FlagWrapper.Options.GemMockDockerImage),
 		models_cont.DockerContainerImage(CLI.FlagWrapper.Options.AppServiceDockerImage),
+		models_cont.DockerContainerImage(CLI.FlagWrapper.Options.PropagatorDockerImage),
 		models_cont.NetworkName(CLI.FlagWrapper.Options.DockerNetwork),
 		models.TestRunningEnv(CLI.FlagWrapper.Options.TestRunningEnv),
 	)

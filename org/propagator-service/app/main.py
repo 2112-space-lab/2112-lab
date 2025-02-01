@@ -4,11 +4,11 @@ import json
 from flask import Flask, request, jsonify
 from ariadne import graphql_sync, make_executable_schema, gql
 from ariadne.explorer import ExplorerGraphiQL
-from dependencies import Dependencies
-from routes.health_router import HealthRouter 
-from routes.satellite_router import SatelliteRouter
-from config import config_class
-from services.health_resolver import HealthResolver  
+from app.dependencies import Dependencies
+from app.routes.health_router import HealthRouter 
+from app.routes.satellite_router import SatelliteRouter
+from app.config import config_class
+from app.services.health_resolver import HealthResolver  
 
 logger = logging.getLogger("propagator-service")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -16,6 +16,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 deps = Dependencies()
 
 flask_app = Flask(__name__)
+app = flask_app
 
 health_router = HealthRouter(deps) 
 satellite_router = SatelliteRouter(deps) 

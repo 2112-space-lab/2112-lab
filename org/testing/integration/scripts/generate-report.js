@@ -1,8 +1,8 @@
 var reporter = require('cucumber-html-reporter');
 
 var options = {
-    brandTitle: "SES",
-    name: "mPower App Integration Test Suite",
+    brandTitle: "Canooplay",
+    name: "2112 App Integration Test Suite",
     theme: 'bootstrap',
     // theme: 'hierarchy',
     // theme: 'foundation',

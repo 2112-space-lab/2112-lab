@@ -48,7 +48,7 @@ lint:
 # Docker
 ##############################################################################
 .PHONY: docker-network
-docker-network: ## spin up the local mpower docker network so that all dockerized mpower components can communicate
+docker-network: ## spin up the local docker network so that all dockerized components can communicate
 	if [ $$( docker network ls -q --filter 'name=$(DOCKERNET)' | wc -l ) -eq 0 ]; then\
 			docker network create $(DOCKERNET);\
 	else\

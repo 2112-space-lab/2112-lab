@@ -9,7 +9,8 @@ type GlobalPropKeyValueMap map[string]string
 type ServiceAppName string
 
 const (
-	AppName ServiceAppName = "app"
+	AppName           ServiceAppName = "app"
+	PropagatorAppName ServiceAppName = "propagator"
 )
 
 type NamedAppEventReference string
