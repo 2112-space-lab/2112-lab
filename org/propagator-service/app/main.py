@@ -23,7 +23,7 @@ satellite_router = SatelliteRouter(deps)
 flask_app.register_blueprint(health_router.router, url_prefix="/health")
 flask_app.register_blueprint(satellite_router.router, url_prefix="/satellite")
 
-schema_directory = getattr(config_class, "SCHEMA_DIRECTORY", os.getenv("SCHEMA_DIRECTORY", "./propagator-service/app/graphql_schemas/"))
+schema_directory = getattr(config_class, "SCHEMA_DIRECTORY", os.getenv("SCHEMA_DIRECTORY", "./app/graphql_schemas/"))
 
 if not os.path.exists(schema_directory):
     logger.warning(f"Schema directory not found: {schema_directory}. GraphQL API may not work correctly.")

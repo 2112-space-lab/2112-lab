@@ -1,6 +1,9 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type ServiceName string
 
@@ -15,3 +18,11 @@ const (
 
 type NamedAppEventReference string
 type AppEventRawJSON json.RawMessage
+
+type EventRoot struct {
+	EventTimeUtc time.Time
+	EventUid     string
+	EventType    string
+	Comment      string
+	Payload      AppEventRawJSON
+}

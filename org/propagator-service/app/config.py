@@ -4,10 +4,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq-service")
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "test-rabbitmq")
 RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", 5672))
-RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
-RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "guest")
+RABBITMQ_USER = os.getenv("RABBITMQ_USER", "2112")
+RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "2112")
 RABBITMQ_QUEUE = os.getenv("RABBITMQ_QUEUE", "satellite_positions")
 
 class Config:
@@ -20,7 +20,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     FLASK_ENV = "development"
-    SCHEMA_DIRECTORY = os.getenv("SCHEMA_DIRECTORY", "./propagator-service/app/graphql_schemas/")
+    SCHEMA_DIRECTORY = os.getenv("SCHEMA_DIRECTORY", "./app/graphql_schemas/")
 
 class ProductionConfig(Config):
     FLASK_ENV = "production"

@@ -23,9 +23,11 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/blues/jsonata-go v1.5.4 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
+	github.com/streadway/amqp v1.1.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/net v0.29.0 // indirect

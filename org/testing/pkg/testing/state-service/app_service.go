@@ -73,11 +73,11 @@ func (s *AppState) GetAppServiceContainer(ctx context.Context, serviceName model
 	return nil, fmt.Errorf("no App service container registered for service [%s]", serviceName)
 }
 
-func (s *AppState) RegisterNamedEventReference(ref models_service.NamedAppEventReference, jsonData models_service.AppEventRawJSON) {
+func (s *AppState) RegisterAppNamedEventReference(ref models_service.NamedAppEventReference, jsonData models_service.AppEventRawJSON) {
 	s.NamedEventReferences[ref] = jsonData
 }
 
-func (s *AppState) GetNamedEventByReference(ref models_service.NamedAppEventReference) (models_service.AppEventRawJSON, bool) {
+func (s *AppState) GetAppNamedEventByReference(ref models_service.NamedAppEventReference) (models_service.AppEventRawJSON, bool) {
 	data, found := s.NamedEventReferences[ref]
 	return data, found
 }

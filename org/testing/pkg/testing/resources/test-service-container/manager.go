@@ -11,6 +11,7 @@ import (
 
 const AppServiceHttpPort models_cont.ContainerPort = 8090
 const PropagatorServiceHttpPort models_cont.ContainerPort = 5000
+const RabbitMQURL = "amqp://2112:2112@test-rabbitmq:5672"
 
 type ServiceContainerManager struct {
 	AppServiceDockerImage        models_cont.DockerContainerImage

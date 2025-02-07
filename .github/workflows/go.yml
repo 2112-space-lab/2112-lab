@@ -41,18 +41,18 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
-          cd src/app-service
+          cd org/app-service
           go mod tidy
 
       # Build the application
       - name: Build the application
         run: |
-          cd src/app-service/internal
+          cd org/app-service/internal
           go build -o ./out/service .
 
-      # (Optional) Run tests
+      # Run tests
       - name: Run tests
         run: |
-          cd src/app-service/internal
+          cd org/app-service/internal
           go test -v ./...
 

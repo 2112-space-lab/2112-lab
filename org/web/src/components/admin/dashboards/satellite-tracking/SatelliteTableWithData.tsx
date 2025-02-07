@@ -27,7 +27,7 @@ export default function SatelliteTableWithData({
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get("http://localhost:8081/satellites/paginated", {
+        const response = await axios.get("http://test-rabbitmq:8081/satellites/paginated", {
           params: { page: pageIndex + 1, pageSize, search },
           headers: { Accept: "application/json" },
         });
