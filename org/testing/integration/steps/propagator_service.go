@@ -63,7 +63,7 @@ func (steps *PropagatorServiceSteps) propagatorServiceCreateWithEnv(ctx context.
 }
 
 func (steps *PropagatorServiceSteps) requestPropagation(ctx context.Context, serviceName string, propagationRequest *godog.Table) error {
-	propSettings, err := GodogTableToSlice[models_service.PropagatorSettings](propagationRequest)
+	propSettings, err := GodogTableToSlice[models_service.SatellitePropagationRequest](propagationRequest)
 	if err != nil {
 		log.Printf("Error parsing propagation request: %v", err)
 		return err

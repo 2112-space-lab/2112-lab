@@ -24,7 +24,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     FLASK_ENV = "production"
-    SERVER_NAME = os.getenv("SERVER_NAME", "myapp.com")
+    SERVER_NAME = os.getenv("SERVER_NAME", "test")
 
 class TestingConfig(Config):
     TESTING = True

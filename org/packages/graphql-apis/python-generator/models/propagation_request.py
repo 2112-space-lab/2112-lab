@@ -3,7 +3,7 @@ from typing import Dict
 
 @dataclass
 class PropagationRequestInput:
-    noradId: int
+    noradId: str
     tleLine1: str
     tleLine2: str
     startTime: str

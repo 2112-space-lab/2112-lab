@@ -46,29 +46,31 @@ func GetPropagatorRestClient(ctx context.Context, scenarioState PropagatorClient
 	return restClient, err
 }
 
-func (cl *PropagatorRestClient) RequestSatellitePropagation(ctx context.Context, config models_service.PropagatorSettings) error {
+func (cl *PropagatorRestClient) RequestSatellitePropagation(ctx context.Context, config models_service.SatellitePropagationRequest) error {
 	url := fmt.Sprintf("%s/satellite/propagate", cl.hostName)
 
 	buf, err := json.Marshal(config)
 	if err != nil {
-		return fmt.Errorf("failed to marshal UpdateLiveSettings [%w]", err)
+		return fmt.Errorf("failed to marshal RequestSatellitePropagation [%w]", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(buf))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(buf))
 	if err != nil {
-		return fmt.Errorf("failed prepare request UpdateLiveSettings [%w]", err)
+		return fmt.Errorf("failed prepare request RequestSatellitePropagation [%w]", err)
 	}
+
+	req.Header.Set("Content-Type", "application/json")
 
 	res, err := cl.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed send request UpdateLiveSettings [%w]", err)
+		return fmt.Errorf("failed send request RequestSatellitePropagation [%w]", err)
 	}
 	defer func() {
 		err = fx.FlattenErrorsIfAny(err, res.Body.Close())
 	}()
 	_, err = io.ReadAll(res.Body)
 	if err != nil {
-		return fmt.Errorf("failed to read response body UpdateLiveSettings [%w]", err)
+		return fmt.Errorf("failed to read response body RequestSatellitePropagation [%w]", err)
 	}
 	return nil
 }

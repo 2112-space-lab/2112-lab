@@ -9,7 +9,6 @@ class SatellitePosition:
     longitude: float
     altitude: float
     timestamp: str
-    uid: str
 
 def parse_satellite_position(data: Dict) -> SatellitePosition:
     return SatellitePosition(**data)
@@ -22,5 +21,4 @@ def serialize_satellite_position(satellite_position: SatellitePosition) -> Dict:
         "longitude": satellite_position.longitude,
         "altitude": satellite_position.altitude,
         "timestamp": satellite_position.timestamp,
-        "uid": satellite_position.uid
     }

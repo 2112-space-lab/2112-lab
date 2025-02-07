@@ -5,6 +5,8 @@ schema:
   - ../schemas/mutations.graphqls
   - ../schemas/subscriptions.graphqls
   - ../schemas/health.graphqls
+  - ../schemas/events.graphqls
+  - ../schemas/enums.graphqls
 
 # Where should the generated server code go?
 exec:

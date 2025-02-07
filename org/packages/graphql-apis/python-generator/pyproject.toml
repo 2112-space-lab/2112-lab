@@ -7,7 +7,9 @@ files_to_include = [
     "models/satellite_position.py",
     "models/satellite_tle.py",
     "models/satellite_visibility.py",
-    "models/propagation_request.py"
+    "models/event_root.py",
+    "models/satellite_tle_propagated.py",
+    "models/event_builder.py",
 ]
 
 # Enable advanced features
@@ -56,3 +58,13 @@ serialize = ".user_location.serialize_user_location_input"
 type = ".propagation_request.PropagationRequestInput"
 parse = ".propagation_request.parse_propagation_request_input"
 serialize = ".propagation_request.serialize_propagation_request_input"
+
+[tool.ariadne-codegen.scalars.EventRoot]
+type = ".event_root.EventRoot"
+parse = ".event_root.parse_event_root"
+serialize = ".event_root.serialize_event_root"
+
+[tool.ariadne-codegen.scalars.SatelliteTlePropagated]
+type = ".satellite_tle_propagate.SatelliteTlePropagated"
+parse = ".satellite_tle_propagate.parse_satellite_tle_propagated"
+serialize = ".satellite_tle_propagate.serialize_satellite_tle_propagated"

@@ -1,10 +1,10 @@
 package models
 
-type PropagatorSettings struct {
-	NoradId         string
-	TleLine1        string
-	TleLine2        string
-	StartTime       string
-	DurationMinutes int32
-	IntervalSeconds int32
+type SatellitePropagationRequest struct {
+	NoradId         string `json:"noradId"`
+	TleLine1        string `json:"tleLine1"`
+	TleLine2        string `json:"tleLine2"`
+	StartTime       string `json:"startTime"`
+	DurationMinutes int32  `json:"durationMinutes"`
+	IntervalSeconds int32  `json:"intervalSeconds"`
 }

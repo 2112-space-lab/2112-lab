@@ -1,0 +1,9 @@
+enum EventType {
+  SATELLITE_TLE_PROPAGATED    # Event when a satellite's TLE has been propagated
+  SATELLITE_POSITION_UPDATED  # Event when a new satellite position is calculated
+  SATELLITE_VISIBILITY_CHECKED # Event when a satellite's visibility is determined
+  SATELLITE_ORBIT_PREDICTED   # Event when a satellite's orbit is predicted
+  SYSTEM_HEALTH_CHECKED       # Event when a system health check is performed
+  DATA_STORED_IN_REDIS        # Event when data is successfully stored in Redis
+  MESSAGE_PUBLISHED_TO_RABBITMQ # Event when a message is published to RabbitMQ
+}

@@ -11,6 +11,7 @@ try:
 except ImportError:
     get_current_span = None
 
+
 class LokiJSONFormatter(logging.Formatter):
     """Custom JSON log formatter for Grafana Loki / Tempo."""
 
@@ -23,45 +24,49 @@ class LokiJSONFormatter(logging.Formatter):
             "function": record.funcName,
             "line": record.lineno,
             "service": "propagator-service",
-            "hostname": os.getenv("HOSTNAME", "localhost")
+            "hostname": os.getenv("HOSTNAME", "localhost"),
         }
 
-        # Add OpenTelemetry trace context if available
         if get_current_span:
             span = get_current_span()
             if span and span.get_span_context():
-                log_record["trace_id"] = span.get_span_context().trace_id
-                log_record["span_id"] = span.get_span_context().span_id
-        
-        # If there's an exception, add stack trace
+                log_record["trace_id"] = f"{span.get_span_context().trace_id:032x}"
+                log_record["span_id"] = f"{span.get_span_context().span_id:016x}"
+
         if record.exc_info:
             log_record["exception"] = "".join(traceback.format_exception(*record.exc_info))
 
         return json.dumps(log_record)
 
+
 def setup_logger():
     """Configures structured JSON logging for Grafana Loki / Tempo."""
     log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 
-    # Create logger
     logger = logging.getLogger("propagator-service")
     logger.setLevel(getattr(logging, log_level, logging.INFO))
 
-    # Console Handler (JSON logs for Loki)
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(LokiJSONFormatter())
+    console_handler.setLevel(getattr(logging, log_level, logging.INFO))
 
-    # File Handler (Rotating logs)
     log_dir = "propagator-service/logs"
     os.makedirs(log_dir, exist_ok=True)
-    file_handler = RotatingFileHandler(f"{log_dir}/app.log", maxBytes=5 * 1024 * 1024, backupCount=3)
+    file_handler = RotatingFileHandler(
+        f"{log_dir}/log", maxBytes=5 * 1024 * 1024, backupCount=3
+    )
     file_handler.setFormatter(LokiJSONFormatter())
+    file_handler.setLevel(getattr(logging, log_level, logging.INFO))
 
-    # Add handlers
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
     return logger
 
-# Initialize logger
+
 logger = setup_logger()
+
+logger.info("Logger is successfully configured and writing to both stdout and file.")

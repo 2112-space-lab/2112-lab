@@ -1,6 +1,7 @@
 # Core dependencies
 flask
 uvicorn[standard]
+asgiref
 
 # Caching & Messaging
 redis
@@ -32,3 +33,4 @@ python-json-logger
 
 # Async support
 asyncio
+gunicorn

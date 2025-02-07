@@ -1,0 +1,18 @@
+# Event Root for structuring all events consistently
+type EventRoot {
+  eventTimeUtc: String!  # UTC timestamp in ISO 8601 format
+  eventUid: String!  # Unique identifier for this event
+  eventType: String!  # Type of event (e.g., "PROPAGATION_RESULT")
+  comment: String  # Optional comments for event metadata
+  payload: String!  # JSON representation of event data
+}
+
+# New type for TLE propagation data
+type SatelliteTlePropagated {
+  noradId: String!  # NORAD ID of the satellite
+  tleLine1: String!  # First line of the Two-Line Element set (TLE)
+  tleLine2: String!  # Second line of the Two-Line Element set (TLE)
+  timeInterval: Int!  # Time interval for updates
+  store_key: String!  # Unique key in Redis associated with the propagated data
+}
+

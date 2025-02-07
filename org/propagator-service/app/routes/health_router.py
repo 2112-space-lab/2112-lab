@@ -1,9 +1,9 @@
 import json
 import logging
 from flask import Blueprint, Response, jsonify
-from app.dependencies import Dependencies
-from app.services.health_service import HealthService
-from app.generated.health_status import serialize_health_status
+from dependencies import Dependencies
+from services.health_service import HealthService
+from generated.health_status import serialize_health_status
 
 class HealthRouter:
     def __init__(self, dependencies: Dependencies):

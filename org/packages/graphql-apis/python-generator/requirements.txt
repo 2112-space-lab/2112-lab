@@ -3,4 +3,5 @@ uvicorn
 ariadne
 ariadne-codegen
 ariadne-codegen[subscriptions]
+uuid
 
