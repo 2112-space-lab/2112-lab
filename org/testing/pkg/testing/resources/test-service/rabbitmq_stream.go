@@ -5,33 +5,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"log/slog"
+	"net/http"
 	"slices"
 	"time"
 
 	"github.com/blues/jsonata-go"
 	"github.com/org/2112-space-lab/org/testing/pkg/fx"
 	testservicecontainer "github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service-container"
-	"github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service/models"
 	models_service "github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service/models"
 	xtesttime "github.com/org/2112-space-lab/org/testing/pkg/testing/x-test-time"
 	models_time "github.com/org/2112-space-lab/org/testing/pkg/testing/x-test-time/models"
 	"github.com/streadway/amqp"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
-var protojsonOpts = protojson.MarshalOptions{
-	AllowPartial:      true,
-	UseProtoNames:     true,
-	UseEnumNumbers:    false,
-	EmitUnpopulated:   true,
-	EmitDefaultValues: true,
-	Multiline:         true,
-}
-
-// SubscribeToPropagator subscribes to RabbitMQ for Propagator events
-func SubscribeToPropagator(ctx context.Context, scenarioState PropagatorClientScenarioState, service string, subscriber string, callbacks []models.EventCallbackInfo) (context.CancelFunc, error) {
+// SubscribeToPropagator dynamically subscribes to all queues in RabbitMQ
+func SubscribeToPropagator(ctx context.Context, scenarioState PropagatorClientScenarioState, service string, callbacks []models_service.EventCallbackInfo) (context.CancelFunc, error) {
 	conn, err := amqp.Dial(testservicecontainer.RabbitMQURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to RabbitMQ: %v", err)
@@ -43,90 +34,148 @@ func SubscribeToPropagator(ctx context.Context, scenarioState PropagatorClientSc
 		return nil, fmt.Errorf("failed to open a channel: %v", err)
 	}
 
-	queueName := fmt.Sprintf("propagator_events_%s", subscriber)
-	_, err = ch.QueueDeclare(
-		queueName, // queue name
-		true,      // durable
-		false,     // auto-delete
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
+	queues, err := getRabbitMQQueues()
 	if err != nil {
 		ch.Close()
 		conn.Close()
-		return nil, fmt.Errorf("failed to declare queue: %v", err)
+		return nil, fmt.Errorf("failed to fetch queue list: %v", err)
 	}
 
-	msgs, err := ch.Consume(
-		queueName, // queue name
-		"",        // consumer
-		true,      // auto-ack
-		false,     // exclusive
-		false,     // no-local
-		false,     // no-wait
-		nil,       // args
-	)
-	if err != nil {
-		ch.Close()
-		conn.Close()
-		return nil, fmt.Errorf("failed to consume messages: %v", err)
-	}
+	for _, queue := range queues {
+		log.Printf("🔄 Found queue: %s, subscribing...", queue)
 
-	streamCtx, cancel := context.WithCancel(ctx)
-
-	go func() {
-		for {
-			select {
-			case <-streamCtx.Done():
+		for _, cb := range callbacks {
+			routingKey := fmt.Sprintf("events.%s", cb.EventType)
+			err := ch.QueueBind(
+				queue,
+				routingKey,
+				"",
+				false,
+				nil,
+			)
+			if err != nil {
 				ch.Close()
 				conn.Close()
-				return
-			case msg := <-msgs:
-				var event models.EventRoot
-				err := json.Unmarshal(msg.Body, &event)
-				if err != nil {
-					log.Printf("Error unmarshaling event: %v", err)
-					continue
-				}
+				return nil, fmt.Errorf("failed to bind queue %s to routing key %s: %v", queue, routingKey, err)
+			}
+			log.Printf("✅ Subscribed queue '%s' to routing key: %s", queue, routingKey)
+		}
 
-				log.Printf("Received event: %+v", event)
+		msgs, err := ch.Consume(
+			queue,
+			"",
+			true,
+			false,
+			false,
+			false,
+			nil,
+		)
+		if err != nil {
+			ch.Close()
+			conn.Close()
+			return nil, fmt.Errorf("failed to consume messages from queue %s: %v", queue, err)
+		}
 
-				for _, cb := range callbacks {
-					if cb.EventType != event.EventType {
+		streamCtx, cancel := context.WithCancel(ctx)
+
+		go func(queueName string) {
+			defer func() {
+				cancel()
+				ch.Close()
+				conn.Close()
+				log.Printf("🔴 Gracefully stopped listening to queue: %s", queueName)
+			}()
+
+			for {
+				select {
+				case <-streamCtx.Done():
+					log.Printf("🛑 Stopping listener for queue: %s", queueName)
+					return
+				case msg := <-msgs:
+					var event models_service.EventRoot
+					err := json.Unmarshal(msg.Body, &event)
+					if err != nil {
+						log.Printf("❌ Error unmarshaling event from queue %s: %v", queueName, err)
 						continue
 					}
 
-					go func(cb models.EventCallbackInfo) {
-						if cb.ActionDelay != "" {
-							waitDur, _ := time.ParseDuration(cb.ActionDelay)
-							time.Sleep(waitDur)
+					log.Printf("📥 Received event from queue %s: %+v", queueName, event)
+					scenarioState.SaveReceivedEvent(&event, models_service.ServiceName(service))
+					for _, cb := range callbacks {
+						if cb.EventType != event.EventType {
+							continue
 						}
 
-						err := processEventCallback(streamCtx, scenarioState, service, cb, event)
-						if err != nil {
-							log.Printf("Error processing callback for event %s: %v", event.EventType, err)
-						}
-					}(cb)
+						go func(cb models_service.EventCallbackInfo) {
+							if cb.ActionDelay != "" {
+								waitDur, _ := time.ParseDuration(cb.ActionDelay)
+								time.Sleep(waitDur)
+							}
+
+							err := processEventCallback(scenarioState, service, cb, event)
+							if err != nil {
+								log.Printf("❌ Error processing callback for event %s in queue %s: %v", event.EventType, queueName, err)
+							}
+						}(cb)
+					}
 				}
 			}
-		}
-	}()
+		}(queue)
+	}
 
-	return cancel, nil
+	return nil, nil
+}
+
+// Fetch all queues from RabbitMQ Management API
+func getRabbitMQQueues() ([]string, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", testservicecontainer.RabbitMQAPIURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
+	}
+
+	req.SetBasicAuth(testservicecontainer.RabbitMQAPIUser, testservicecontainer.RabbitMQAPIPassword)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call RabbitMQ API: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected response from RabbitMQ API: %s", resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	var queues []struct {
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal(body, &queues); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON response: %v", err)
+	}
+
+	var queueNames []string
+	for _, q := range queues {
+		queueNames = append(queueNames, q.Name)
+	}
+
+	return queueNames, nil
 }
 
 // processEventCallback executes the callback for an event
-func processEventCallback(ctx context.Context, scenarioState PropagatorClientScenarioState, serviceName string, cb models.EventCallbackInfo, event models_service.EventRoot) error {
-	log.Printf("Processing callback: %+v for event: %+v", cb, event)
+func processEventCallback(scenarioState PropagatorClientScenarioState, serviceName string, cb models_service.EventCallbackInfo, event models_service.EventRoot) error {
+	log.Printf("🔄 Processing callback: %+v for event: %+v", cb, event)
 	scenarioState.SaveReceivedEvent(&event, models_service.ServiceName(serviceName))
 	return nil
 }
 
 // VerifyPropagatorEvents checks if expected events have been received
-func VerifyPropagatorEvents(scenarioState PropagatorClientScenarioState, serviceName string, expectedEvents []models.ExpectedEvent) error {
+func VerifyPropagatorEvents(scenarioState PropagatorClientScenarioState, serviceName string, expectedEvents []models_service.ExpectedEvent) error {
 	for _, exp := range expectedEvents {
-		err := checkExpectedEvent(scenarioState, models.ServiceName(serviceName), exp)
+		err := checkExpectedEvent(scenarioState, models_service.ServiceName(serviceName), exp)
 		if err != nil {
 			return err
 		}
@@ -135,7 +184,7 @@ func VerifyPropagatorEvents(scenarioState PropagatorClientScenarioState, service
 }
 
 // checkExpectedEvent verifies if a single expected event was received
-func checkExpectedEvent(scenarioState PropagatorClientScenarioState, serviceName models.ServiceName, expected models.ExpectedEvent) error {
+func checkExpectedEvent(scenarioState PropagatorClientScenarioState, serviceName models_service.ServiceName, expected models_service.ExpectedEvent) error {
 	var expFrom, expToWarn, expToErr models_time.TimeCheckpointValue
 	var errExpFrom, errExpToWarn, errExpToErr error
 	expFrom, errExpFrom = xtesttime.EvaluateCheckpoint(scenarioState, expected.FromTime)
@@ -191,7 +240,7 @@ func checkExpectedEvent(scenarioState PropagatorClientScenarioState, serviceName
 		time.Sleep(pauseIncrementDuration)
 		now = time.Now().UTC()
 	}
-	if !found || evt.EventTimeUtc.After(time.Time(expToErr)) {
+	if !found || evt.GetEventTimeUtc().Inner().After(time.Time(expToErr)) {
 		if expected.IsReject {
 			logger.Debug("unwanted event not received during time window - all is fine")
 			return nil
@@ -211,7 +260,7 @@ func checkExpectedEvent(scenarioState PropagatorClientScenarioState, serviceName
 		)
 	}
 
-	if evt.EventTimeUtc.After(time.Time(expToWarn)) {
+	if evt.GetEventTimeUtc().Inner().After(time.Time(expToWarn)) {
 		logger.Warn("got expected event in warning threshold",
 			slog.Any("receivedEvent", evt),
 		)
@@ -231,7 +280,7 @@ func checkExpectedEvent(scenarioState PropagatorClientScenarioState, serviceName
 		scenarioState.RegisterNamedEventReference(expected.AssignRef, mval)
 	}
 	if expected.ProduceCheckpointEventTime != "" {
-		err = scenarioState.RegisterCheckpoint(models_time.TimeCheckpointName(expected.ProduceCheckpointEventTime), models_time.TimeCheckpointValue(evt.EventTimeUtc))
+		err = scenarioState.RegisterCheckpoint(models_time.TimeCheckpointName(expected.ProduceCheckpointEventTime), models_time.TimeCheckpointValue(evt.GetEventTimeUtc().Inner()))
 		if err != nil {
 			return err
 		}
@@ -239,7 +288,7 @@ func checkExpectedEvent(scenarioState PropagatorClientScenarioState, serviceName
 	return nil
 }
 
-func containsExpectedEvent(logger *slog.Logger, events []models_service.EventRoot, expected models.ExpectedEvent) (models_service.EventRoot, bool) {
+func containsExpectedEvent(logger *slog.Logger, events []models_service.EventRoot, expected models_service.ExpectedEvent) (models_service.EventRoot, bool) {
 	occurence := 0
 	logger.Debug("looking for event",
 		slog.Any("expected", expected),

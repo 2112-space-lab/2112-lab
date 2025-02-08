@@ -20,4 +20,4 @@ ENV FASTAPI_APP=app.main:flask_app
 ENV FASTAPI_HOST=0.0.0.0
 ENV FASTAPI_PORT=5000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "app.main:application", "--host", "0.0.0.0", "--port", "5000"]

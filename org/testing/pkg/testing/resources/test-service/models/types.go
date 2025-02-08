@@ -2,7 +2,8 @@ package models
 
 import (
 	"encoding/json"
-	"time"
+
+	xtime "github.com/org/2112-space-lab/org/testing/pkg/x-time"
 )
 
 type ServiceName string
@@ -20,9 +21,17 @@ type NamedAppEventReference string
 type AppEventRawJSON json.RawMessage
 
 type EventRoot struct {
-	EventTimeUtc time.Time
-	EventUid     string
-	EventType    string
-	Comment      string
-	Payload      AppEventRawJSON
+	EventTimeUtc string          `json:"event_time_utc"`    // ISO-8601 string format (matches Python)
+	EventUid     string          `json:"event_uid"`         // UUID string
+	EventType    string          `json:"event_type"`        // Event type as string
+	Comment      string          `json:"comment,omitempty"` // Optional field
+	Payload      json.RawMessage `json:"payload,omitempty"` // Raw JSON for flexible structure
+}
+
+func (e *EventRoot) GetEventTimeUtc() xtime.UtcTime {
+	v, err := xtime.FromString(xtime.DateTimeFormat(e.EventTimeUtc))
+	if err != nil {
+		panic("error while parsing date from event")
+	}
+	return v
 }

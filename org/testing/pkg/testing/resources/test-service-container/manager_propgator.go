@@ -21,10 +21,10 @@ func (m *ServiceContainerManager) SpawnServicePropagatorService(
 	appContName, appSvcName := prepareServiceContainerNames(scenarioState, serviceName, models_service.PropagatorAppName)
 
 	env := fx.MergeMapOverrides(
-		GetAppDefaultEnv(),                         // defaults
+		GetPropagatorDefaultEnv(),                  // defaults
 		scenarioState.GetAppEnvScenarioOverrides(), // overrides for all services in scenario
 		serviceEnvOverrides,                        // service specific overrides
-		map[string]string{ // technical env vars
+		map[string]string{
 			"BIND_ADDRESS": PropagatorServiceHttpPort.ToBindAddress(),
 		},
 	)

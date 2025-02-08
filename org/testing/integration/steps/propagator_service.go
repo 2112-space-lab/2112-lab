@@ -35,7 +35,7 @@ func RegisterPropagatorServiceSteps(ctx *godog.ScenarioContext, state propagator
 	ctx.Step(`^a Propagator service is created for service "([^"]*)" with env overrides:$`, s.propagatorServiceCreateWithEnv)
 	ctx.Step(`^I register Propagator service default scenario environment variable overrides:$`, s.propagatorRegisterCommonEnvVars)
 	ctx.Step(`^I request satellite propagation on propagator for service "([^"]*)"$`, s.requestPropagation)
-	ctx.Step(`^I subscribe as consumer "([^"]*)" to Propagator events for gateway "([^"]*)" with registered callbacks:$`, s.subscribeToPropagatorEvents)
+	ctx.Step(`^I subscribe as consumer "([^"]*)" with registered callbacks:$`, s.subscribeToPropagatorEvents)
 	ctx.Step(`^Propagator events are expected for service "([^"]*)":$`, s.verifyPropagatorEvents)
 }
 
@@ -73,15 +73,15 @@ func (steps *PropagatorServiceSteps) requestPropagation(ctx context.Context, ser
 	return testservice.PropagatorRequest(ctx, steps.state, models_service.ServiceName(serviceName), propSettings)
 }
 
-func (steps *PropagatorServiceSteps) subscribeToPropagatorEvents(consumer string, gateway string, eventTable *godog.Table) error {
+func (steps *PropagatorServiceSteps) subscribeToPropagatorEvents(consumer string, eventTable *godog.Table) error {
 	events, err := GodogTableToSlice[models_service.EventCallbackInfo](eventTable)
 	if err != nil {
 		log.Printf("Error parsing event subscription table: %v", err)
 		return err
 	}
 
-	log.Printf("Subscribing as consumer '%s' to propagator events for gateway '%s' with events: %+v", consumer, gateway, events)
-	_, err = testservice.SubscribeToPropagator(context.Background(), steps.state, consumer, gateway, events)
+	log.Printf("Subscribing as consumer '%s' with events: %+v", consumer, events)
+	_, err = testservice.SubscribeToPropagator(context.Background(), steps.state, consumer, events)
 	return err
 }
 

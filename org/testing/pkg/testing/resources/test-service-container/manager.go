@@ -12,6 +12,9 @@ import (
 const AppServiceHttpPort models_cont.ContainerPort = 8090
 const PropagatorServiceHttpPort models_cont.ContainerPort = 5000
 const RabbitMQURL = "amqp://2112:2112@localhost:5672"
+const RabbitMQAPIURL = "http://localhost:15672/api/queues"
+const RabbitMQAPIUser = "2112"
+const RabbitMQAPIPassword = "2112"
 
 type ServiceContainerManager struct {
 	AppServiceDockerImage        models_cont.DockerContainerImage

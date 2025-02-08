@@ -112,8 +112,7 @@ func (s *PropagatorState) GetReceivedEvents(serviceName models_service.ServiceNa
 	}
 
 	for _, evt := range events {
-		eventTime := evt.EventTimeUtc
-		if eventTime.After(from) && eventTime.Before(to) {
+		if evt.GetEventTimeUtc().Inner().After(from) && evt.GetEventTimeUtc().Inner().Before(to) {
 			res = append(res, *evt)
 		}
 	}
