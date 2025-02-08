@@ -1,4 +1,0 @@
-_artifacts
-__debug*
-*.log*
-godog-cucumber.log.json

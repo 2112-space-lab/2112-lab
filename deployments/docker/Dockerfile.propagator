@@ -1,29 +1,23 @@
-# Use an official Python image as a base
 FROM python:3.9
 
-# Set a working directory inside the container
-WORKDIR /app
+WORKDIR /
 
-# Copy and install dependencies
 COPY propagator-service/requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install uvicorn redis
 
-# Copy the rest of the application code into the container
 COPY propagator-service/app/ app/
 
-# Ensure the graphql_schemas directory exists
-RUN mkdir -p app/graphql_schemas
-
-# Expose the application port
 EXPOSE 5000
 
-# Set environment variables for FastAPI
+ENV PYTHONPATH=~/
+ENV FLASK_ENV=development
+ENV SCHEMA_DIRECTORY=/app/graphql/schemas
+
 ENV FASTAPI_APP=app.main:flask_app
 ENV FASTAPI_HOST=0.0.0.0
 ENV FASTAPI_PORT=5000
 
-# Run FastAPI using Uvicorn with auto-reload in development mode
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]

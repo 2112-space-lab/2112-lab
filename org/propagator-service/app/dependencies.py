@@ -27,7 +27,7 @@ class Dependencies:
         return logger
 
     def setup_redis(self):
-        redis_url = os.getenv("REDIS_URL", "redis://test-redis:6379/0")
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
         try:
             client = redis.Redis.from_url(redis_url, decode_responses=True)
             client.ping()
@@ -38,7 +38,7 @@ class Dependencies:
             return None
 
     def setup_rabbitmq(self):
-        rabbitmq_url = os.getenv("RABBITMQ_URL", f"amqp://{os.getenv('RABBITMQ_USER', '2112')}:{os.getenv('RABBITMQ_PASSWORD', '2112')}@{os.getenv('RABBITMQ_HOST', 'test-rabbitmq')}:{os.getenv('RABBITMQ_PORT', 5672)}/")
+        rabbitmq_url = os.getenv("RABBITMQ_URL", f"amqp://{os.getenv('RABBITMQ_USER', '2112')}:{os.getenv('RABBITMQ_PASSWORD', '2112')}@{os.getenv('RABBITMQ_HOST', 'localhost')}:{os.getenv('RABBITMQ_PORT', 5672)}/")
         try:
             params = pika.URLParameters(rabbitmq_url)
             connection = pika.BlockingConnection(params)

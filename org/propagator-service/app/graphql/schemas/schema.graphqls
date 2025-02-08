@@ -1,0 +1,6 @@
+# Import all schema files
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

@@ -1,9 +1,9 @@
 import logging
 import json
 from flask import Blueprint, request, jsonify, Response
-from dependencies import Dependencies
-from services.visibility_service import compute_single_visibility
-from generated.models import VisibilityEvent
+from app.dependencies import Dependencies
+from app.services.visibility_service import compute_single_visibility
+from app.models.generated.models import VisibilityEvent
 
 class VisibilityRouter:
 

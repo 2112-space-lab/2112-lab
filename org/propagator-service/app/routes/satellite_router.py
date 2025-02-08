@@ -2,10 +2,9 @@ import logging
 import json
 import traceback
 from flask import Blueprint, request, jsonify
-from dependencies import Dependencies
-from propagate.propagate import Propagator
-from generated.input_types import PropagationRequestInput
-
+from app.dependencies import Dependencies
+from app.models.generated.input_types import PropagationRequestInput
+from app.services.satellite_propagation_service import SatellitePropagationService
 
 class SatelliteRouter:
     """
@@ -16,7 +15,7 @@ class SatelliteRouter:
         self.router = Blueprint("satellite_router", __name__)
         self.dependencies = dependencies
         self.logger = logging.getLogger("satellite-router")
-        self.propagator = Propagator(dependencies)
+        self.propagation_service = SatellitePropagationService(dependencies)
 
         self._register_routes()
 
@@ -60,13 +59,13 @@ class SatelliteRouter:
                     f"Propagating satellite {propagation_request.norad_id} from {propagation_request.start_time}"
                 )
 
-                positions = self.propagator.propagate(propagation_request)
+                store_key = self.propagation_service.propagate_and_store(propagation_request)
 
                 self.logger.info(
-                    f"Propagation complete for NORAD ID {propagation_request.norad_id} | Positions: {len(positions)} generated"
+                    f"Propagation complete for NORAD ID {propagation_request.norad_id} | Stored under key: {store_key}"
                 )
 
-                return jsonify({"positions": positions}), 200
+                return jsonify({"message": "Propagation successful", "store_key": store_key}), 200
 
             except Exception as e:
                 error_trace = traceback.format_exc()

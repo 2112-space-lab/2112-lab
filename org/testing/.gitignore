@@ -1,1 +1,5 @@
 vendor
+integration/_artifacts
+integration/__debug*
+integration/*.log*
+integration/godog-cucumber.log.json

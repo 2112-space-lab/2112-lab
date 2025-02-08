@@ -1,29 +1,16 @@
-import json
-import logging
 import dataclasses
+import logging
 import uuid
 from skyfield.api import EarthSatellite, load, wgs84
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Tuple
 
-from dependencies import Dependencies
-from generated.propagation_request import PropagationRequestInput
-from generated.satellite_position import SatellitePosition
-from generated.satellite_tle_propagated import SatelliteTlePropagated
-from generated.enums import EventType
-from core.message_broker import MessageBroker
-from core.event_builder import EventBuilder
-from core.event_emitter import EventEmitter
+from app.models.generated.propagation_request import PropagationRequestInput
+from app.models.generated.satellite_position import SatellitePosition
 
 logger = logging.getLogger(__name__)
 
 class Propagator:
-    def __init__(self, dependencies: Dependencies):
-        self.dependencies = dependencies
-        self.message_broker = MessageBroker(dependencies)
-        self.redis_client = dependencies.redis_client
-        self.event_emitter = EventEmitter(self.message_broker) 
-
     def normalize_and_parse_iso_date(self, iso_date: str) -> datetime:
         """
         Normalize and parse ISO 8601 date string to datetime object.
@@ -48,13 +35,13 @@ class Propagator:
             logger.error(f"❌ Error parsing ISO date {iso_date}: {e}")
             raise ValueError(f"Error parsing ISO date {iso_date}: {e}")
 
-    def propagate(self, request: PropagationRequestInput) -> str:
+    def propagate(self, request: PropagationRequestInput) -> Tuple[str, List[dict]]:
         """
-        Propagate satellite positions based on TLE data and store in Redis.
+        Propagates satellite positions based on TLE data.
+        Returns: (store_key, list of positions)
         """
         try:
             start_time = self.normalize_and_parse_iso_date(request.start_time)
-
             ts = load.timescale()
             satellite = EarthSatellite(request.tle_line_1, request.tle_line_2, str(request.norad_id), ts)
 
@@ -87,43 +74,8 @@ class Propagator:
                 positions.append(dataclasses.asdict(position))
                 current_time += timedelta(seconds=request.interval_seconds)
 
-            self.store_positions_in_redis(store_key, positions)
-
-            self.publish_propagation_event(request, store_key)
-
-            return store_key
+            return store_key, positions
 
         except Exception as e:
             logger.error(f"❌ Error propagating satellite position: {e}")
             raise ValueError(f"Error propagating satellite position: {e}")
-
-    def store_positions_in_redis(self, store_key: str, positions: List[dict]):
-        """
-        Stores satellite positions in Redis under a unique key.
-        """
-        try:
-            json_data = json.dumps(positions)
-            self.redis_client.set(store_key, json_data)
-            self.redis_client.expire(store_key, 86400)
-            logger.info(f"✅ Stored positions in Redis with key: {store_key}")
-        except Exception as e:
-            logger.error(f"❌ Failed to store positions in Redis: {e}")
-
-    def publish_propagation_event(self, request: PropagationRequestInput, store_key: str):
-        """
-        Publishes an event with the stored key instead of raw positions.
-        """
-        try:
-            propagated_event = SatelliteTlePropagated(
-                norad_id=request.norad_id,
-                tle_line_1=request.tle_line_1,
-                tle_line_2=request.tle_line_2,
-                time_interval=request.interval_seconds,
-                store_key=store_key
-            )
-
-            self.event_emitter.emit(event_type=EventType.SATELLITE_TLE_PROPAGATED, model=propagated_event)
-            logger.info(f"✅ Published propagation event to RabbitMQ with key: {store_key}")
-
-        except Exception as e:
-            logger.error(f"❌ Failed to publish propagation event: {e}")

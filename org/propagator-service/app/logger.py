@@ -3,7 +3,7 @@ import os
 import sys
 import json
 import traceback
-from logging.handlers import RotatingFileHandler
+from app.logging.handlers import RotatingFileHandler
 from datetime import datetime
 
 try:

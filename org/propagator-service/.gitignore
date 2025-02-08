@@ -1,4 +1,5 @@
-generated
-graphql_schemas
+models/generated
+graphql/schemas
 __pycache__
 __debug*
+.env

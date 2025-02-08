@@ -5,9 +5,10 @@ from datetime import datetime
 from typing import Any
 from dataclasses import asdict, is_dataclass
 
-from generated.event_root import EventRoot
-from generated.enums import EventType
-from core.message_broker import MessageBroker
+from app.models.generated.event_root import EventRoot
+from app.models.generated.enums import EventType
+from app.core.message_broker import MessageBroker
+from app.dependencies import Dependencies
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,8 +18,8 @@ class EventEmitter:
     A utility class for building and emitting events.
     """
 
-    def __init__(self, message_broker: MessageBroker):
-        self.message_broker = message_broker
+    def __init__(self, dependencies: Dependencies):
+        self.message_broker = MessageBroker(dependencies)
 
     def emit(self, event_type: EventType, model: Any, comment: str = ""):
         """

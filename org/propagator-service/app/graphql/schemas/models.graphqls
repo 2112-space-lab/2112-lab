@@ -1,0 +1,57 @@
+# User-defined location parameters for visibility queries
+input UserLocationInput {
+  uid: String!  # User ID for identifying the request
+  latitude: Float!
+  longitude: Float!
+  radius: Float!  # Radius of visibility in kilometers
+  horizon: Float!  # Horizon angle in degrees
+}
+
+# Request for propagating satellite positions
+input PropagationRequestInput {
+  noradId: String!  # NORAD ID of the satellite
+  tleLine1: String!  # First line of the Two-Line Element set (TLE)
+  tleLine2: String!  # Second line of the Two-Line Element set (TLE)
+  startTime: String!  # Start time for propagation (ISO 8601 format)
+  durationMinutes: Int = 90  # Duration of propagation in minutes (default: 90)
+  intervalSeconds: Int = 15  # Time interval for position updates (default: 15)
+}
+
+# Satellite position and visibility information
+type SatellitePosition {
+  id: ID!
+  name: String!
+  latitude: Float!
+  longitude: Float!
+  altitude: Float!
+  timestamp: String!  # ISO 8601 format
+  uid: String!  # User ID associated with the update
+}
+
+# Satellite TLE information
+type SatelliteTle {
+  id: ID!
+  name: String!
+  tleLine1: String!
+  tleLine2: String!
+  uid: String!  # User ID associated with the request
+}
+
+# Satellite visibility details
+type SatelliteVisibility {
+  satelliteId: ID!
+  satelliteName: String!
+  aos: String!  # Acquisition of Signal (ISO 8601 format)
+  los: String!  # Loss of Signal (ISO 8601 format)
+  userLocation: UserLocation!  # The location and parameters of the user
+  uid: String!  # User ID associated with the visibility data
+}
+
+# User location and viewing parameters
+type UserLocation {
+  uid: String!  # User ID for identifying the location context
+  latitude: Float!
+  longitude: Float!
+  radius: Float!  # Radius of visibility in kilometers
+  horizon: Float!  # Horizon angle in degrees
+}

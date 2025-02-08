@@ -1,0 +1,27 @@
+type Query {
+  # Retrieve the position of a satellite by ID
+  satellitePosition(id: ID!): SatellitePosition
+
+  # Retrieve the TLE data of a satellite by ID
+  satelliteTle(id: ID!): SatelliteTle
+
+  # Retrieve positions of a satellite within a time range
+  satellitePositionsInRange(id: ID!, startTime: String!, endTime: String!): [SatellitePosition!]!
+
+  # Fetch cached visibilities for satellites in view based on user location and parameters
+  cachedSatelliteVisibilities(
+    uid: String!
+    userLocation: UserLocationInput!
+    startTime: String!
+    endTime: String!
+  ): [SatelliteVisibility!]!
+
+    """
+  Lightweight health check to verify if the service is running.
+  """
+  ping: String!
+  """
+  Readiness check: Ensures all critical dependencies (e.g., Redis, RabbitMQ) are available.
+  """
+  ready: HealthStatus!
+}
