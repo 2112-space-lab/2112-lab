@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/alecthomas/kong v1.7.0
+	github.com/blues/jsonata-go v1.5.4
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cucumber/godog v0.15.0
 	github.com/docker/go-connections v0.5.0
@@ -15,6 +16,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/namsral/flag v1.7.4-pre
 	github.com/sirupsen/logrus v1.9.3
+	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.35.0
 	google.golang.org/protobuf v1.36.4
@@ -23,14 +25,12 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/blues/jsonata-go v1.5.4 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/streadway/amqp v1.1.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
-	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240318140521-94a12d6c2237 // indirect
