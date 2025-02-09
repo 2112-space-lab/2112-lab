@@ -1,0 +1,58 @@
+name: Web App CI Workflow
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+
+jobs:
+  build-and-test:
+    name: Build and Test Web App
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "npm"
+          cache-dependency-path: org/web/package-lock.json
+
+      # Cache dependencies
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('org/web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+        working-directory: org/web
+
+      # Run linting
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: org/web
+
+      # Run tests
+      - name: Run tests
+        run: npm test
+        working-directory: org/web
+
+      # Build the frontend
+      - name: Build the app
+        run: npm run build
+        working-directory: org/web
