@@ -25,17 +25,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: "npm"
-          cache-dependency-path: org/web/package-lock.json
+          cache: "npm" 
+          cache-dependency-path: "org/web/package-lock.json" 
 
-      # Cache dependencies
+      # Manually cache npm dependencies (Fix for GitHub Actions cache issue)
       - name: Cache npm dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('org/web/package-lock.json') }}
+          path: ~/.npm  # Ensure the cache path is correct
+          key: ${{ runner.os }}-node-${{ hashFiles('org/web/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-npm-
+            ${{ runner.os }}-node-
 
       # Install dependencies
       - name: Install dependencies

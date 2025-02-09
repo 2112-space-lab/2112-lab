@@ -35,19 +35,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      # Install dependencies
+      # Install dependencies (including flake8)
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8  # Ensure flake8 is installed
         working-directory: org/propagator-service
 
-      # Run linting
-      - name: Lint with flake8
+      # Run linting with flake8
+      - name: Run flake8 linter
         run: flake8 .
         working-directory: org/propagator-service
 
-      # Run tests
+      # Run tests with pytest
       - name: Run tests with pytest
         run: pytest
         working-directory: org/propagator-service
