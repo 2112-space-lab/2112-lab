@@ -43,17 +43,7 @@ jobs:
         run: go build -o out/app-service ./internal
         working-directory: org/app-service
 
-      # Build Testing Utilities
-      - name: Build Testing Utilities
-        run: go build -o out/testing ./pkg
-        working-directory: org/testing
-
       # Run tests for App Service
       - name: Run tests for App Service
         run: go test -v ./...
         working-directory: org/app-service/internal
-
-      # Run tests for Testing Utilities
-      - name: Run tests for Testing Utilities
-        run: go test -v ./...
-        working-directory: org/testing/pkg

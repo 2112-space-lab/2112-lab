@@ -1,0 +1,46 @@
+name: Testing Integration Workflow
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Docker Compose (if needed)
+      - name: Set up Docker
+        run: |
+          docker --version
+          docker-compose --version
+
+      # Set up dependencies (if required for Makefile)
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y make
+
+      # Run Makefile command to setup integration test environment
+      - name: Set up integration test environment
+        run: make test-it-setup-up
+        working-directory: org/testing
+
+      # Run integration tests
+      - name: Run integration tests
+        run: make test-it
+        working-directory: org/testing
+
+      # Cleanup resources after tests
+      - name: Tear down Docker containers
+        run: docker-compose down -v
+        working-directory: org/testing
