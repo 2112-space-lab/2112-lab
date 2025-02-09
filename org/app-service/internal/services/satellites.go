@@ -17,11 +17,11 @@ type SatelliteService struct {
 	tleRepo          repository.TleRepository
 	propagateClient  *propagator.PropagatorClient
 	celestrackClient celestrackClient
-	repo             domain.SatelliteRepository
+	repo             repository.SatelliteRepository
 }
 
 // NewSatelliteService creates a new instance of SatelliteService.
-func NewSatelliteService(tleRepo repository.TleRepository, propagateClient *propagator.PropagatorClient, celestrackClient celestrackClient, repo domain.SatelliteRepository) SatelliteService {
+func NewSatelliteService(tleRepo repository.TleRepository, propagateClient *propagator.PropagatorClient, celestrackClient celestrackClient, repo repository.SatelliteRepository) SatelliteService {
 	return SatelliteService{tleRepo: tleRepo, propagateClient: propagateClient, celestrackClient: celestrackClient, repo: repo}
 }
 

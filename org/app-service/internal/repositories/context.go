@@ -17,8 +17,8 @@ type ContextRepository struct {
 }
 
 // NewContextRepository creates a new ContextRepository instance.
-func NewContextRepository(db *data.Database) domain.GameContextRepository {
-	return &ContextRepository{db: db}
+func NewContextRepository(db *data.Database) ContextRepository {
+	return ContextRepository{db: db}
 }
 
 // Save creates a new context record.

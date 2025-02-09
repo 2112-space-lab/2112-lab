@@ -21,12 +21,11 @@ import (
 type TleRepository struct {
 	db          *data.Database
 	redisClient *redis.RedisClient
-	cacheTTL    time.Duration
 }
 
 // NewTLERepository initializes the repository with a cache TTL.
-func NewTLERepository(db *data.Database, redisClient *redis.RedisClient, cacheTTL time.Duration) TleRepository {
-	return TleRepository{db: db, redisClient: redisClient, cacheTTL: cacheTTL}
+func NewTLERepository(db *data.Database, redisClient *redis.RedisClient) TleRepository {
+	return TleRepository{db: db, redisClient: redisClient}
 }
 
 // mapToDomainTLE converts a models.TLE to a domain.TLE.
@@ -138,10 +137,6 @@ func (r *TleRepository) UpdateTleBatch(ctx context.Context, tles []domain.TLE) e
 			if err := r.redisClient.HSet(ctx, key, cacheData); err != nil {
 				log.Printf("Failed to update Redis cache for key %s: %v\n", key, err)
 			}
-			if err := r.redisClient.Expire(ctx, key, r.cacheTTL); err != nil {
-				log.Printf("Failed to set expiration for Redis key %s: %v\n", key, err)
-			}
-
 			// Publish to the message broker
 			if err := r.publishTleToBroker(ctx, tle); err != nil {
 				log.Printf("Failed to publish TLE to message broker for NORAD ID %s: %v\n", tle.NoradID, err)
@@ -260,9 +255,6 @@ func (r *TleRepository) updateCache(ctx context.Context, key string, tle domain.
 	}
 	if err := r.redisClient.HSet(ctx, key, cacheData); err != nil {
 		log.Printf("Failed to update Redis cache for key %s: %v\n", key, err)
-	}
-	if err := r.redisClient.Expire(ctx, key, r.cacheTTL); err != nil {
-		log.Printf("Failed to set expiration for Redis key %s: %v\n", key, err)
 	}
 }
 

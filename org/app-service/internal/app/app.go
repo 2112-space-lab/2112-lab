@@ -4,15 +4,15 @@ import (
 	"context"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	"github.com/org/2112-space-lab/org/app-service/internal/dependencies"
 	"github.com/org/2112-space-lab/org/app-service/internal/proc"
-	"github.com/org/2112-space-lab/org/app-service/internal/services"
 	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 // App struct encapsulates shared dependencies
 type App struct {
-	Services *services.ServiceComponent
-	Version  string
+	Dependencies *dependencies.Dependencies
+	Version      string
 }
 
 func NewApp(ctx context.Context, serviceName string, version string) (App, error) {
@@ -45,17 +45,13 @@ func NewApp(ctx context.Context, serviceName string, version string) (App, error
 
 	// Finalize app instance creation
 	logger.Debug("Creating service component...")
-	serviceComponent, err := services.NewServiceComponent(config.Env)
-	if err != nil {
-		logger.Error(err.Error())
-		panic("failed to init service component")
-	}
+	deps := dependencies.NewDependencies(config.Env)
 	logger.Info("Service component created.")
 
 	logger.Infof("App instance successfully initialized for serviceName=%s, version=%s", serviceName, version)
 
 	return App{
-		Services: serviceComponent,
-		Version:  version,
+		Dependencies: deps,
+		Version:      version,
 	}, nil
 }

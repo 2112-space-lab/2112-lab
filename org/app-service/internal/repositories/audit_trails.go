@@ -14,8 +14,8 @@ type AuditTrailRepository struct {
 }
 
 // NewAuditTrailRepository creates a new AuditTrailRepository instance.
-func NewAuditTrailRepository(db *data.Database) domain.AuditTrailRepository {
-	return &AuditTrailRepository{db: db}
+func NewAuditTrailRepository(db *data.Database) AuditTrailRepository {
+	return AuditTrailRepository{db: db}
 }
 
 // Save creates a new audit trail record.

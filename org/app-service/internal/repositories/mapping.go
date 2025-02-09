@@ -15,8 +15,8 @@ type TileSatelliteMappingRepository struct {
 }
 
 // NewTileSatelliteMappingRepository creates a new instance of TileSatelliteMappingRepository.
-func NewTileSatelliteMappingRepository(db *data.Database) domain.MappingRepository {
-	return &TileSatelliteMappingRepository{db: db}
+func NewTileSatelliteMappingRepository(db *data.Database) TileSatelliteMappingRepository {
+	return TileSatelliteMappingRepository{db: db}
 }
 
 func (r *TileSatelliteMappingRepository) FindByNoradIDAndTile(ctx context.Context, contextID, noradID, tileID string) ([]domain.TileSatelliteMapping, error) {

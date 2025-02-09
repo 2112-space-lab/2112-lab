@@ -16,8 +16,8 @@ func StartCmd(app *app.App) *cobra.Command {
 		Long:  "Start both public and protected API services, as well as optional daemons.",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.Debug("Starting public and protected API services...")
-			proc.StartPublicApi(app.Services)
-			proc.StartProtectedApi(app.Services)
+			proc.StartPublicApi(app.Dependencies)
+			proc.StartProtectedApi(app.Dependencies)
 		},
 	}
 
@@ -42,7 +42,7 @@ func PublicApiCmd(app *app.App) *cobra.Command {
 		Short: "Start public API service",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.Debug("Starting public API service...")
-			proc.StartPublicApi(app.Services)
+			proc.StartPublicApi(app.Dependencies)
 		},
 	}
 }
@@ -54,7 +54,7 @@ func ProtectedApiCmd(app *app.App) *cobra.Command {
 		Short: "Start protected API service",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.Debug("Starting protected API service...")
-			proc.StartProtectedApi(app.Services)
+			proc.StartProtectedApi(app.Dependencies)
 		},
 	}
 }

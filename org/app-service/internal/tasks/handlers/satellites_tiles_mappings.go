@@ -18,7 +18,6 @@ type SatellitesTilesMappingsHandler struct {
 	satelliteRepo domain.SatelliteRepository
 	mappingRepo   domain.MappingRepository
 	redisClient   *redis.RedisClient
-	workerCount   int
 }
 
 // NewSatellitesTilesMappingsHandler creates a new instance of the handler.
@@ -28,7 +27,6 @@ func NewSatellitesTilesMappingsHandler(
 	satelliteRepo domain.SatelliteRepository,
 	mappingRepo domain.MappingRepository,
 	redisClient *redis.RedisClient,
-	workerCount int, // Number of workers
 ) SatellitesTilesMappingsHandler {
 	return SatellitesTilesMappingsHandler{
 		tileRepo:      tileRepo,
@@ -36,7 +34,6 @@ func NewSatellitesTilesMappingsHandler(
 		satelliteRepo: satelliteRepo,
 		mappingRepo:   mappingRepo,
 		redisClient:   redisClient,
-		workerCount:   workerCount,
 	}
 }
 
@@ -122,9 +119,7 @@ func (h *SatellitesTilesMappingsHandler) Subscribe(ctx context.Context, channel 
 	messageChan := make(chan string, 100)
 
 	// Start worker pool
-	for i := 0; i < h.workerCount; i++ {
-		go h.worker(ctx, messageChan)
-	}
+	go h.worker(ctx, messageChan)
 
 	// Subscribe to the Redis channel
 	err := h.redisClient.Subscribe(ctx, channel, func(message string) error {

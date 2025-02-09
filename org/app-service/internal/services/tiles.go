@@ -12,18 +12,18 @@ import (
 )
 
 type TileService struct {
-	repo          domain.TileRepository
+	repo          repository.TileRepository
 	tleRepo       repository.TleRepository
-	satelliteRepo domain.SatelliteRepository
-	mappingRepo   domain.MappingRepository
+	satelliteRepo repository.SatelliteRepository
+	mappingRepo   repository.TileSatelliteMappingRepository
 }
 
 // NewTileService creates a new instance of TileService.
 func NewTileService(
-	tileRepo domain.TileRepository,
+	tileRepo repository.TileRepository,
 	tleRepo repository.TleRepository,
-	satelliteRepo domain.SatelliteRepository,
-	mappingRepo domain.MappingRepository,
+	satelliteRepo repository.SatelliteRepository,
+	mappingRepo repository.TileSatelliteMappingRepository,
 ) TileService {
 	return TileService{
 		repo:          tileRepo,

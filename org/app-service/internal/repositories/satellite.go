@@ -47,8 +47,8 @@ type SatelliteRepository struct {
 }
 
 // NewSatelliteRepository creates a new SatelliteRepository instance.
-func NewSatelliteRepository(db *data.Database) domain.SatelliteRepository {
-	return &SatelliteRepository{db: db}
+func NewSatelliteRepository(db *data.Database) SatelliteRepository {
+	return SatelliteRepository{db: db}
 }
 
 // FindByNoradID retrieves a satellite by its NORAD ID, excluding deleted ones.

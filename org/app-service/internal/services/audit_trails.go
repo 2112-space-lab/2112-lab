@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	fx "github.com/org/2112-space-lab/org/app-service/pkg/option"
 	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
@@ -13,11 +14,11 @@ import (
 
 // AuditTrailService provides business logic for managing audit trails.
 type AuditTrailService struct {
-	repo domain.AuditTrailRepository
+	repo repository.AuditTrailRepository
 }
 
 // NewAuditTrailService creates a new instance of AuditTrailService.
-func NewAuditTrailService(repo domain.AuditTrailRepository) AuditTrailService {
+func NewAuditTrailService(repo repository.AuditTrailRepository) AuditTrailService {
 	return AuditTrailService{repo: repo}
 }
 

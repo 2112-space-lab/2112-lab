@@ -5,17 +5,18 @@ import (
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
 // ContextService definition
 type ContextService struct {
-	repo domain.GameContextRepository
+	repo repository.ContextRepository
 }
 
 // NewContextService creates a new instance of ContextService.
-func NewContextService(repo domain.GameContextRepository) ContextService {
+func NewContextService(repo repository.ContextRepository) ContextService {
 	return ContextService{repo: repo}
 }
 

@@ -4,10 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
-	"github.com/org/2112-space-lab/org/app-service/internal/domain"
-	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
-	"github.com/org/2112-space-lab/org/app-service/internal/services"
+	"github.com/org/2112-space-lab/org/app-service/internal/dependencies"
 	"github.com/org/2112-space-lab/org/app-service/internal/tasks/handlers"
 )
 
@@ -23,37 +20,36 @@ type TaskMonitor struct {
 }
 
 // TaskMonitor constructor
-func NewTaskMonitor(satelliteRepo domain.SatelliteRepository, tleRepo repository.TleRepository, tileRepo domain.TileRepository, visibilityRepo domain.MappingRepository, tleService services.TleService, satelliteService services.SatelliteService, redisClient *redis.RedisClient) (TaskMonitor, error) {
+func NewTaskMonitor(dependencies *dependencies.Dependencies) (TaskMonitor, error) {
 
 	celestrackTleUpload := handlers.NewCelestrackTleUploadHandler(
-		satelliteRepo,
-		tleRepo,
-		&tleService,
+		dependencies.Repositories.SatelliteRepo,
+		dependencies.Repositories.TleRepo,
+		&dependencies.Services.TleService,
 	)
 
 	generateTilesHandler := handlers.NewGenerateTilesHandler(
-		tileRepo,
+		&dependencies.Repositories.TileRepo,
 	)
 
 	mappingHandler := handlers.NewSatellitesTilesMappingsHandler(
-		tileRepo,
-		tleRepo,
-		satelliteRepo,
-		visibilityRepo,
-		redisClient,
-		4,
+		&dependencies.Repositories.TileRepo,
+		dependencies.Repositories.TleRepo,
+		&dependencies.Repositories.SatelliteRepo,
+		&dependencies.Repositories.MappingRepo,
+		dependencies.Clients.RedisClient,
 	)
 
 	celestrackSatelliteUpload := handlers.NewCelesTrackSatelliteUploadHandler(
-		satelliteRepo,
-		&satelliteService,
+		&dependencies.Repositories.SatelliteRepo,
+		&dependencies.Services.SatelliteService,
 	)
 
 	satelliteVisibilities := handlers.NewComputeVisibilitiessHandler(
-		tileRepo,
-		visibilityRepo,
-		tleRepo,
-		redisClient,
+		&dependencies.Repositories.TileRepo,
+		&dependencies.Repositories.MappingRepo,
+		dependencies.Repositories.TleRepo,
+		dependencies.Clients.RedisClient,
 	)
 
 	tasks := map[handlers.TaskName]TaskHandler{

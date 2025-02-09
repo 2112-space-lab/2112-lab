@@ -17,13 +17,13 @@ type TleServiceClient interface {
 }
 
 type CelestrackTleUploadHandler struct {
-	satelliteRepo domain.SatelliteRepository
+	satelliteRepo repository.SatelliteRepository
 	tleRepo       repository.TleRepository
 	tleService    TleServiceClient
 }
 
 func NewCelestrackTleUploadHandler(
-	satelliteRepo domain.SatelliteRepository,
+	satelliteRepo repository.SatelliteRepository,
 	tleRepo repository.TleRepository,
 	tleService TleServiceClient) CelestrackTleUploadHandler {
 	return CelestrackTleUploadHandler{

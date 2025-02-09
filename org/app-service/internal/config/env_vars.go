@@ -85,6 +85,10 @@ func (c *EnvVars) setDefaults() {
 	viper.SetDefault("DB_TIMEZONE", constants.DEFAULT_DB_TIMEZONE)
 	viper.SetDefault("DB_PORT", constants.DB_PORT)
 
+	viper.SetDefault("REDIS_HOST", constants.DEFAULT_HOST)
+	viper.SetDefault("REDIS_PORT", constants.DEFAULT_REDIS_PORT)
+	viper.SetDefault("REDIS_PASSWORD", constants.DEFAULT_REDIS_PASSWORD)
+
 	viper.SetDefault("CORS_ALLOW_ORIGINS", constants.DEFAULT_CORS_ALLOW_ORIGINS)
 
 	viper.SetDefault("CELESTRACK_URL", constants.DEFAULT_PUBLIC_CESLESTRACK_URL)

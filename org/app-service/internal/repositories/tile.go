@@ -20,8 +20,8 @@ type TileRepository struct {
 }
 
 // NewTileRepository creates a new instance of TileRepository.
-func NewTileRepository(db *data.Database) domain.TileRepository {
-	return &TileRepository{db: db}
+func NewTileRepository(db *data.Database) TileRepository {
+	return TileRepository{db: db}
 }
 
 // FindTilesInRegion retrieves tiles that intersect a given bounding box and belong to a specific context.

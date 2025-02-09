@@ -20,7 +20,7 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/api/middlewares"
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
 	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
-	"github.com/org/2112-space-lab/org/app-service/internal/services"
+	"github.com/org/2112-space-lab/org/app-service/internal/dependencies"
 	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
@@ -28,18 +28,18 @@ import (
 type PublicRouter struct {
 	Echo              *echo.Echo
 	Name              string
-	ServiceComponent  *services.ServiceComponent
+	Dependencies      *dependencies.Dependencies
 	RouteTableMapping map[string]string
 }
 
 // NewPublicRouter creates and initializes a new PublicRouter instance.
-func NewPublicRouter(env *config.SEnv, services *services.ServiceComponent) *PublicRouter {
+func NewPublicRouter(env *config.SEnv, deps *dependencies.Dependencies) *PublicRouter {
 	logger.Debug("Initializing public API router ...")
 	clerk.SetKey(constants.DEFAULT_CLERK_API_KEY)
 
 	router := &PublicRouter{
-		Name:             "public API",
-		ServiceComponent: services,
+		Name:         "public API",
+		Dependencies: deps,
 	}
 	router.setupEcho()
 	router.registerRoutes()
@@ -64,7 +64,7 @@ func (r *PublicRouter) registerMiddlewares() {
 		middlewares.TimeoutMiddleware(),
 		middlewares.ResponseHeadersMiddleware(),
 		middlewares.ClerkMiddleware(),
-		middlewares.LogNonGETRequestsMiddleware(r.RouteTableMapping, r.ServiceComponent.AuditTrailService),
+		middlewares.LogNonGETRequestsMiddleware(r.RouteTableMapping, r.Dependencies.Services.AuditTrailService),
 	}
 
 	if config.DevModeFlag {
@@ -104,10 +104,10 @@ func (r *PublicRouter) registerPublicAPIRoutes() {
 	r.RouteTableMapping = middlewares.GenerateRouteTableMapping(r.Echo)
 
 	// Handlers
-	satelliteHandler := satellites.NewSatelliteHandler(r.ServiceComponent.SatelliteService)
-	contextHandler := apicontext.NewContextHandler(r.ServiceComponent.ContextService)
-	tileHandler := tiles.NewTileHandler(r.ServiceComponent.TileService)
-	auditTrailHandler := apiaudittrail.NewAuditTrailHandler(r.ServiceComponent.AuditTrailService)
+	satelliteHandler := satellites.NewSatelliteHandler(r.Dependencies.Services.SatelliteService)
+	contextHandler := apicontext.NewContextHandler(r.Dependencies.Services.ContextService)
+	tileHandler := tiles.NewTileHandler(r.Dependencies.Services.TileService)
+	auditTrailHandler := apiaudittrail.NewAuditTrailHandler(r.Dependencies.Services.AuditTrailService)
 	userHandler := apiuser.NewUserHandler()
 
 	// Satellite routes

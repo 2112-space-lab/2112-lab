@@ -13,16 +13,16 @@ import (
 	healthHandlers "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/healthz"
 	metricsHandlers "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/metrics"
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
-	"github.com/org/2112-space-lab/org/app-service/internal/services"
+	"github.com/org/2112-space-lab/org/app-service/internal/dependencies"
 	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 // ProtectedRouter manages the public API router and its dependencies.
 type ProtectedRouter struct {
-	Echo             *echo.Echo
-	Name             string
-	ServiceComponent *services.ServiceComponent
+	Echo         *echo.Echo
+	Name         string
+	Dependencies *dependencies.Dependencies
 }
 
 // Init initializes the Echo instance for the router.
@@ -32,11 +32,11 @@ func (r *ProtectedRouter) Init() {
 
 }
 
-func InitProtectedAPIRouter(env *config.SEnv, services *services.ServiceComponent) *ProtectedRouter {
+func InitProtectedAPIRouter(env *config.SEnv, deps *dependencies.Dependencies) *ProtectedRouter {
 	logger.Debug("Initializing protected api router ...")
 	protectedApiRouter := &ProtectedRouter{
-		Name:             "public API",
-		ServiceComponent: services,
+		Name:         "public API",
+		Dependencies: deps,
 	}
 	protectedApiRouter.Init()
 	protectedApiRouter.registerPrometheusMetrics()

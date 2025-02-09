@@ -29,11 +29,8 @@ const (
 
 	// features
 	FEATURE_SERVICE    string = "service"
-	FEATURE_ORY_KRATOS string = "ory_kratos"
-	FEATURE_ORY_KETO   string = "ory_keto"
 	FEATURE_DATABASE   string = "database"
 	FEATURE_CORS       string = "cors"
-	FEATURE_GZIP       string = "gzip"
 	FEATURE_CELESTRACK string = "celestrack"
 	FEATURE_PROPAGATOR string = "propagator"
 	FEATURE_REDIS      string = "redis"
@@ -59,6 +56,9 @@ const (
 	DB_SSL_MODE_DISABLED  string = "disable"
 	DB_TIMEZONE_UTC       string = "Etc/GMT"
 	DB_TIMEZONE_MELBOURNE string = "Australia/Melbourne"
+
+	DEFAULT_REDIS_PASSWORD string = "2112"
+	DEFAULT_REDIS_PORT     int32  = 6379
 
 	HEADER_CONTENT_TYPE      string = "Content-Type"
 	HEADER_CONTENT_TYPE_JSON string = "application/json; charset=UTF-8"
