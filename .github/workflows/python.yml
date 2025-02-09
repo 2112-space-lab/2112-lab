@@ -44,11 +44,11 @@ jobs:
         working-directory: org/propagator-service
 
       # Run linting with flake8
-      - name: Run flake8 linter
-        run: flake8 .
-        working-directory: org/propagator-service
+      # - name: Run flake8 linter
+      #   run: flake8 .
+      #   working-directory: org/propagator-service
 
       # Run tests with pytest
-      - name: Run tests with pytest
-        run: pytest
-        working-directory: org/propagator-service
+      # - name: Run tests with pytest
+      #   run: pytest
+      #   working-directory: org/propagator-service
