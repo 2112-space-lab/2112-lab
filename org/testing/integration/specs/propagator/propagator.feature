@@ -20,4 +20,3 @@ Feature: Propagator Service allows propagation of TLE
       | EventType                | Occurence | IsReject | FromTime  | ToTimeWarn | ToTimeErr | ProduceCheckpointEventTime | AssignRef | XPathQuery | XPathValue |
       | SATELLITE_TLE_PROPAGATED | 1         |          | ready>+0s |            | ready>+5s |                            |           |            |            |
 
-

@@ -7,10 +7,10 @@
                 "command": "cd testing && go mod tidy && go mod vendor"
             }
         },
-        "db-up": {
+        "setup-up": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "cd testing && make test-it-db-up"
+                "command": "cd testing && make test-it-setup-up"
             }
         },
         "test": {
