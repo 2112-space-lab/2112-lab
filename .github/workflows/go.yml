@@ -38,13 +38,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      # Install dependencies for all Go projects
-      - name: Install dependencies (Go Modules)
-        run: |
-          go mod tidy
-          go mod download
-        working-directory: org
-
       # Build App Service
       - name: Build App Service
         run: go build -o out/app-service ./internal
