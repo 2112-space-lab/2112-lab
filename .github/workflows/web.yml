@@ -1,24 +1,24 @@
 name: Web App CI Workflow
 
-# on:
-#   push:
-#     branches:
-#       - master
-#       - dev
-#   pull_request:
-#     branches:
-#       - master
-#       - dev
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
 
-# jobs:
-#   build-and-test:
-#     name: Build and Test Web App
-#     runs-on: ubuntu-latest
+jobs:
+  build-and-test:
+    name: Build and Test Web App
+    runs-on: ubuntu-latest
 
-#     steps:
-#       # Checkout the code
-#       - name: Checkout code
-#         uses: actions/checkout@v3
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
 
 #       # Set up Node.js
 #       - name: Set up Node.js
