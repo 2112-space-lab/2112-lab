@@ -20,20 +20,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Docker Compose (if needed)
-      - name: Set up Docker
+      # Verify Docker installation
+      - name: Check Docker version
         run: |
           docker --version
-          docker-compose --version
+          docker compose version || echo "Docker Compose not installed separately"
 
-      # Set up dependencies (if required for Makefile)
+      # Install dependencies (Make and Go)
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y make
 
-      # Run Makefile command to setup integration test environment
+      # Pull required Docker images
+      - name: Pull required Docker images
+        run: |
+          docker pull postgis/postgis:latest
+          docker pull redis:latest
+          docker pull rabbitmq:management
+
+      # Create the custom Docker network
+      - name: Create Docker network
+        run: docker network create 2112_net || echo "Network already exists"
+
+      # Run Makefile command to setup integration test environment (Start Containers)
       - name: Set up integration test environment
         run: make test-it-setup-up
         working-directory: org/testing
+
+      # Wait for database and services to be ready
+      - name: Wait for services to be ready
+        run: sleep 15  # Ensure services are fully initialized before running tests
 
       # Run integration tests
       - name: Run integration tests
@@ -42,5 +57,7 @@ jobs:
 
       # Cleanup resources after tests
       - name: Tear down Docker containers
-        run: docker-compose down -v
-        working-directory: org/testing
+        run: |
+          docker stop 2112-database.db test-redis test-rabbitmq || echo "Some containers were not running"
+          docker rm 2112-database.db test-redis test-rabbitmq || echo "Some containers were already removed"
+          docker network rm 2112_net || echo "Network was already removed"
