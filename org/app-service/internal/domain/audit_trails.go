@@ -3,8 +3,8 @@ package domain
 import (
 	"context"
 
-	fx "github.com/Elbujito/2112/src/app-service/pkg/option"
-	xtime "github.com/Elbujito/2112/src/app-service/pkg/time"
+	fx "github.com/org/2112-space-lab/org/app-service/pkg/option"
+	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
 )
 
 // ActionType represents the type of action performed in the audit trail.

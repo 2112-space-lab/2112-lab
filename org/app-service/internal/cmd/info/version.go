@@ -3,7 +3,7 @@ package info
 import (
 	"fmt"
 
-	"github.com/Elbujito/2112/src/app-service/internal/app"
+	"github.com/org/2112-space-lab/org/app-service/internal/app"
 	"github.com/spf13/cobra"
 )
 

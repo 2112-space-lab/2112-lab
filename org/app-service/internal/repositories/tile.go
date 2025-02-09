@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/data"
-	"github.com/Elbujito/2112/src/app-service/internal/data/models"
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/data"
+	"github.com/org/2112-space-lab/org/app-service/internal/data/models"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	"gorm.io/gorm"
 )
 

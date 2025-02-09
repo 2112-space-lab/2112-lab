@@ -1,16 +1,22 @@
 {
     "name": "app-service",
     "targets": {
+        "vendor": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "cd app-service && go mod tidy && go mod vendor"
+            }
+        },
         "build": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "go build -o dist/org/app-service ./app-service"
+                "command": "cd app-service && go build -o dist/app-service ./internal"
             }
         },
         "serve": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "go run ./app-service/internal/main.go"
+                "command": "cd app-service && go run ./internal/main.go start"
             }
         }
     }

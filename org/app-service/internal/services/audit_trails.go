@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
-	log "github.com/Elbujito/2112/src/app-service/pkg/log"
-	fx "github.com/Elbujito/2112/src/app-service/pkg/option"
-	xtime "github.com/Elbujito/2112/src/app-service/pkg/time"
-	"github.com/Elbujito/2112/src/app-service/pkg/tracing"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
+	fx "github.com/org/2112-space-lab/org/app-service/pkg/option"
+	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
 // AuditTrailService provides business logic for managing audit trails.

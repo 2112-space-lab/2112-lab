@@ -1,11 +1,12 @@
-module github.com/Elbujito/2112/src/app-service
+module github.com/org/2112-space-lab/org/app-service
 
 go 1.22.7
 
 toolchain go1.23.4
 
+replace github.com/org/2112-space-lab/org/go-utils => ../packages/go-utils
+
 require (
-	github.com/org/2112-space-lab/org/go-utils v0.0.1
 	github.com/clerk/clerk-sdk-go/v2 v2.2.0
 	github.com/go-gormigrate/gormigrate/v2 v2.1.3
 	github.com/go-playground/validator/v10 v10.23.0
@@ -13,6 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jedib0t/go-pretty/v6 v6.6.3
 	github.com/labstack/echo/v4 v4.13.0
+	github.com/org/2112-space-lab/org/go-utils v0.0.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1

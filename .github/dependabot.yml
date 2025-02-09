@@ -1,38 +1,97 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# Dependabot configuration for automatic dependency updates
 version: 2
 updates:
-  # Enable version updates for npm
+  # NPM - JavaScript/TypeScript dependencies (Web frontend)
   - package-ecosystem: "npm"
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: "/"
-    # Check the npm registry for updates every day (weekdays)
+    directory: "/web" 
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      frontend-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # Enable version updates for npm
+  # Go Modules - Gateway Service
   - package-ecosystem: "gomod"
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: "/"
-    # Check the npm registry for updates every day (weekdays)
+    directory: "/gateway-service"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      gateway-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # Enable version updates for npm
+  # Go Modules - App Service
+  - package-ecosystem: "gomod"
+    directory: "/app-service"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      app-service-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Go Modules - Go Utils (shared package)
+  - package-ecosystem: "gomod"
+    directory: "/packages/go-utils"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      go-utils-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Go Modules - Testing Utilities
+  - package-ecosystem: "gomod"
+    directory: "/testing"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      testing-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Python - Testing / Backend dependencies
   - package-ecosystem: "pip"
-    # Look for `package.json` and `lock` files in the `root` directory
-    directory: "/"
-    # Check the npm registry for updates every day (weekdays)
+    directory: "/propagator-service"
     schedule:
       interval: "weekly"
-      
-      
-  # Enable version updates for Docker
+    open-pull-requests-limit: 5
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Docker - Updates for Dockerfiles
   - package-ecosystem: "docker"
-    # Look for a `Dockerfile` in the `root` directory
-    directory: "/"
-    # Check for updates once a week
+    directory: "/"  # Root Dockerfile
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      docker-dependencies:
+        patterns:
+          - "*"

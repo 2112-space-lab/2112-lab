@@ -3,7 +3,7 @@ package middlewares
 import (
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/clients/service"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/service"
 	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xutils"
 
 	"github.com/labstack/echo/v4"

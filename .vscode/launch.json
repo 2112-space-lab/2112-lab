@@ -21,7 +21,7 @@
       "request": "launch",
     },
     {
-      "program": "${workspaceRoot}/src/app-service",
+      "program": "${workspaceRoot}/org/app-service",
       "name": "Public API",
       "type": "go",
       "mode": "debug",
@@ -134,7 +134,7 @@
       "host": "127.0.0.1",
     },
     {
-      "program": "${workspaceRoot}/src/gateway-service/internal/main.go",
+      "program": "${workspaceRoot}/org/gateway-service/internal/main.go",
       "name": "Graphql gateway",
       "type": "go",
       "mode": "debug",

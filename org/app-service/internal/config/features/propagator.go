@@ -1,13 +1,13 @@
 package features
 
-import xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+import "github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 
 type PropagatorConfig struct {
 	BaseUrl string `mapstructure:"PROPAGATOR_URL"`
 }
 
 var propagator = &Feature{
-	Name:       xconstants.FEATURE_PROPAGATOR,
+	Name:       constants.FEATURE_PROPAGATOR,
 	Config:     &PropagatorConfig{},
 	enabled:    true,
 	configured: false,

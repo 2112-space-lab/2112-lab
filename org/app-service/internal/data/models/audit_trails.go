@@ -3,9 +3,9 @@ package models
 import (
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
-	fx "github.com/Elbujito/2112/src/app-service/pkg/option"
-	xtime "github.com/Elbujito/2112/src/app-service/pkg/time"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	fx "github.com/org/2112-space-lab/org/app-service/pkg/option"
+	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
 )
 
 // AuditTrail represents the database model for audit trails.

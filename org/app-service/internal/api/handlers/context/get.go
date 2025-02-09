@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
-	"github.com/Elbujito/2112/src/app-service/internal/services"
 	"github.com/labstack/echo/v4"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/services"
 )
 
 // ContextHandler handles API requests related to GameContexts.

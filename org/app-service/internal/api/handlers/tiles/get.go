@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
-	"github.com/Elbujito/2112/src/app-service/internal/services"
 	"github.com/labstack/echo/v4"
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/services"
 )
 
 type TileHandler struct {
@@ -30,8 +30,8 @@ func (h *TileHandler) GetAllTiles(c echo.Context) error {
 
 	// If no tiles are found
 	if len(tiles) == 0 {
-		c.Echo().Logger.Error(xconstants.ERROR_ID_NOT_FOUND)
-		return xconstants.ERROR_ID_NOT_FOUND
+		c.Echo().Logger.Error(constants.ERROR_ID_NOT_FOUND)
+		return constants.ERROR_ID_NOT_FOUND
 	}
 
 	// Return tiles in the response

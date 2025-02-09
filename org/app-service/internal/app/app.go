@@ -3,10 +3,10 @@ package app
 import (
 	"context"
 
-	"github.com/Elbujito/2112/src/app-service/internal/config"
-	"github.com/Elbujito/2112/src/app-service/internal/proc"
-	"github.com/Elbujito/2112/src/app-service/internal/services"
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
+	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	"github.com/org/2112-space-lab/org/app-service/internal/proc"
+	"github.com/org/2112-space-lab/org/app-service/internal/services"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 // App struct encapsulates shared dependencies

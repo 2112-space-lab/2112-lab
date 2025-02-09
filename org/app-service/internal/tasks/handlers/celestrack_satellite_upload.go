@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 )
 
 type SatelliteServiceClient interface {

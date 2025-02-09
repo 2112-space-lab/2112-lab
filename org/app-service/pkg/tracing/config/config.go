@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 
-	otelHttpExporter "github.com/Elbujito/2112/src/app-service/pkg/tracing/otelhttp"
-	otelStdoutExporter "github.com/Elbujito/2112/src/app-service/pkg/tracing/otelstdout"
+	otelHttpExporter "github.com/org/2112-space-lab/org/app-service/pkg/tracing/otelhttp"
+	otelStdoutExporter "github.com/org/2112-space-lab/org/app-service/pkg/tracing/otelstdout"
 )
 
 // Config holds config flags used to create a tracer

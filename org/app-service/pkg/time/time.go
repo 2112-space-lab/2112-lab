@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	fx "github.com/Elbujito/2112/src/app-service/pkg/option"
+	fx "github.com/org/2112-space-lab/org/app-service/pkg/option"
 )
 
 // ToUtcTime converts *time.Time to xtime.UtcTime.

@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/config"
 	"github.com/go-redis/redis"
+	"github.com/org/2112-space-lab/org/app-service/internal/config"
 )
 
 func (r *RedisClient) Init() {}

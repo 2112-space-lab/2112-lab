@@ -1,8 +1,8 @@
 package task
 
 import (
-	"github.com/Elbujito/2112/src/app-service/internal/proc"
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
+	"github.com/org/2112-space-lab/org/app-service/internal/proc"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/spf13/cobra"
 )
 

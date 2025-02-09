@@ -7,9 +7,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/clients/redis"
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
-	repository "github.com/Elbujito/2112/src/app-service/internal/repositories"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
 )
 
 type SatellitesTilesMappingsHandler struct {

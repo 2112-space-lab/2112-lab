@@ -3,8 +3,8 @@ package xcontext
 import (
 	"context"
 
-	log "github.com/Elbujito/2112/src/app-service/pkg/log"
 	"github.com/google/uuid"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 const (

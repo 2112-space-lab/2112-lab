@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 )
 
 // TileSatelliteMapping defines the relationship between a satellite and a tile.

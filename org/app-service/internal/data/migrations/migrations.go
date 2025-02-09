@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	log "github.com/Elbujito/2112/src/app-service/pkg/log"
 	"github.com/go-gormigrate/gormigrate/v2"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"gorm.io/gorm"
 )
 

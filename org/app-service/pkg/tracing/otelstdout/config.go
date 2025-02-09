@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Elbujito/2112/src/app-service/pkg/tracing"
-	server "github.com/Elbujito/2112/src/app-service/pkg/tracing/tracer"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
+	server "github.com/org/2112-space-lab/org/app-service/pkg/tracing/tracer"
 
 	stdout "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	sdk_trace "go.opentelemetry.io/otel/sdk/trace"

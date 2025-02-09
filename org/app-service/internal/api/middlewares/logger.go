@@ -3,14 +3,14 @@ package middlewares
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 )
 
 // LoggerMiddleware returns Logger Middleware
 func LoggerMiddleware() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format:           "${time_custom} ${user_agent} ${remote_ip} ${status} ${method} ${uri} ${latency_human} ${bytes_out}\n",
-		CustomTimeFormat: xconstants.DEFAULT_LOGGER_TIMESTAMP_FORMAT,
+		CustomTimeFormat: constants.DEFAULT_LOGGER_TIMESTAMP_FORMAT,
 	})
 }
 

@@ -1,7 +1,5 @@
-# This workflow will build a Go project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Go Build Workflow
+# GitHub Actions Workflow to build and test Go services in a monorepo
+name: Go Build and Test Workflow
 
 on:
   push:
@@ -12,10 +10,12 @@ on:
     branches:
       - master
       - dev
- 
+
 jobs:
   build:
+    name: Build and Test Go Services
     runs-on: ubuntu-latest
+
     steps:
       # Checkout the code
       - name: Checkout code
@@ -38,21 +38,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      # Install dependencies
-      - name: Install dependencies
+      # Install dependencies for all Go projects
+      - name: Install dependencies (Go Modules)
         run: |
-          cd org/app-service
           go mod tidy
+          go mod download
+        working-directory: org
 
-      # Build the application
-      - name: Build the application
-        run: |
-          cd org/app-service/internal
-          go build -o ./out/service .
+      # Build App Service
+      - name: Build App Service
+        run: go build -o out/app-service ./internal
+        working-directory: org/app-service
 
-      # Run tests
-      - name: Run tests
-        run: |
-          cd org/app-service/internal
-          go test -v ./...
+      # Build Testing Utilities
+      - name: Build Testing Utilities
+        run: go build -o out/testing ./pkg
+        working-directory: org/testing
 
+      # Run tests for App Service
+      - name: Run tests for App Service
+        run: go test -v ./...
+        working-directory: org/app-service/internal
+
+      # Run tests for Testing Utilities
+      - name: Run tests for Testing Utilities
+        run: go test -v ./...
+        working-directory: org/testing/pkg

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Elbujito/2112/src/app-service/pkg/tracing"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"

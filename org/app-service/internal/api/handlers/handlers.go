@@ -4,33 +4,33 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Elbujito/2112/src/app-service/internal/config"
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
 	"github.com/go-playground/validator/v10"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 func Success(payload interface{}) *ApiResponse {
 	return BuildResponse(
-		xconstants.STATUS_CODE_SERVICE_SUCCESS,
-		xconstants.MSG_SUCCESS,
+		constants.STATUS_CODE_SERVICE_SUCCESS,
+		constants.MSG_SUCCESS,
 		[]string{},
 		payload)
 }
 
 func Accepted() *ApiResponse {
 	return BuildResponse(
-		xconstants.STATUS_CODE_SERVICE_SUCCESS,
-		xconstants.MSG_SUCCESS,
+		constants.STATUS_CODE_SERVICE_SUCCESS,
+		constants.MSG_SUCCESS,
 		[]string{},
 		nil)
 }
 
 func Deleted() *ApiResponse {
 	return BuildResponse(
-		xconstants.STATUS_CODE_DELETE_SUCCESS,
-		xconstants.MSG_SUCCESS,
+		constants.STATUS_CODE_DELETE_SUCCESS,
+		constants.MSG_SUCCESS,
 		[]string{},
 		nil)
 }
@@ -52,8 +52,8 @@ func ValidationErrors(errs error) *ApiResponse {
 		logger.Error(string(str))
 	}
 	return BuildResponse(
-		xconstants.STATUS_CODE_VALIDATION_ERROR,
-		xconstants.MSG_VALIDATION_ERROR,
-		[]string{xconstants.MSG_VALIDATION_ERROR},
+		constants.STATUS_CODE_VALIDATION_ERROR,
+		constants.MSG_VALIDATION_ERROR,
+		[]string{constants.MSG_VALIDATION_ERROR},
 		payload)
 }

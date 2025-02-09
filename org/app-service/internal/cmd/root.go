@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 
-	"github.com/Elbujito/2112/src/app-service/internal/app"
+	"github.com/org/2112-space-lab/org/app-service/internal/app"
 
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/spf13/cobra"
 )
 

@@ -3,7 +3,7 @@ package errors
 import (
 	"net/http"
 
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 	"gorm.io/gorm"
 )
 
@@ -11,99 +11,99 @@ func ErrorsMap() map[error]interface{} {
 	var errorMap = make(map[error]interface{})
 
 	// service errors
-	errorMap[xconstants.ERROR_ID_NOT_FOUND] = map[string]interface{}{
+	errorMap[constants.ERROR_ID_NOT_FOUND] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_ID_NOT_FOUND,
+		"serviceCode":  constants.STATUS_CODE_ID_NOT_FOUND,
 	}
-	errorMap[xconstants.ERROR_ACCESS_IDS_NOT_FOUND] = map[string]interface{}{
+	errorMap[constants.ERROR_ACCESS_IDS_NOT_FOUND] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_IDS_NOT_READABLE,
+		"serviceCode":  constants.STATUS_CODE_IDS_NOT_READABLE,
 	}
-	errorMap[xconstants.ERROR_BINDING_BODY] = map[string]interface{}{
+	errorMap[constants.ERROR_BINDING_BODY] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_ERROR_BINDING_BODY,
+		"serviceCode":  constants.STATUS_CODE_ERROR_BINDING_BODY,
 	}
-	errorMap[xconstants.ERROR_SESSION_NOT_FOUND] = map[string]interface{}{
+	errorMap[constants.ERROR_SESSION_NOT_FOUND] = map[string]interface{}{
 		"internalCode": http.StatusForbidden,
-		"serviceCode":  xconstants.STATUS_CODE_NOT_AUTHORIZED_WITHOUT_HEADER,
+		"serviceCode":  constants.STATUS_CODE_NOT_AUTHORIZED_WITHOUT_HEADER,
 	}
-	errorMap[xconstants.ERROR_NOT_AUTHORIZED] = map[string]interface{}{
+	errorMap[constants.ERROR_NOT_AUTHORIZED] = map[string]interface{}{
 		"internalCode": http.StatusForbidden,
-		"serviceCode":  xconstants.STATUS_CODE_NOT_AUTHORIZED,
+		"serviceCode":  constants.STATUS_CODE_NOT_AUTHORIZED,
 	}
-	errorMap[xconstants.ERROR_INTERNAL_SERVER] = map[string]interface{}{
+	errorMap[constants.ERROR_INTERNAL_SERVER] = map[string]interface{}{
 		"internalCode": http.StatusInternalServerError,
-		"serviceCode":  xconstants.STATUS_CODE_INTERNAL_SERVER_ERROR,
+		"serviceCode":  constants.STATUS_CODE_INTERNAL_SERVER_ERROR,
 	}
 
 	// gorm errors
 	errorMap[gorm.ErrRecordNotFound] = map[string]interface{}{
 		"internalCode": http.StatusNotFound,
-		"serviceCode":  xconstants.STATUS_CODE_RECORD_NOT_FOUND,
+		"serviceCode":  constants.STATUS_CODE_RECORD_NOT_FOUND,
 	}
 	errorMap[gorm.ErrInvalidTransaction] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_INVALID_TRANSACTION,
+		"serviceCode":  constants.STATUS_CODE_INVALID_TRANSACTION,
 	}
 	errorMap[gorm.ErrPrimaryKeyRequired] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_PRIMARY_KEY_REQUIRED,
+		"serviceCode":  constants.STATUS_CODE_PRIMARY_KEY_REQUIRED,
 	}
 	errorMap[gorm.ErrModelValueRequired] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_MODEL_VALUE_REQUIRED,
+		"serviceCode":  constants.STATUS_CODE_MODEL_VALUE_REQUIRED,
 	}
 	errorMap[gorm.ErrUnsupportedDriver] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_UNSUPPORTED_DRIVER,
+		"serviceCode":  constants.STATUS_CODE_UNSUPPORTED_DRIVER,
 	}
 	errorMap[gorm.ErrRegistered] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_REGISTERED,
+		"serviceCode":  constants.STATUS_CODE_REGISTERED,
 	}
 	errorMap[gorm.ErrInvalidField] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_INVALID_FIELD,
+		"serviceCode":  constants.STATUS_CODE_INVALID_FIELD,
 	}
 	errorMap[gorm.ErrInvalidData] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_INVALID_DATA,
+		"serviceCode":  constants.STATUS_CODE_INVALID_DATA,
 	}
 	errorMap[gorm.ErrInvalidDB] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_INVALID_DB,
+		"serviceCode":  constants.STATUS_CODE_INVALID_DB,
 	}
 	errorMap[gorm.ErrInvalidValue] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_INVALID_VALUE,
+		"serviceCode":  constants.STATUS_CODE_INVALID_VALUE,
 	}
 	errorMap[gorm.ErrNotImplemented] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_NOT_IMPLEMENTED,
+		"serviceCode":  constants.STATUS_CODE_NOT_IMPLEMENTED,
 	}
 	errorMap[gorm.ErrMissingWhereClause] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_MISSING_WHERE_CLAUSE,
+		"serviceCode":  constants.STATUS_CODE_MISSING_WHERE_CLAUSE,
 	}
 	errorMap[gorm.ErrUnsupportedRelation] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_UNSUPPORTED_RELATION,
+		"serviceCode":  constants.STATUS_CODE_UNSUPPORTED_RELATION,
 	}
 	errorMap[gorm.ErrEmptySlice] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_EMPTY_SLICE,
+		"serviceCode":  constants.STATUS_CODE_EMPTY_SLICE,
 	}
 	errorMap[gorm.ErrDryRunModeUnsupported] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_DRY_RUN_UNSUPPORTED,
+		"serviceCode":  constants.STATUS_CODE_DRY_RUN_UNSUPPORTED,
 	}
 	errorMap[gorm.ErrInvalidValueOfLength] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_INVALID_VALUE_LENGTH,
+		"serviceCode":  constants.STATUS_CODE_INVALID_VALUE_LENGTH,
 	}
 	errorMap[gorm.ErrPreloadNotAllowed] = map[string]interface{}{
 		"internalCode": http.StatusBadRequest,
-		"serviceCode":  xconstants.STATUS_CODE_PRELOAD_NOT_ALLOWED,
+		"serviceCode":  constants.STATUS_CODE_PRELOAD_NOT_ALLOWED,
 	}
 
 	return errorMap

@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/Elbujito/2112/src/app-service/internal/config/features"
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/features"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func init() {
-	Adapters.AppendAdapter(xconstants.DB_PLATFORM_POSTGRES, &PostgresAdapter{
+	Adapters.AppendAdapter(constants.DB_PLATFORM_POSTGRES, &PostgresAdapter{
 		requiredConfig: []string{"Host", "Port", "User", "Password", "Name", "SslMode", "Timezone"},
 	})
 }

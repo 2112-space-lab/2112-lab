@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 
-	"github.com/Elbujito/2112/src/app-service/internal/api/mappers"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/mappers"
 	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
 )
 

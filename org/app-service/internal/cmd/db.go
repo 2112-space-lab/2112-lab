@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"github.com/Elbujito/2112/src/app-service/internal/app"
-	"github.com/Elbujito/2112/src/app-service/internal/cmd/db"
-	"github.com/Elbujito/2112/src/app-service/internal/proc"
-	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/app"
+	"github.com/org/2112-space-lab/org/app-service/internal/cmd/db"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
+	"github.com/org/2112-space-lab/org/app-service/internal/proc"
 
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -48,9 +48,9 @@ func execDbPersistentPreRun(app *app.App, cmd *cobra.Command) {
 
 	// Establish connection only for specific commands
 	switch ca {
-	case xconstants.NAME_CMD_DB_MIGRATE,
-		xconstants.NAME_CMD_DB_ROLLBACK,
-		xconstants.NAME_CMD_DB_SEED:
+	case constants.NAME_CMD_DB_MIGRATE,
+		constants.NAME_CMD_DB_ROLLBACK,
+		constants.NAME_CMD_DB_SEED:
 		proc.InitDbConnection()
 		proc.InitModels()
 	}

@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/Elbujito/2112/src/app-service/internal/clients/dbc"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/dbc"
 	"gorm.io/gorm"
 )
 

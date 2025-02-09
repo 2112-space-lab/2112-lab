@@ -8,9 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
-
 	"github.com/labstack/echo/v4"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 )
 
 // Router echo
@@ -44,7 +43,7 @@ func (r *Router) Start(host string, port string) {
 		r.Echo.Logger.Info(fmt.Sprintf("Starting %s server on port: %s", r.Name, port))
 		if err := r.Echo.Start(host + ":" + port); err != nil && err != http.ErrServerClosed {
 			r.Echo.Logger.Fatal(err)
-			r.Echo.Logger.Fatal(xconstants.MSG_SERVER_SHUTTING_DOWN)
+			r.Echo.Logger.Fatal(constants.MSG_SERVER_SHUTTING_DOWN)
 		}
 	}()
 	<-ctx.Done()

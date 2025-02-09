@@ -4,9 +4,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/Elbujito/2112/src/app-service/internal/clients/dbc"
-	"github.com/Elbujito/2112/src/app-service/internal/data/migrations"
-	log "github.com/Elbujito/2112/src/app-service/pkg/log"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/dbc"
+	"github.com/org/2112-space-lab/org/app-service/internal/data/migrations"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 func DBRollback() {

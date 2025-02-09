@@ -1,6 +1,6 @@
 package features
 
-import xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+import "github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 
 type ServiceConfig struct {
 	Host                   string `mapstructure:"HOST"`
@@ -10,11 +10,10 @@ type ServiceConfig struct {
 	LogLevel               string `mapstructure:"LOG_LEVEL"`
 	RequestTimeoutDuration string `mapstructure:"REQUEST_TIMEOUT_DURATION"`
 	WatcherSleepInterval   string `mapstructure:"WATCHER_SLEEP_INTERVAL"`
-	// DisableFeatures        []string `mapstructure:"DISABLE_FEATURES"`
 }
 
 var service = &Feature{
-	Name:       xconstants.FEATURE_SERVICE,
+	Name:       constants.FEATURE_SERVICE,
 	Config:     &ServiceConfig{},
 	enabled:    true,
 	configured: false,
@@ -27,7 +26,6 @@ var service = &Feature{
 		"LogLevel",
 		"RequestTimeoutDuration",
 		"WatcherSleepInterval",
-		// "DisableFeatures",
 	},
 }
 

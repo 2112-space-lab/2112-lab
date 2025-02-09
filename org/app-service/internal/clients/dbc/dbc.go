@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/Elbujito/2112/src/app-service/internal/clients/dbc/adapters"
-	"github.com/Elbujito/2112/src/app-service/internal/config/features"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/dbc/adapters"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/features"
 	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xutils"
 
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"gorm.io/gorm"
 	gLogger "gorm.io/gorm/logger"
 )

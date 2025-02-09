@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/clients/service"
-	log "github.com/Elbujito/2112/src/app-service/pkg/log"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/service"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xutils"
 )
 

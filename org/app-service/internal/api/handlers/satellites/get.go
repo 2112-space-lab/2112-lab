@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
-	"github.com/Elbujito/2112/src/app-service/internal/services"
 	"github.com/labstack/echo/v4"
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/services"
 )
 
 type SatelliteHandler struct {
@@ -24,8 +24,8 @@ func NewSatelliteHandler(service services.SatelliteService) *SatelliteHandler {
 func (h *SatelliteHandler) GetSatellitePositionsByNoradID(c echo.Context) error {
 	noradID := c.QueryParam("noradID")
 	if noradID == "" {
-		c.Echo().Logger.Error(xconstants.ERROR_ID_NOT_FOUND)
-		return xconstants.ERROR_ID_NOT_FOUND
+		c.Echo().Logger.Error(constants.ERROR_ID_NOT_FOUND)
+		return constants.ERROR_ID_NOT_FOUND
 	}
 
 	positions, err := h.Service.Propagate(c.Request().Context(), noradID, 24*time.Hour, 1*time.Minute)
@@ -35,8 +35,8 @@ func (h *SatelliteHandler) GetSatellitePositionsByNoradID(c echo.Context) error 
 	}
 
 	if len(positions) == 0 {
-		c.Echo().Logger.Error(xconstants.ERROR_ID_NOT_FOUND)
-		return xconstants.ERROR_ID_NOT_FOUND
+		c.Echo().Logger.Error(constants.ERROR_ID_NOT_FOUND)
+		return constants.ERROR_ID_NOT_FOUND
 	}
 
 	return c.JSON(http.StatusOK, positions)

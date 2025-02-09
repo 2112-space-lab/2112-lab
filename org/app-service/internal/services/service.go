@@ -4,12 +4,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/clients/celestrack"
-	propagator "github.com/Elbujito/2112/src/app-service/internal/clients/propagate"
-	"github.com/Elbujito/2112/src/app-service/internal/clients/redis"
-	"github.com/Elbujito/2112/src/app-service/internal/config"
-	"github.com/Elbujito/2112/src/app-service/internal/data"
-	repository "github.com/Elbujito/2112/src/app-service/internal/repositories"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/celestrack"
+	propagator "github.com/org/2112-space-lab/org/app-service/internal/clients/propagate"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
+	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	"github.com/org/2112-space-lab/org/app-service/internal/data"
+	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
 )
 
 // ServiceComponent holds all service instances for dependency injection.

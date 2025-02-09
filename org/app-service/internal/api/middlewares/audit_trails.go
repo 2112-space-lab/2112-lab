@@ -6,9 +6,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/Elbujito/2112/src/app-service/internal/services"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/labstack/echo/v4"
+	"github.com/org/2112-space-lab/org/app-service/internal/services"
 )
 
 // GenerateRouteTableMapping dynamically generates a route-to-table mapping from Echo routes.

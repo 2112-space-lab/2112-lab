@@ -8,19 +8,20 @@ import (
 	"os/signal"
 	"time"
 
-	apiaudittrail "github.com/Elbujito/2112/src/app-service/internal/api/handlers/audits"
-	apicontext "github.com/Elbujito/2112/src/app-service/internal/api/handlers/context"
-	"github.com/Elbujito/2112/src/app-service/internal/api/handlers/errors"
-	healthHandlers "github.com/Elbujito/2112/src/app-service/internal/api/handlers/healthz"
-	"github.com/Elbujito/2112/src/app-service/internal/api/handlers/satellites"
-	"github.com/Elbujito/2112/src/app-service/internal/api/handlers/tiles"
-	apiuser "github.com/Elbujito/2112/src/app-service/internal/api/handlers/users"
-	"github.com/Elbujito/2112/src/app-service/internal/api/middlewares"
-	"github.com/Elbujito/2112/src/app-service/internal/config"
-	"github.com/Elbujito/2112/src/app-service/internal/services"
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/labstack/echo/v4"
+	apiaudittrail "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/audits"
+	apicontext "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/context"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/handlers/errors"
+	healthHandlers "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/healthz"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/handlers/satellites"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/handlers/tiles"
+	apiuser "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/users"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/middlewares"
+	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
+	"github.com/org/2112-space-lab/org/app-service/internal/services"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 // PublicRouter manages the public API router and its dependencies.
@@ -34,8 +35,7 @@ type PublicRouter struct {
 // NewPublicRouter creates and initializes a new PublicRouter instance.
 func NewPublicRouter(env *config.SEnv, services *services.ServiceComponent) *PublicRouter {
 	logger.Debug("Initializing public API router ...")
-	// clerk.SetKey(env.EnvVars.Clerk.CLERK_API_KEY)
-	clerk.SetKey("sk_test_GkqI0OhxlxMiywMZ2zgoNhGZ5H4RYymSdfDfdiTPBc")
+	clerk.SetKey(constants.DEFAULT_CLERK_API_KEY)
 
 	router := &PublicRouter{
 		Name:             "public API",

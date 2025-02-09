@@ -1,12 +1,12 @@
 package proc
 
 import (
-	clientsPkg "github.com/Elbujito/2112/src/app-service/internal/clients"
-	"github.com/Elbujito/2112/src/app-service/internal/clients/dbc"
-	"github.com/Elbujito/2112/src/app-service/internal/clients/service"
-	"github.com/Elbujito/2112/src/app-service/internal/config"
-	"github.com/Elbujito/2112/src/app-service/internal/data/models"
-	log "github.com/Elbujito/2112/src/app-service/pkg/log"
+	clientsPkg "github.com/org/2112-space-lab/org/app-service/internal/clients"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/dbc"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/service"
+	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	"github.com/org/2112-space-lab/org/app-service/internal/data/models"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 func InitServiceEnv(serviceName string, version string) {

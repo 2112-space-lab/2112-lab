@@ -1,6 +1,6 @@
 package features
 
-import xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+import "github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 
 type RedisConfig struct {
 	Host     string `mapstructure:"REDIS_HOST"`
@@ -10,7 +10,7 @@ type RedisConfig struct {
 }
 
 var redis = &Feature{
-	Name:       xconstants.FEATURE_REDIS,
+	Name:       constants.FEATURE_REDIS,
 	Config:     &RedisConfig{},
 	enabled:    true,
 	configured: false,

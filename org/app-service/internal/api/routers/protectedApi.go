@@ -8,13 +8,13 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/api/handlers/errors"
-	healthHandlers "github.com/Elbujito/2112/src/app-service/internal/api/handlers/healthz"
-	metricsHandlers "github.com/Elbujito/2112/src/app-service/internal/api/handlers/metrics"
-	"github.com/Elbujito/2112/src/app-service/internal/config"
-	"github.com/Elbujito/2112/src/app-service/internal/services"
-	logger "github.com/Elbujito/2112/src/app-service/pkg/log"
 	"github.com/labstack/echo/v4"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/handlers/errors"
+	healthHandlers "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/healthz"
+	metricsHandlers "github.com/org/2112-space-lab/org/app-service/internal/api/handlers/metrics"
+	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	"github.com/org/2112-space-lab/org/app-service/internal/services"
+	logger "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

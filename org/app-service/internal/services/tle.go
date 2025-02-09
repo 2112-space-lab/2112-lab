@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/api/mappers"
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
-	repository "github.com/Elbujito/2112/src/app-service/internal/repositories"
-	"github.com/Elbujito/2112/src/app-service/pkg/tracing"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/mappers"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
 type celestrackClient interface {

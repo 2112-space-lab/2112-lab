@@ -1,6 +1,8 @@
 package features
 
-import xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+import (
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
+)
 
 type DatabaseConfig struct {
 	Host     string `mapstructure:"DB_HOST"`
@@ -14,7 +16,7 @@ type DatabaseConfig struct {
 }
 
 var database = &Feature{
-	Name:       xconstants.FEATURE_DATABASE,
+	Name:       constants.FEATURE_DATABASE,
 	Config:     &DatabaseConfig{},
 	enabled:    true,
 	configured: false,

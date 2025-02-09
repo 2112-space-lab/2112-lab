@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Elbujito/2112/src/app-service/internal/clients/redis"
-	"github.com/Elbujito/2112/src/app-service/internal/data"
-	"github.com/Elbujito/2112/src/app-service/internal/data/models"
-	"github.com/Elbujito/2112/src/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
+	"github.com/org/2112-space-lab/org/app-service/internal/data"
+	"github.com/org/2112-space-lab/org/app-service/internal/data/models"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xtime"
 	"gorm.io/gorm/clause"
 )

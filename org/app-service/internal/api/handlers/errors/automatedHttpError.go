@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/Elbujito/2112/src/app-service/internal/api/handlers"
-	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
+	"github.com/org/2112-space-lab/org/app-service/internal/api/handlers"
+	"github.com/org/2112-space-lab/org/app-service/internal/config/constants"
 
 	"github.com/labstack/echo/v4"
 )
@@ -31,10 +31,10 @@ func (h *httpErrorHandler) getStatusCode(err error) (int, string) {
 	for key, value := range h.statusCodes {
 		if errors.Is(err, key) {
 			val := value.(map[string]interface{})
-			return val[xconstants.WORD_INTERNAL_CODE].(int), val[xconstants.WORD_SERVICE_CODE].(string)
+			return val[constants.WORD_INTERNAL_CODE].(int), val[constants.WORD_SERVICE_CODE].(string)
 		}
 	}
-	return http.StatusInternalServerError, xconstants.STATUS_CODE_FAILED_TO_DECODE_VALUE
+	return http.StatusInternalServerError, constants.STATUS_CODE_FAILED_TO_DECODE_VALUE
 }
 
 func unwrapRecursive(err error) error {
@@ -72,7 +72,7 @@ func (h *httpErrorHandler) Handler(err error, c echo.Context) {
 	if _, ok := he.Message.(string); ok {
 		message = handlers.BuildResponse(
 			serviceCode,
-			xconstants.MSG_ERROR,
+			constants.MSG_ERROR,
 			[]string{err.Error()},
 			nil)
 	}
