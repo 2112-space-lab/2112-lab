@@ -45,7 +45,11 @@ func NewApp(ctx context.Context, serviceName string, version string) (App, error
 
 	// Finalize app instance creation
 	logger.Debug("Creating service component...")
-	serviceComponent := services.NewServiceComponent(config.Env)
+	serviceComponent, err := services.NewServiceComponent(config.Env)
+	if err != nil {
+		logger.Error(err.Error())
+		panic("failed to init service component")
+	}
 	logger.Info("Service component created.")
 
 	logger.Infof("App instance successfully initialized for serviceName=%s, version=%s", serviceName, version)

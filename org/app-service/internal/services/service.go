@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/clients/celestrack"
@@ -21,13 +20,12 @@ type ServiceComponent struct {
 }
 
 // NewServiceComponent initializes and returns a new ServiceComponent.
-func NewServiceComponent(env *config.SEnv) *ServiceComponent {
+func NewServiceComponent(env *config.SEnv) (*ServiceComponent, error) {
 	database := data.NewDatabase()
 
 	redisClient, err := redis.NewRedisClient(config.Env)
 	if err != nil {
-		log.Println(err.Error())
-		return nil
+		return nil, err
 	}
 
 	tleRepo := repository.NewTLERepository(&database, redisClient, 24*7*time.Hour)
@@ -50,5 +48,5 @@ func NewServiceComponent(env *config.SEnv) *ServiceComponent {
 		TileService:       tileService,
 		ContextService:    contextService,
 		AuditTrailService: auditTrailService,
-	}
+	}, nil
 }

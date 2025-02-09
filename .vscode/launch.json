@@ -21,7 +21,7 @@
       "request": "launch",
     },
     {
-      "program": "${workspaceRoot}/org/app-service",
+      "program": "${workspaceRoot}/org/app-service/internal",
       "name": "Public API",
       "type": "go",
       "mode": "debug",
@@ -29,7 +29,6 @@
       "args": [
         "start",
         "public",
-        "-e",
         "-d"
       ],
       "showLog": true,
