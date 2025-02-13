@@ -22,7 +22,7 @@ import (
 )
 
 // Subscribe dynamically subscribes to all queues in RabbitMQ
-func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, service string, callbacks []models_service.EventCallbackInfo) (context.CancelFunc, error) {
+func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, service models_service.ServiceName, callbacks []models_service.EventCallbackInfo) (context.CancelFunc, error) {
 	conn, err := amqp.Dial(testservicecontainer.RabbitMQURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to RabbitMQ: %v", err)
@@ -100,7 +100,7 @@ func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, s
 					}
 
 					log.Printf("📥 Received event from queue %s: %+v", queueName, event)
-					scenarioState.SaveReceivedEvent(&event, models_service.ServiceName(service))
+					scenarioState.SaveReceivedEvent(&event, service)
 					for _, cb := range callbacks {
 						if cb.EventType != event.EventType {
 							continue
@@ -112,7 +112,7 @@ func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, s
 								time.Sleep(waitDur)
 							}
 
-							scenarioState.SaveReceivedEvent(&event, models_service.ServiceName(service))
+							scenarioState.SaveReceivedEvent(&event, service)
 							if err != nil {
 								log.Printf("❌ Error processing callback for event %s in queue %s: %v", event.EventType, queueName, err)
 							}
@@ -204,7 +204,7 @@ func checkExpectedEvent(scenarioState RabbitMqClientScenarioState, serviceName m
 
 	pauseIncrementDuration := 100 * time.Millisecond
 	now := time.Now().UTC()
-	if expected.Occurence < 0 {
+	if expected.Occurrence < 0 {
 		sleepDuration := time.Time(expToErr).Sub(time.Now().UTC())
 		logger.Info("negative occurance wanting last received - sleeping until end of expected window",
 			slog.Duration("sleepDuration", sleepDuration),
@@ -288,11 +288,11 @@ func containsExpectedEvent(logger *slog.Logger, events []models_service.EventRoo
 		slog.Any("events", events),
 	)
 	ordered := events
-	expectedOccurence := expected.Occurence
-	if expected.Occurence < 0 {
+	expectedOccurence := expected.Occurrence
+	if expected.Occurrence < 0 {
 		clone := slices.Clone(events)
 		slices.Reverse(clone)
-		expectedOccurence = -expected.Occurence
+		expectedOccurence = -expected.Occurrence
 		ordered = clone
 	}
 	for _, evt := range ordered {
@@ -340,4 +340,60 @@ func sanitizeURLEncodedJSON(b []byte) []byte {
 	b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
 	b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
 	return b
+}
+
+// PublishTestEvent injects a test event into a RabbitMQ queue for testing purposes.
+func PublishTestEvent(serviceName models_service.ServiceAppName, event models_service.EventRoot) error {
+	conn, err := amqp.Dial(testservicecontainer.RabbitMQURL)
+	if err != nil {
+		return fmt.Errorf("❌ failed to connect to RabbitMQ: %v", err)
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		return fmt.Errorf("❌ failed to open a channel: %v", err)
+	}
+	defer ch.Close()
+
+	// Serialize the event
+	eventBody, err := json.Marshal(event)
+	if err != nil {
+		return fmt.Errorf("❌ failed to serialize test event: %v", err)
+	}
+
+	// Define the queue name based on event type
+	// queueName := fmt.Sprintf("%s.events.all", serviceName)
+	queueName := "events.all"
+
+	// Ensure queue exists
+	_, err = ch.QueueDeclare(
+		queueName, // name
+		true,      // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("❌ failed to declare queue %s: %v", queueName, err)
+	}
+
+	// Publish message to queue
+	err = ch.Publish(
+		"",        // exchange
+		queueName, // routing key
+		false,     // mandatory
+		false,     // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        eventBody,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("❌ failed to publish test event: %v", err)
+	}
+
+	log.Printf("✅ Successfully injected test event into queue '%s': %+v\n", queueName, event)
+	return nil
 }

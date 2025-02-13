@@ -44,7 +44,7 @@ class EventEmitter:
                 payload=encoded_payload
             )
 
-            routing_key = f"propagator.events.{event_type.value.lower()}"
+            routing_key = f"events.all"
             event_dict = asdict(event)
             self.message_broker.publish_message(routing_key, event_dict)
 

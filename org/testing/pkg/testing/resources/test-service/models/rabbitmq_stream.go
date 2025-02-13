@@ -15,7 +15,7 @@ type EventCallbackInfo struct {
 
 type ExpectedEvent struct {
 	EventType                  string
-	Occurence                  int
+	Occurrence                 int
 	FromTime                   models_time.TimeCheckpointExpression
 	ToTimeWarn                 models_time.TimeCheckpointExpression
 	ToTimeErr                  models_time.TimeCheckpointExpression

@@ -2,6 +2,7 @@
 flask
 uvicorn[standard]
 asgiref
+aio_pika
 
 # Caching & Messaging
 redis

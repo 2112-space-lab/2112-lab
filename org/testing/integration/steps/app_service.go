@@ -68,7 +68,7 @@ func (steps *AppServiceSteps) subscribeToEvents(consumer string, eventTable *god
 	}
 
 	log.Printf("Subscribing as consumer '%s' with events: %+v", consumer, events)
-	_, err = testservice.Subscribe(context.Background(), steps.state, consumer, events)
+	_, err = testservice.Subscribe(context.Background(), steps.state, models_service.ServiceName(consumer), events)
 	return err
 }
 

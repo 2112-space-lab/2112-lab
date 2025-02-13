@@ -1,14 +1,14 @@
 import pika
 import json
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 from app.dependencies import Dependencies
 
 logger = logging.getLogger(__name__)
 
 class MessageBroker:
     """
-    A message broker for publishing messages to RabbitMQ.
+    A message broker for publishing and subscribing to messages in RabbitMQ.
     """
 
     def __init__(self, dependencies: Dependencies):
@@ -23,12 +23,12 @@ class MessageBroker:
             connection = self.dependencies.rabbitmq_connection
             if not connection or connection.is_closed:
                 logger.info("🔄 Reconnecting to RabbitMQ...")
-                connection = self.dependencies.create_rabbitmq_connection()
+                connection = self.dependencies.get_rabbitmq_connection()
             return connection
         except Exception as e:
             logger.error(f"❌ Failed to connect to RabbitMQ: {e}")
             return None
-
+        
     def publish_message(self, routing_key: str, message: Dict[str, Any]):
         """
         Publishes a message to the RabbitMQ queue.
@@ -60,6 +60,39 @@ class MessageBroker:
 
         except Exception as e:
             logger.error(f"❌ Unexpected error publishing message to {routing_key}: {e}")
+
+    def subscribe(self, queue_name: str, callback: Callable[[Dict[str, Any]], None]):
+        """
+        Subscribes to a RabbitMQ queue and consumes messages.
+
+        :param queue_name: The queue name to consume messages from.
+        :param callback: A function that will process the message.
+        """
+        if not self.rabbitmq_connection:
+            logger.error("❌ Cannot subscribe - No RabbitMQ connection available.")
+            return
+
+        try:
+            channel = self.rabbitmq_connection.channel()
+            channel.queue_declare(queue=queue_name, durable=True)
+
+            def on_message(channel, method, properties, body):
+                try:
+                    message = json.loads(body)
+                    callback(message)
+                    channel.basic_ack(delivery_tag=method.delivery_tag)
+                except Exception as e:
+                    logger.error(f"❌ Error processing message from {queue_name}: {e}")
+
+            channel.basic_consume(queue=queue_name, on_message_callback=on_message)
+            logger.info(f"📥 Listening for messages on {queue_name}...")
+            channel.start_consuming()
+        
+        except pika.exceptions.AMQPError as e:
+            logger.error(f"❌ RabbitMQ error while subscribing to {queue_name}: {e}")
+
+        except Exception as e:
+            logger.error(f"❌ Unexpected error while subscribing to {queue_name}: {e}")
 
     def close_connection(self):
         """

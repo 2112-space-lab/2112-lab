@@ -2,7 +2,10 @@ package steps
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/cucumber/godog"
 	testservice "github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service"
@@ -35,8 +38,9 @@ func RegisterPropagatorServiceSteps(ctx *godog.ScenarioContext, state propagator
 	ctx.Step(`^a Propagator service is created for service "([^"]*)" with env overrides:$`, s.propagatorServiceCreateWithEnv)
 	ctx.Step(`^I register Propagator service default scenario environment variable overrides:$`, s.propagatorRegisterCommonEnvVars)
 	ctx.Step(`^I request satellite propagation on propagator for service "([^"]*)"$`, s.requestPropagation)
-	ctx.Step(`^I subscribe as consumer "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
-	ctx.Step(`^Events are expected for service "([^"]*)":$`, s.verifyEvents)
+	ctx.Step(`^Propagator subscribes as consumer "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
+	ctx.Step(`^Propagator events are expected for service "([^"]*)":$`, s.verifyEvents)
+	ctx.Step(`^I publish propagator events for service "([^"]*)" from file "([^"]*)"$`, s.publishEventsFromJSONFile)
 }
 
 func (steps *PropagatorServiceSteps) propagatorRegisterCommonEnvVars(envVars *godog.Table) error {
@@ -81,7 +85,7 @@ func (steps *PropagatorServiceSteps) subscribeToEvents(consumer string, eventTab
 	}
 
 	log.Printf("Subscribing as consumer '%s' with events: %+v", consumer, events)
-	_, err = testservice.Subscribe(context.Background(), steps.state, consumer, events)
+	_, err = testservice.Subscribe(context.Background(), steps.state, models_service.ServiceName(consumer), events)
 	return err
 }
 
@@ -94,4 +98,30 @@ func (steps *PropagatorServiceSteps) verifyEvents(serviceName string, eventTable
 
 	log.Printf("Verifying expected events for service: %s", serviceName)
 	return testservice.VerifyEvents(steps.state, serviceName, expectedEvents)
+}
+
+// publishEventsFromJSONFile reads events from a JSON file and publishes them for a given service.
+func (steps *PropagatorServiceSteps) publishEventsFromJSONFile(serviceName string, jsonFilePath string) error {
+	file, err := os.ReadFile(jsonFilePath)
+	if err != nil {
+		return fmt.Errorf("❌ failed to read JSON file: %v", err)
+	}
+
+	var events []models_service.EventRoot
+	err = json.Unmarshal(file, &events)
+	if err != nil {
+		return fmt.Errorf("❌ failed to parse JSON file: %v", err)
+	}
+
+	log.Printf("📤 Publishing %d events for service '%s' from file '%s'", 1, serviceName, jsonFilePath)
+
+	for _, event := range events {
+	err = testservice.PublishTestEvent(models_service.ServiceAppName(serviceName), event)
+	if err != nil {
+		log.Printf("❌ Error publishing event: %v", err)
+		return err
+	}
+	log.Printf("✅ Successfully published event: %+v", event)
+	}
+	return nil
 }
