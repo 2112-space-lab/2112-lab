@@ -9,7 +9,15 @@
 
 # Getting Started
 
+## Architecture Overview
+
+### Service Architecture
+
 ![2112 Architecture Overview](docs/img/architecture.png)
+
+### Satellites Propagation Workflow
+
+![2112 Satellites Propagation Worflow](docs/img/satellite-propagation.jpg)
 
 ## Project Overview
 
