@@ -25,7 +25,7 @@ var CLI struct {
 		DatabaseServer struct {
 			Host         string        `default:"localhost" env:"TEST_DB_HOST"`
 			Port         int           `default:"5432" env:"TEST_DB_PORT"`
-			HostDocker   string        `default:"app-service.db" env:"TEST_DB_HOST_DOCKER"`
+			HostDocker   string        `default:"2112-database.db" env:"TEST_DB_HOST_DOCKER"`
 			PortDocker   int           `default:"5432" env:"TEST_DB_PORT_DOCKER"`
 			UserName     string        `default:"postgres" env:"TEST_DB_USER"`
 			Password     string        `default:"postgres" env:"TEST_DB_PASS"`

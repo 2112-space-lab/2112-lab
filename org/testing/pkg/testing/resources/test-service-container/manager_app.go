@@ -65,6 +65,6 @@ func (m *ServiceContainerManager) SpawnServiceAppService(
 		return err
 	}
 
-	scenarioState.RegisterPropagatorServiceContainer(ctx, serviceName, cont)
+	scenarioState.RegisterAppServiceContainer(ctx, serviceName, cont)
 	return nil
 }

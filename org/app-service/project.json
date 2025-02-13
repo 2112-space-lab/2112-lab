@@ -18,6 +18,22 @@
             "options": {
                 "command": "cd app-service && go run ./internal/main.go start"
             }
+        },
+        "docker-package": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "docker build -t app-service -f ../deployments/docker/Dockerfile.app ."
+                ]
+            }
+        },
+        "docker-start": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "docker run -d --name app-container --network=2112_net -p 8081:8081 app-service"
+                ]
+            }
         }
     }
 }

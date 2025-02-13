@@ -15,11 +15,11 @@ WORKDIR /app
 RUN apk update && apk add --no-cache git make build-base
 
 # Copy Go modules and vendor
-COPY src/app-service/go.mod src/app-service/go.sum ./
-COPY src/app-service/vendor ./vendor
+COPY app-service/go.mod app-service/go.sum ./
+COPY app-service/vendor ./vendor
 
 # Copy application source
-COPY src/app-service ./
+COPY app-service ./
 
 # Build the application
 RUN GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 \
@@ -41,4 +41,4 @@ COPY --from=builder /out/app-service /usr/local/bin/app-service
 EXPOSE 8081 8080
 
 # Set default command (placeholder or shell)
-CMD ["/usr/local/bin/app-service"]
+CMD ["/usr/local/bin/app-service", "start", "public"]

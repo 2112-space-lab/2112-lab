@@ -16,7 +16,7 @@ Feature: Propagator Service allows propagation of TLE
     Then I request satellite propagation on propagator for service "TEST"
       | NoradId | TleLine1                                                              | TleLine2                                                              | StartTime            | DurationMinutes | IntervalSeconds |
       | 25544   | 1 25544U 98067A   24037.49236111  .00016717  00000-0  30709-3 0  9993 | 2 25544  51.6456 264.6625 0007377  24.9892 335.1377 15.50051545369613 | 2024-02-07T12:00:00Z | 60              | 10              |
-    Then Propagator events are expected for service "TEST":
+    Then Events are expected for service "TEST":
       | EventType                | Occurence | IsReject | FromTime  | ToTimeWarn | ToTimeErr | ProduceCheckpointEventTime | AssignRef | XPathQuery | XPathValue |
       | SATELLITE_TLE_PROPAGATED | 1         |          | ready>+0s |            | ready>+5s |                            |           |            |            |
 

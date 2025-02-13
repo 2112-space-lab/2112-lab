@@ -21,8 +21,8 @@ import (
 	"github.com/streadway/amqp"
 )
 
-// SubscribeToPropagator dynamically subscribes to all queues in RabbitMQ
-func SubscribeToPropagator(ctx context.Context, scenarioState PropagatorClientScenarioState, service string, callbacks []models_service.EventCallbackInfo) (context.CancelFunc, error) {
+// Subscribe dynamically subscribes to all queues in RabbitMQ
+func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, service string, callbacks []models_service.EventCallbackInfo) (context.CancelFunc, error) {
 	conn, err := amqp.Dial(testservicecontainer.RabbitMQURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to RabbitMQ: %v", err)
@@ -112,7 +112,7 @@ func SubscribeToPropagator(ctx context.Context, scenarioState PropagatorClientSc
 								time.Sleep(waitDur)
 							}
 
-							err := processEventCallback(scenarioState, service, cb, event)
+							scenarioState.SaveReceivedEvent(&event, models_service.ServiceName(service))
 							if err != nil {
 								log.Printf("❌ Error processing callback for event %s in queue %s: %v", event.EventType, queueName, err)
 							}
@@ -165,15 +165,8 @@ func getRabbitMQQueues() ([]string, error) {
 	return queueNames, nil
 }
 
-// processEventCallback executes the callback for an event
-func processEventCallback(scenarioState PropagatorClientScenarioState, serviceName string, cb models_service.EventCallbackInfo, event models_service.EventRoot) error {
-	log.Printf("🔄 Processing callback: %+v for event: %+v", cb, event)
-	scenarioState.SaveReceivedEvent(&event, models_service.ServiceName(serviceName))
-	return nil
-}
-
-// VerifyPropagatorEvents checks if expected events have been received
-func VerifyPropagatorEvents(scenarioState PropagatorClientScenarioState, serviceName string, expectedEvents []models_service.ExpectedEvent) error {
+// VerifyEvents checks if expected events have been received
+func VerifyEvents(scenarioState RabbitMqClientScenarioState, serviceName string, expectedEvents []models_service.ExpectedEvent) error {
 	for _, exp := range expectedEvents {
 		err := checkExpectedEvent(scenarioState, models_service.ServiceName(serviceName), exp)
 		if err != nil {
@@ -184,7 +177,7 @@ func VerifyPropagatorEvents(scenarioState PropagatorClientScenarioState, service
 }
 
 // checkExpectedEvent verifies if a single expected event was received
-func checkExpectedEvent(scenarioState PropagatorClientScenarioState, serviceName models_service.ServiceName, expected models_service.ExpectedEvent) error {
+func checkExpectedEvent(scenarioState RabbitMqClientScenarioState, serviceName models_service.ServiceName, expected models_service.ExpectedEvent) error {
 	var expFrom, expToWarn, expToErr models_time.TimeCheckpointValue
 	var errExpFrom, errExpToWarn, errExpToErr error
 	expFrom, errExpFrom = xtesttime.EvaluateCheckpoint(scenarioState, expected.FromTime)

@@ -14,22 +14,23 @@ import (
 type AppClientScenarioState interface {
 	GetScenarioInfo() models_common.ScenarioInfo
 	GetScenarioFolder() string
-	GetLogger() *slog.Logger
-
-	xtesttime.ScenarioState
 
 	GetAppServiceContainer(ctx context.Context, serviceName models_service.ServiceName) (*xtestcontainer.BaseContainer, error)
-	GetScenarioAppServiceContainers() map[models_service.ServiceName]*xtestcontainer.BaseContainer
+
+	RabbitMqClientScenarioState
 }
 
 type PropagatorClientScenarioState interface {
 	GetScenarioInfo() models_common.ScenarioInfo
 	GetScenarioFolder() string
-	GetLogger() *slog.Logger
-
-	xtesttime.ScenarioState
-
 	GetPropagatorServiceContainer(ctx context.Context, serviceName models_service.ServiceName) (*xtestcontainer.BaseContainer, error)
+
+	RabbitMqClientScenarioState
+}
+
+type RabbitMqClientScenarioState interface {
+	xtesttime.ScenarioState
+	GetLogger() *slog.Logger
 	RegisterNamedEventReference(ref models_service.NamedAppEventReference, jsonData models_service.AppEventRawJSON)
 	GetNamedEventByReference(ref models_service.NamedAppEventReference) (models_service.AppEventRawJSON, bool)
 	GetReceivedEvents(serviceName models_service.ServiceName, from time.Time, to time.Time) []models_service.EventRoot

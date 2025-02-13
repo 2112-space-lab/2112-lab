@@ -35,8 +35,8 @@ func RegisterPropagatorServiceSteps(ctx *godog.ScenarioContext, state propagator
 	ctx.Step(`^a Propagator service is created for service "([^"]*)" with env overrides:$`, s.propagatorServiceCreateWithEnv)
 	ctx.Step(`^I register Propagator service default scenario environment variable overrides:$`, s.propagatorRegisterCommonEnvVars)
 	ctx.Step(`^I request satellite propagation on propagator for service "([^"]*)"$`, s.requestPropagation)
-	ctx.Step(`^I subscribe as consumer "([^"]*)" with registered callbacks:$`, s.subscribeToPropagatorEvents)
-	ctx.Step(`^Propagator events are expected for service "([^"]*)":$`, s.verifyPropagatorEvents)
+	ctx.Step(`^I subscribe as consumer "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
+	ctx.Step(`^Events are expected for service "([^"]*)":$`, s.verifyEvents)
 }
 
 func (steps *PropagatorServiceSteps) propagatorRegisterCommonEnvVars(envVars *godog.Table) error {
@@ -73,7 +73,7 @@ func (steps *PropagatorServiceSteps) requestPropagation(ctx context.Context, ser
 	return testservice.PropagatorRequest(ctx, steps.state, models_service.ServiceName(serviceName), propSettings)
 }
 
-func (steps *PropagatorServiceSteps) subscribeToPropagatorEvents(consumer string, eventTable *godog.Table) error {
+func (steps *PropagatorServiceSteps) subscribeToEvents(consumer string, eventTable *godog.Table) error {
 	events, err := GodogTableToSlice[models_service.EventCallbackInfo](eventTable)
 	if err != nil {
 		log.Printf("Error parsing event subscription table: %v", err)
@@ -81,11 +81,11 @@ func (steps *PropagatorServiceSteps) subscribeToPropagatorEvents(consumer string
 	}
 
 	log.Printf("Subscribing as consumer '%s' with events: %+v", consumer, events)
-	_, err = testservice.SubscribeToPropagator(context.Background(), steps.state, consumer, events)
+	_, err = testservice.Subscribe(context.Background(), steps.state, consumer, events)
 	return err
 }
 
-func (steps *PropagatorServiceSteps) verifyPropagatorEvents(serviceName string, eventTable *godog.Table) error {
+func (steps *PropagatorServiceSteps) verifyEvents(serviceName string, eventTable *godog.Table) error {
 	expectedEvents, err := GodogTableToSlice[models_service.ExpectedEvent](eventTable)
 	if err != nil {
 		log.Printf("Error parsing expected event table: %v", err)
@@ -93,5 +93,5 @@ func (steps *PropagatorServiceSteps) verifyPropagatorEvents(serviceName string, 
 	}
 
 	log.Printf("Verifying expected events for service: %s", serviceName)
-	return testservice.VerifyPropagatorEvents(steps.state, serviceName, expectedEvents)
+	return testservice.VerifyEvents(steps.state, serviceName, expectedEvents)
 }
