@@ -15,10 +15,9 @@ WORKDIR /app
 RUN apk update && apk add --no-cache git make build-base
 
 # Copy Go modules and vendor
-COPY app-service/go.mod app-service/go.sum ./
-COPY app-service/vendor ./vendor
+# COPY app-service/go.mod app-service/go.sum ./
+# COPY app-service/vendor ./vendor
 
-# Copy application source
 COPY app-service ./
 
 # Build the application
