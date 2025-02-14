@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/blues/jsonata-go"
@@ -159,7 +160,9 @@ func getRabbitMQQueues(filter string) ([]string, error) {
 
 	var queueNames []string
 	for _, q := range queues {
-		if q.Name == filter {
+		trimedLowerQueue := strings.ToLower(strings.TrimSpace(q.Name))
+		trimedLowerFilter := strings.ToLower(strings.TrimSpace(filter))
+		if strings.Contains(trimedLowerQueue, trimedLowerFilter) {
 			queueNames = append(queueNames, q.Name)
 		}
 	}

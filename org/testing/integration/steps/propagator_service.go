@@ -77,7 +77,7 @@ func (steps *PropagatorServiceSteps) requestPropagation(ctx context.Context, ser
 	return testservice.PropagatorRequest(ctx, steps.state, models_service.ServiceName(serviceName), propSettings)
 }
 
-func (steps *PropagatorServiceSteps) subscribeToEvents(consumer string, queueName string, eventTable *godog.Table) error {
+func (steps *PropagatorServiceSteps) subscribeToEvents(ctx context.Context, consumer string, queueName string, eventTable *godog.Table) error {
 	events, err := GodogTableToSlice[models_service.EventCallbackInfo](eventTable)
 	if err != nil {
 		log.Printf("Error parsing event subscription table: %v", err)
@@ -85,11 +85,11 @@ func (steps *PropagatorServiceSteps) subscribeToEvents(consumer string, queueNam
 	}
 
 	log.Printf("Subscribing as consumer '%s' with events: %+v", consumer, events)
-	_, err = testservice.Subscribe(context.Background(), steps.state, models_service.ServiceName(consumer), queueName, events)
+	_, err = testservice.Subscribe(ctx, steps.state, models_service.ServiceName(consumer), queueName, events)
 	return err
 }
 
-func (steps *PropagatorServiceSteps) verifyEvents(serviceName string, eventTable *godog.Table) error {
+func (steps *PropagatorServiceSteps) verifyEvents(ctx context.Context, serviceName string, eventTable *godog.Table) error {
 	expectedEvents, err := GodogTableToSlice[models_service.ExpectedEvent](eventTable)
 	if err != nil {
 		log.Printf("Error parsing expected event table: %v", err)
