@@ -20,8 +20,8 @@ COPY app-service/go.mod app-service/go.sum ./
 RUN go mod tidy && go mod vendor
 
 # Copy Go modules and vendor
-# COPY app-service/go.mod app-service/go.sum ./
-# COPY app-service/vendor ./vendor
+COPY app-service/go.mod app-service/go.sum ./
+COPY app-service/vendor ./vendor
 
 COPY app-service ./
 
