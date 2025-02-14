@@ -61,13 +61,18 @@ jobs:
         run: make test-it
         working-directory: org/testing
 
+      # Run Cucumber report generation
+      - name: Generate Cucumber report
+        run: make test-it-report
+        working-directory: org/testing
+
       # Upload artifacts (logs, reports, test results, etc.)
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-test-results
-          path: org/testing/integration/_artefacts
+          path: org/testing/integration/_artifacts
           retention-days: 7 
 
       # Cleanup resources after tests
