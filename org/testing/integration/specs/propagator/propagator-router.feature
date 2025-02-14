@@ -9,6 +9,10 @@ Feature: Propagator Service allows propagation of TLE from HTTP request
       | RABBITMQ_INPUT_QUEUE  | test-http-propagator-input  |
       | RABBITMQ_OUTPUT_QUEUE | test-http-propagator-output |
     And a Propagator service is created for service "TEST_PROPAGATOR"
+    And I register queues to RabbitMQ
+      | Key                         | Value                       |
+      | test-http-propagator-input  | test-http-propagator-input  |
+      | test-http-propagator-output | test-http-propagator-output |
     And Propagator subscribes as consumer "TEST_PROPAGATOR" for "test-http-propagator-output" with registered callbacks:
       | EventType | Action | ActionHandlerArgs | ActionDelay |
     And I wait "5s" and set now time as checkpoint "ready"

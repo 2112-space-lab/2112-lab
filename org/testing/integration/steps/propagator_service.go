@@ -41,6 +41,7 @@ func RegisterPropagatorServiceSteps(ctx *godog.ScenarioContext, state propagator
 	ctx.Step(`^Propagator subscribes as consumer "([^"]*)" for "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
 	ctx.Step(`^Propagator events are expected for service "([^"]*)":$`, s.verifyEvents)
 	ctx.Step(`^I publish propagator events for service "([^"]*)" on "([^"]*)" from file "([^"]*)"$`, s.publishEventsFromJSONFile)
+	ctx.Step(`^I register queues to RabbitMQ`, s.registerQueues)
 }
 
 func (steps *PropagatorServiceSteps) propagatorRegisterCommonEnvVars(envVars *godog.Table) error {
@@ -50,6 +51,14 @@ func (steps *PropagatorServiceSteps) propagatorRegisterCommonEnvVars(envVars *go
 	}
 	steps.state.RegisterAppEnvScenarioOverrides(env)
 	return nil
+}
+
+func (steps *PropagatorServiceSteps) registerQueues(queues *godog.Table) error {
+	queueNames, err := GodogTableToKeyValueMap[string, string](queues, true)
+	if err != nil {
+		return err
+	}
+	return testservice.RegisterQueuesToRabbitMQ(queueNames)
 }
 
 func (steps *PropagatorServiceSteps) propagatorServiceCreate(ctx context.Context, serviceName string) error {

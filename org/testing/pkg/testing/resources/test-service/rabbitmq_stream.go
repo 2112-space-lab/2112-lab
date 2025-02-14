@@ -10,12 +10,14 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/blues/jsonata-go"
 	"github.com/org/2112-space-lab/org/testing/pkg/fx"
 	testservicecontainer "github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service-container"
 	models_service "github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service/models"
+	models_cont "github.com/org/2112-space-lab/org/testing/pkg/testing/x-test-container/models"
 	xtesttime "github.com/org/2112-space-lab/org/testing/pkg/testing/x-test-time"
 	models_time "github.com/org/2112-space-lab/org/testing/pkg/testing/x-test-time/models"
 	"github.com/streadway/amqp"
@@ -161,13 +163,13 @@ func getRabbitMQQueues(filter string) ([]string, error) {
 
 	var queueNames []string
 	for _, q := range queues {
-		// trimmedLowerQueue := strings.ToLower(strings.TrimSpace(q.Name))
-		// trimmedLowerFilter := strings.ToLower(strings.TrimSpace(filter))
+		trimmedLowerQueue := strings.ToLower(strings.TrimSpace(q.Name))
+		trimmedLowerFilter := strings.ToLower(strings.TrimSpace(filter))
 
-		// if strings.Contains(trimmedLowerQueue, trimmedLowerFilter) {
-		queueNames = append(queueNames, q.Name)
-		log.Printf("Queue matched filter '%s': %s", filter, q.Name)
-		// }
+		if strings.Contains(trimmedLowerQueue, trimmedLowerFilter) {
+			queueNames = append(queueNames, q.Name)
+			log.Printf("Queue matched filter '%s': %s", filter, q.Name)
+		}
 	}
 
 	if len(queueNames) == 0 {
@@ -405,5 +407,47 @@ func PublishTestEvent(serviceName models_service.ServiceAppName, queueName strin
 	}
 
 	log.Printf("✅ Successfully injected test event into queue '%s': %+v\n", queueName, event)
+	return nil
+}
+
+// RegisterQueuesToRabbitMQ declares and ensures the existence of queues in RabbitMQ.
+func RegisterQueuesToRabbitMQ(queues models_cont.EnvVarKeyValueMap) error {
+	// Connect to RabbitMQ
+	conn, err := amqp.Dial(testservicecontainer.RabbitMQURL)
+	if err != nil {
+		return fmt.Errorf("❌ failed to connect to RabbitMQ: %v", err)
+	}
+	defer conn.Close()
+
+	// Open a channel
+	ch, err := conn.Channel()
+	if err != nil {
+		return fmt.Errorf("❌ failed to open a channel: %v", err)
+	}
+	defer ch.Close()
+
+	for key, queueName := range queues {
+		if queueName == "" {
+			log.Printf("⚠️ Skipping empty queue name for key: %s", key)
+			continue
+		}
+
+		// Declare the queue
+		_, err := ch.QueueDeclare(
+			queueName, // name
+			true,      // durable
+			false,     // delete when unused
+			false,     // exclusive
+			false,     // no-wait
+			nil,       // arguments
+		)
+		if err != nil {
+			log.Printf("❌ Failed to declare queue '%s' (key: %s): %v", queueName, key, err)
+			continue
+		}
+
+		log.Printf("✅ Successfully registered queue '%s' (key: %s)", queueName, key)
+	}
+
 	return nil
 }
