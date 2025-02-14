@@ -44,8 +44,8 @@ jobs:
       # Build the Docker images locally using 'org/' as the context
       - name: Build Docker images
         run: |
-          docker build -t propagator-service -f deployments/docker/Dockerfile.propagator .
-          docker build -t app-service -f deployments/docker/Dockerfile.app .
+          docker build -t propagator-service -f ../deployments/docker/Dockerfile.propagator .
+          docker build -t app-service -f ../deployments/docker/Dockerfile.app .
         working-directory: org  
 
       # Run Makefile command to setup integration test environment (Start Containers)
