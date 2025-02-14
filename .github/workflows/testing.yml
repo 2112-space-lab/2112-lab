@@ -41,11 +41,12 @@ jobs:
       - name: Create Docker network
         run: docker network create 2112_net || echo "Network already exists"
 
-      # Build the Docker images locally (without pushing to a registry)
+      # Build the Docker images locally using 'org/' as the context
       - name: Build Docker images
         run: |
           docker build -t propagator-service -f deployments/docker/Dockerfile.propagator .
           docker build -t app-service -f deployments/docker/Dockerfile.app .
+        working-directory: org  
 
       # Run Makefile command to setup integration test environment (Start Containers)
       - name: Set up integration test environment
@@ -54,7 +55,7 @@ jobs:
 
       # Wait for database and services to be ready
       - name: Wait for services to be ready
-        run: sleep 15  # Ensure services are fully initialized before running tests
+        run: sleep 15  
 
       # Run integration tests
       - name: Run integration tests
