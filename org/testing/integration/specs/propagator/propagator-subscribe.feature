@@ -18,4 +18,4 @@ Feature: Propagator Service allows propagation of TLE from RabbitMQ event
     Then I publish propagator events for service "TEST" on "test-subscribe-propagator-input" from file "./resources/tle_propagation_request.json"
     Then Propagator events are expected for service "TEST":
       | EventType                | Occurrence | IsReject | FromTime  | ToTimeWarn | ToTimeErr  | ProduceCheckpointEventTime | AssignRef | XPathQuery | XPathValue |
-      | SATELLITE_TLE_PROPAGATED | 1          |          | ready>+0s |            | ready>+10s |                            |           |            |            |
+      | SATELLITE_TLE_PROPAGATED | 1          |          | begin>+0s |            | ready>+15s |                            |           |            |            |

@@ -20,4 +20,4 @@ Feature: Propagator Service allows propagation of TLE from HTTP request
       | 25544   | 1 25544U 98067A   24037.49236111  .00016717  00000-0  30709-3 0  9993 | 2 25544  51.6456 264.6625 0007377  24.9892 335.1377 15.50051545369613 | 2024-02-07T12:00:00Z | 60              | 10              |
     Then Propagator events are expected for service "TEST_PROPAGATOR":
       | EventType                | Occurrence | IsReject | FromTime  | ToTimeWarn | ToTimeErr | ProduceCheckpointEventTime | AssignRef | XPathQuery | XPathValue |
-      | SATELLITE_TLE_PROPAGATED | 1          |          | ready>+0s |            | ready>+5s |                            |           |            |            |
+      | SATELLITE_TLE_PROPAGATED | 1          |          | begin>+0s |            | ready>+15s |                            |           |            |            |
