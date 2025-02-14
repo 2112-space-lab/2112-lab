@@ -10,7 +10,7 @@ Feature: Propagator Service allows propagation of TLE from RabbitMQ event
       | RABBITMQ_OUTPUT_QUEUE | test-subscribe-propagator-output |
     And a Propagator service is created for service "TEST"
     And I register queues to RabbitMQ
-      | Key                         | Value                       |
+      | Key                              | Value                            |
       | test-subscribe-propagator-input  | test-subscribe-propagator-input  |
       | test-subscribe-propagator-output | test-subscribe-propagator-output |
     And Propagator subscribes as consumer "TEST" for "test-subscribe-propagator-output" with registered callbacks:
