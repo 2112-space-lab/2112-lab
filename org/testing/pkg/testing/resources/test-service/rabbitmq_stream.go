@@ -64,7 +64,7 @@ func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, s
 
 		msgs, err := ch.Consume(
 			queue,
-			"",
+			queue,
 			true,
 			false,
 			false,
@@ -102,23 +102,23 @@ func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, s
 
 					log.Printf("📥 Received event from queue %s: %+v", queueName, event)
 					scenarioState.SaveReceivedEvent(&event, service)
-					for _, cb := range callbacks {
-						if cb.EventType != event.EventType {
-							continue
-						}
+					// for _, cb := range callbacks {
+					// 	if cb.EventType != event.EventType {
+					// 		continue
+					// 	}
 
-						go func(cb models_service.EventCallbackInfo) {
-							if cb.ActionDelay != "" {
-								waitDur, _ := time.ParseDuration(cb.ActionDelay)
-								time.Sleep(waitDur)
-							}
+					// 	go func(cb models_service.EventCallbackInfo) {
+					// 		if cb.ActionDelay != "" {
+					// 			waitDur, _ := time.ParseDuration(cb.ActionDelay)
+					// 			time.Sleep(waitDur)
+					// 		}
 
-							scenarioState.SaveReceivedEvent(&event, service)
-							if err != nil {
-								log.Printf("❌ Error processing callback for event %s in queue %s: %v", event.EventType, queueName, err)
-							}
-						}(cb)
-					}
+					// 		scenarioState.SaveReceivedEvent(&event, service)
+					// 		if err != nil {
+					// 			log.Printf("❌ Error processing callback for event %s in queue %s: %v", event.EventType, queueName, err)
+					// 		}
+					// 	}(cb)
+					// }
 				}
 			}
 		}(queue)
@@ -158,13 +158,23 @@ func getRabbitMQQueues(filter string) ([]string, error) {
 		return nil, fmt.Errorf("failed to parse JSON response: %v", err)
 	}
 
+	log.Printf("Total queues retrieved from RabbitMQ: %d", len(queues))
+
 	var queueNames []string
 	for _, q := range queues {
-		trimedLowerQueue := strings.ToLower(strings.TrimSpace(q.Name))
-		trimedLowerFilter := strings.ToLower(strings.TrimSpace(filter))
-		if strings.Contains(trimedLowerQueue, trimedLowerFilter) {
+		trimmedLowerQueue := strings.ToLower(strings.TrimSpace(q.Name))
+		trimmedLowerFilter := strings.ToLower(strings.TrimSpace(filter))
+
+		if strings.Contains(trimmedLowerQueue, trimmedLowerFilter) {
 			queueNames = append(queueNames, q.Name)
+			log.Printf("Queue matched filter '%s': %s", filter, q.Name)
 		}
+	}
+
+	if len(queueNames) == 0 {
+		log.Printf("No queues found matching filter: '%s'", filter)
+	} else {
+		log.Printf("Total queues matched filter '%s': %d", filter, len(queueNames))
 	}
 
 	return queueNames, nil
