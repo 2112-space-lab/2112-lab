@@ -16,7 +16,6 @@ func GetPropagatorDefaultEnv() models.EnvVarKeyValueMap {
 		"RABBITMQ_PORT":     getEnv("RABBITMQ_PORT", "5672"),
 		"RABBITMQ_USER":     getEnv("RABBITMQ_USER", "2112"),
 		"RABBITMQ_PASSWORD": getEnv("RABBITMQ_PASSWORD", "2112"),
-		"RABBITMQ_QUEUE":    getEnv("RABBITMQ_QUEUE", "satellite_positions"),
 		"SERVER_NAME":       getEnv("SERVER_NAME", "localhost:5000"),
 	}
 }

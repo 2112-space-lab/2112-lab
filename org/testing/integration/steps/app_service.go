@@ -33,7 +33,7 @@ func RegisterAppServiceSteps(ctx *godog.ScenarioContext, state appServiceStepsSt
 	ctx.Step(`^a App service is created for service "([^"]*)"$`, s.appServiceCreate)
 	ctx.Step(`^a App service is created for service "([^"]*)" with env overrides:$`, s.appServiceCreateWithEnv)
 	ctx.Step(`^I register App service default scenario environment variable overrides:$`, s.registerCommonEnvVars)
-	ctx.Step(`^I subscribe as consumer "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
+	ctx.Step(`^I subscribes as consumer "([^"]*)" for "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
 	ctx.Step(`^Events are expected for service "([^"]*)":$`, s.verifyEvents)
 }
 
@@ -60,7 +60,7 @@ func (steps *AppServiceSteps) registerCommonEnvVars(envVars *godog.Table) error 
 	return nil
 }
 
-func (steps *AppServiceSteps) subscribeToEvents(consumer string, eventTable *godog.Table) error {
+func (steps *AppServiceSteps) subscribeToEvents(consumer string, queueName string, eventTable *godog.Table) error {
 	events, err := GodogTableToSlice[models_service.EventCallbackInfo](eventTable)
 	if err != nil {
 		log.Printf("Error parsing event subscription table: %v", err)
@@ -68,7 +68,7 @@ func (steps *AppServiceSteps) subscribeToEvents(consumer string, eventTable *god
 	}
 
 	log.Printf("Subscribing as consumer '%s' with events: %+v", consumer, events)
-	_, err = testservice.Subscribe(context.Background(), steps.state, models_service.ServiceName(consumer), events)
+	_, err = testservice.Subscribe(context.Background(), steps.state, models_service.ServiceName(consumer), queueName, events)
 	return err
 }
 

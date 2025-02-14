@@ -22,7 +22,7 @@ import (
 )
 
 // Subscribe dynamically subscribes to all queues in RabbitMQ
-func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, service models_service.ServiceName, callbacks []models_service.EventCallbackInfo) (context.CancelFunc, error) {
+func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, service models_service.ServiceName, queueName string, callbacks []models_service.EventCallbackInfo) (context.CancelFunc, error) {
 	conn, err := amqp.Dial(testservicecontainer.RabbitMQURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to RabbitMQ: %v", err)
@@ -34,7 +34,7 @@ func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, s
 		return nil, fmt.Errorf("failed to open a channel: %v", err)
 	}
 
-	queues, err := getRabbitMQQueues()
+	queues, err := getRabbitMQQueues(queueName)
 	if err != nil {
 		ch.Close()
 		conn.Close()
@@ -127,7 +127,7 @@ func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, s
 }
 
 // Fetch all queues from RabbitMQ Management API
-func getRabbitMQQueues() ([]string, error) {
+func getRabbitMQQueues(filter string) ([]string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", testservicecontainer.RabbitMQAPIURL, nil)
 	if err != nil {
@@ -159,7 +159,9 @@ func getRabbitMQQueues() ([]string, error) {
 
 	var queueNames []string
 	for _, q := range queues {
-		queueNames = append(queueNames, q.Name)
+		if q.Name == filter {
+			queueNames = append(queueNames, q.Name)
+		}
 	}
 
 	return queueNames, nil
@@ -343,7 +345,7 @@ func sanitizeURLEncodedJSON(b []byte) []byte {
 }
 
 // PublishTestEvent injects a test event into a RabbitMQ queue for testing purposes.
-func PublishTestEvent(serviceName models_service.ServiceAppName, event models_service.EventRoot) error {
+func PublishTestEvent(serviceName models_service.ServiceAppName, queueName string, event models_service.EventRoot) error {
 	conn, err := amqp.Dial(testservicecontainer.RabbitMQURL)
 	if err != nil {
 		return fmt.Errorf("❌ failed to connect to RabbitMQ: %v", err)
@@ -361,10 +363,6 @@ func PublishTestEvent(serviceName models_service.ServiceAppName, event models_se
 	if err != nil {
 		return fmt.Errorf("❌ failed to serialize test event: %v", err)
 	}
-
-	// Define the queue name based on event type
-	// queueName := fmt.Sprintf("%s.events.all", serviceName)
-	queueName := "events.all"
 
 	// Ensure queue exists
 	_, err = ch.QueueDeclare(

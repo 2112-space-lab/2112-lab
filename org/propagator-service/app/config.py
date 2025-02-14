@@ -8,7 +8,6 @@ RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
 RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", 5672))
 RABBITMQ_USER = os.getenv("RABBITMQ_USER", "2112")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "2112")
-RABBITMQ_QUEUE = os.getenv("RABBITMQ_QUEUE", "events.all")
 
 DEFAULT_SCHEMA_DIRECTORY = os.path.abspath("./app/graphql/schemas/")
 
@@ -29,7 +28,7 @@ class Config:
         logger.info(f"🌍 FLASK_ENV: {cls.FLASK_ENV}")
         logger.info(f"🔑 SECRET_KEY: {'HIDDEN' if cls.SECRET_KEY != 'default-secret-key' else 'DEFAULT'}")
         logger.info(f"📂 Schema Directory: {cls.SCHEMA_DIRECTORY}")
-        logger.info(f"🐇 RabbitMQ: {RABBITMQ_USER}@{RABBITMQ_HOST}:{RABBITMQ_PORT}, Queue: {RABBITMQ_QUEUE}")
+        logger.info(f"🐇 RabbitMQ: {RABBITMQ_USER}@{RABBITMQ_HOST}:{RABBITMQ_PORT}")
 
 class DevelopmentConfig(Config):
     """Development environment configuration."""

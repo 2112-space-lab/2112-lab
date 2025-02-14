@@ -38,9 +38,9 @@ func RegisterPropagatorServiceSteps(ctx *godog.ScenarioContext, state propagator
 	ctx.Step(`^a Propagator service is created for service "([^"]*)" with env overrides:$`, s.propagatorServiceCreateWithEnv)
 	ctx.Step(`^I register Propagator service default scenario environment variable overrides:$`, s.propagatorRegisterCommonEnvVars)
 	ctx.Step(`^I request satellite propagation on propagator for service "([^"]*)"$`, s.requestPropagation)
-	ctx.Step(`^Propagator subscribes as consumer "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
+	ctx.Step(`^Propagator subscribes as consumer "([^"]*)" for "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
 	ctx.Step(`^Propagator events are expected for service "([^"]*)":$`, s.verifyEvents)
-	ctx.Step(`^I publish propagator events for service "([^"]*)" from file "([^"]*)"$`, s.publishEventsFromJSONFile)
+	ctx.Step(`^I publish propagator events for service "([^"]*)" on "([^"]*)" from file "([^"]*)"$`, s.publishEventsFromJSONFile)
 }
 
 func (steps *PropagatorServiceSteps) propagatorRegisterCommonEnvVars(envVars *godog.Table) error {
@@ -77,7 +77,7 @@ func (steps *PropagatorServiceSteps) requestPropagation(ctx context.Context, ser
 	return testservice.PropagatorRequest(ctx, steps.state, models_service.ServiceName(serviceName), propSettings)
 }
 
-func (steps *PropagatorServiceSteps) subscribeToEvents(consumer string, eventTable *godog.Table) error {
+func (steps *PropagatorServiceSteps) subscribeToEvents(consumer string, queueName string, eventTable *godog.Table) error {
 	events, err := GodogTableToSlice[models_service.EventCallbackInfo](eventTable)
 	if err != nil {
 		log.Printf("Error parsing event subscription table: %v", err)
@@ -85,7 +85,7 @@ func (steps *PropagatorServiceSteps) subscribeToEvents(consumer string, eventTab
 	}
 
 	log.Printf("Subscribing as consumer '%s' with events: %+v", consumer, events)
-	_, err = testservice.Subscribe(context.Background(), steps.state, models_service.ServiceName(consumer), events)
+	_, err = testservice.Subscribe(context.Background(), steps.state, models_service.ServiceName(consumer), queueName, events)
 	return err
 }
 
@@ -101,7 +101,7 @@ func (steps *PropagatorServiceSteps) verifyEvents(serviceName string, eventTable
 }
 
 // publishEventsFromJSONFile reads events from a JSON file and publishes them for a given service.
-func (steps *PropagatorServiceSteps) publishEventsFromJSONFile(serviceName string, jsonFilePath string) error {
+func (steps *PropagatorServiceSteps) publishEventsFromJSONFile(serviceName string, queueName string, jsonFilePath string) error {
 	file, err := os.ReadFile(jsonFilePath)
 	if err != nil {
 		return fmt.Errorf("❌ failed to read JSON file: %v", err)
@@ -116,12 +116,12 @@ func (steps *PropagatorServiceSteps) publishEventsFromJSONFile(serviceName strin
 	log.Printf("📤 Publishing %d events for service '%s' from file '%s'", 1, serviceName, jsonFilePath)
 
 	for _, event := range events {
-	err = testservice.PublishTestEvent(models_service.ServiceAppName(serviceName), event)
-	if err != nil {
-		log.Printf("❌ Error publishing event: %v", err)
-		return err
-	}
-	log.Printf("✅ Successfully published event: %+v", event)
+		err = testservice.PublishTestEvent(models_service.ServiceAppName(serviceName), queueName, event)
+		if err != nil {
+			log.Printf("❌ Error publishing event: %v", err)
+			return err
+		}
+		log.Printf("✅ Successfully published event: %+v", event)
 	}
 	return nil
 }

@@ -1,4 +1,5 @@
 import json
+import os
 import logging
 import asyncio
 from typing import Dict, Type, List
@@ -20,7 +21,7 @@ class EventMonitor:
         self.dependencies = dependencies
         self.message_broker = MessageBroker(dependencies)
         self.event_handlers: Dict[EventType, List[Type[EventHandler]]] = {}
-        self.queue_name = "events.all"
+        self.queue_name = os.getenv("RABBITMQ_INPUT_QUEUE", "propagator.events.all.input")
         self.event_queue = asyncio.Queue()
         self.rabbitmq_url = dependencies.rabbitmq_url
 

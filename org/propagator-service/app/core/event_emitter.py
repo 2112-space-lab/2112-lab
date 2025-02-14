@@ -1,4 +1,5 @@
 import json
+import os
 import base64
 import uuid
 from datetime import datetime
@@ -44,7 +45,7 @@ class EventEmitter:
                 payload=encoded_payload
             )
 
-            routing_key = f"events.all"
+            routing_key = os.getenv("RABBITMQ_OUTPUT_QUEUE", "propagator.events.all.output")
             event_dict = asdict(event)
             self.message_broker.publish_message(routing_key, event_dict)
 
