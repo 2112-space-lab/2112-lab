@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 type SatellitesTilesMappingsHandler struct {
@@ -47,14 +47,14 @@ func (h *SatellitesTilesMappingsHandler) GetTask() Task {
 
 // Run executes the visibility computation process.
 func (h *SatellitesTilesMappingsHandler) Run(ctx context.Context, args map[string]string) error {
-	log.Println("Starting Run method")
-	log.Println("Subscribing to event_satellite_positions_updated channel")
+	log.Debugf("Starting Run method")
+	log.Debugf("Subscribing to event_satellite_positions_updated channel")
 	return h.Subscribe(ctx, "event_satellite_positions_updated")
 }
 
 // Exec executes the visibility computation process, considering satellite paths.
 func (h *SatellitesTilesMappingsHandler) Exec(ctx context.Context, id string, startTime time.Time, endTime time.Time) error {
-	log.Printf("Starting Exec method for satellite ID: %s, from %s to %s\n", id, startTime, endTime)
+	log.Debugf("Starting Exec method for satellite ID: %s, from %s to %s\n", id, startTime, endTime)
 	sat, err := h.satelliteRepo.FindByNoradID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to fetch satellite: %w", err)
@@ -66,16 +66,16 @@ func (h *SatellitesTilesMappingsHandler) Exec(ctx context.Context, id string, st
 	}
 
 	if len(positions) < 2 {
-		log.Printf("Not enough positions to compute mappings for satellite %s\n", sat.NoradID)
+		log.Warnf("Not enough positions to compute mappings for satellite %s\n", sat.NoradID)
 		return nil
 	}
 
-	log.Printf("Computing mappings for satellite %s\n", sat.NoradID)
+	log.Debugf("Computing mappings for satellite %s\n", sat.NoradID)
 	if err := h.computeTileMappings(ctx, "todoSatellitesTilesMappingsHandler", sat, positions); err != nil {
 		return fmt.Errorf("error computing mappings for satellite %s: %w", sat.NoradID, err)
 	}
 
-	log.Printf("Completed Exec method for satellite ID: %s\n", id)
+	log.Debugf("Completed Exec method for satellite ID: %s\n", id)
 	return nil
 }
 
@@ -86,7 +86,7 @@ func (h *SatellitesTilesMappingsHandler) computeTileMappings(
 	sat domain.Satellite,
 	positions []domain.SatellitePosition,
 ) error {
-	log.Printf("Finding visible tiles for satellite %s along its path\n", sat.NoradID)
+	log.Debugf("Finding visible tiles for satellite %s along its path\n", sat.NoradID)
 
 	err := h.mappingRepo.DeleteMappingsByNoradID(ctx, contextID, sat.NoradID)
 	if err != nil {
@@ -99,21 +99,21 @@ func (h *SatellitesTilesMappingsHandler) computeTileMappings(
 	}
 
 	if len(mappings) == 0 {
-		log.Printf("No visible tiles found for satellite %s along its path\n", sat.NoradID)
+		log.Warnf("No visible tiles found for satellite %s along its path\n", sat.NoradID)
 		return nil
 	}
 
 	if err := h.mappingRepo.SaveBatch(ctx, mappings); err != nil {
 		return fmt.Errorf("failed to save mappings: %w", err)
 	}
-	log.Printf("Saved %d mappings for satellite %s\n", len(mappings), sat.NoradID)
+	log.Debugf("Saved %d mappings for satellite %s\n", len(mappings), sat.NoradID)
 
 	return nil
 }
 
 // Subscribe listens for satellite position updates and computes visibility using a worker pool.
 func (h *SatellitesTilesMappingsHandler) Subscribe(ctx context.Context, channel string) error {
-	log.Printf("Subscribing to Redis channel: %s\n", channel)
+	log.Debugf("Subscribing to Redis channel: %s\n", channel)
 
 	// Create a channel for incoming messages
 	messageChan := make(chan string, 100)
@@ -136,7 +136,7 @@ func (h *SatellitesTilesMappingsHandler) Subscribe(ctx context.Context, channel 
 		return fmt.Errorf("failed to subscribe to channel %s: %w", channel, err)
 	}
 
-	log.Printf("Subscribed to Redis channel: %s\n", channel)
+	log.Debugf("Subscribed to Redis channel: %s\n", channel)
 	return nil
 }
 
@@ -151,28 +151,28 @@ func (h *SatellitesTilesMappingsHandler) worker(ctx context.Context, messageChan
 				EndTime     string `json:"end_time"`
 			}
 			if err := json.Unmarshal([]byte(message), &update); err != nil {
-				log.Printf("Failed to parse update message: %v\n", err)
+				log.Errorf("Failed to parse update message: %v\n", err)
 				continue
 			}
 
 			startTime, err := time.Parse(time.RFC3339, update.StartTime)
 			if err != nil {
-				log.Printf("Failed to parse start time: %v\n", err)
+				log.Errorf("Failed to parse start time: %v\n", err)
 				continue
 			}
 			endTime, err := time.Parse(time.RFC3339, update.EndTime)
 			if err != nil {
-				log.Printf("Failed to parse end time: %v\n", err)
+				log.Errorf("Failed to parse end time: %v\n", err)
 				continue
 			}
 
-			log.Printf("Processing update for satellite ID: %s, from %s to %s\n", update.SatelliteID, startTime, endTime)
+			log.Tracef("Processing update for satellite ID: %s, from %s to %s\n", update.SatelliteID, startTime, endTime)
 			if err := h.Exec(ctx, update.SatelliteID, startTime, endTime); err != nil {
-				log.Printf("Failed to execute computation for satellite ID %s: %v\n", update.SatelliteID, err)
+				log.Errorf("Failed to execute computation for satellite ID %s: %v\n", update.SatelliteID, err)
 			}
 
 		case <-ctx.Done():
-			log.Println("Worker shutting down due to context cancellation")
+			log.Warnf("Worker shutting down due to context cancellation")
 			return
 		}
 	}

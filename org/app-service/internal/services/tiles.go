@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
@@ -126,7 +126,7 @@ func (s *TileService) GetSatelliteMappingsByNoradID(ctx context.Context, context
 func (s *TileService) RecomputeMappings(ctx context.Context, contextID, noradID string, startTime, endTime time.Time) (err error) {
 	ctx, span := tracing.NewSpan(ctx, "RecomputeMappings")
 	defer span.EndWithError(err)
-	log.Printf("Recomputing mappings for NORAD ID: %s in context: %s\n", noradID, contextID)
+	log.Tracef("Recomputing mappings for NORAD ID: %s in context: %s\n", noradID, contextID)
 
 	select {
 	case <-ctx.Done():
@@ -138,7 +138,7 @@ func (s *TileService) RecomputeMappings(ctx context.Context, contextID, noradID 
 	if err := s.mappingRepo.DeleteMappingsByNoradID(ctx, contextID, noradID); err != nil {
 		return fmt.Errorf("failed to delete existing mappings for NORAD ID [%s] in context [%s]: %w", noradID, contextID, err)
 	}
-	log.Printf("Deleted existing mappings for NORAD ID: %s in context: %s\n", noradID, contextID)
+	log.Tracef("Deleted existing mappings for NORAD ID: %s in context: %s\n", noradID, contextID)
 
 	// Step 2: Fetch satellite data
 	satellite, err := s.satelliteRepo.FindByNoradID(ctx, noradID)
@@ -153,7 +153,7 @@ func (s *TileService) RecomputeMappings(ctx context.Context, contextID, noradID 
 	}
 
 	if len(positions) < 2 {
-		log.Printf("Not enough positions to compute mappings for NORAD ID: %s\n", noradID)
+		log.Warnf("Not enough positions to compute mappings for NORAD ID: %s\n", noradID)
 		return nil
 	}
 
@@ -168,6 +168,6 @@ func (s *TileService) RecomputeMappings(ctx context.Context, contextID, noradID 
 		return fmt.Errorf("failed to save new mappings for NORAD ID [%s]: %w", noradID, err)
 	}
 
-	log.Printf("Recomputed and saved %d mappings for NORAD ID: %s in context: %s\n", len(mappings), noradID, contextID)
+	log.Debugf("Recomputed and saved %d mappings for NORAD ID: %s in context: %s\n", len(mappings), noradID, contextID)
 	return nil
 }

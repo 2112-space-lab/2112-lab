@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/data/models"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	"gorm.io/gorm"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 type TileRepository struct {
@@ -254,7 +254,7 @@ func (r *TileRepository) FindTilesVisibleFromLine(ctx context.Context, sat domai
 		tile := models.MapToTileDomain(res.Tile)
 		interestPoint, err := parseIntersectionGeometry(res.IntersectionGeom)
 		if err != nil {
-			log.Printf("Failed to parse intersection geometry for TileID %s: %v\n", tile.ID, err)
+			log.Errorf("Failed to parse intersection geometry for TileID %s: %v\n", tile.ID, err)
 			continue
 		}
 

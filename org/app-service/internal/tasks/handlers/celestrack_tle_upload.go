@@ -2,34 +2,46 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/events"
+	model "github.com/org/2112-space-lab/org/app-service/internal/graphql/models/generated"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
+// TleServiceClient defines an interface for fetching TLE data
 type TleServiceClient interface {
 	FetchTLEFromSatCatByCategory(ctx context.Context, category string, contextName domain.GameContextName) ([]domain.TLE, error)
 }
 
+// CelestrackTleUploadHandler handles TLE uploads from CelesTrak
 type CelestrackTleUploadHandler struct {
 	satelliteRepo repository.SatelliteRepository
 	tleRepo       repository.TleRepository
 	tleService    TleServiceClient
+	eventEmitter  *events.EventEmitter
+	eventsMonitor *events.EventMonitor
 }
 
+// NewCelestrackTleUploadHandler creates a new task
 func NewCelestrackTleUploadHandler(
 	satelliteRepo repository.SatelliteRepository,
 	tleRepo repository.TleRepository,
-	tleService TleServiceClient) CelestrackTleUploadHandler {
+	tleService TleServiceClient,
+	eventEmitter *events.EventEmitter,
+	eventsMonitor *events.EventMonitor,
+) CelestrackTleUploadHandler {
 	return CelestrackTleUploadHandler{
 		satelliteRepo: satelliteRepo,
 		tleRepo:       tleRepo,
 		tleService:    tleService,
+		eventEmitter:  eventEmitter,
+		eventsMonitor: eventsMonitor,
 	}
 }
 
@@ -41,8 +53,8 @@ func (h *CelestrackTleUploadHandler) GetTask() Task {
 	}
 }
 
+// Run executes the task manually or via an event
 func (h *CelestrackTleUploadHandler) Run(ctx context.Context, args map[string]string) error {
-
 	category, ok := args["category"]
 	if !ok || category == "" {
 		return fmt.Errorf("missing required argument: category")
@@ -54,14 +66,13 @@ func (h *CelestrackTleUploadHandler) Run(ctx context.Context, args map[string]st
 	}
 
 	contextName, ok := args["contextName"]
-	if !ok || nbTles == "" {
-		return fmt.Errorf("missing required argument: maxCount")
+	if !ok || contextName == "" {
+		return fmt.Errorf("missing required argument: contextName")
 	}
 
-	// Convert nbTles to an integer (assuming it's a string or a similar type in args)
 	maxCount, err := strconv.Atoi(nbTles)
 	if err != nil {
-		return fmt.Errorf("invalid value for max: %v", err)
+		return fmt.Errorf("invalid value for maxCount: %v", err)
 	}
 
 	tles, err := h.tleService.FetchTLEFromSatCatByCategory(ctx, category, domain.GameContextName(contextName))
@@ -69,51 +80,39 @@ func (h *CelestrackTleUploadHandler) Run(ctx context.Context, args map[string]st
 		return fmt.Errorf("failed to fetch TLE catalog for category %s: %v", category, err)
 	}
 
-	// Retain only the maximum nbTles elements
 	if len(tles) > maxCount {
-		tles = tles[:maxCount] // Slice to keep only the first maxCount elements
+		tles = tles[:maxCount]
 	}
 
-	// Ensure satellites exist for the batch
-	// for _, tle := range tles {
-	// 	if err := h.ensureSatelliteExists(ctx, tle.NoradID, category); err != nil {
-	// 		return fmt.Errorf("failed to ensure satellite existence for NORAD ID %s: %v", tle.NoradID, err)
-	// 	}
-	// }
-
-	log.Printf("Returning %d TLEs for category %s", len(tles), category)
 	err = h.tleRepo.UpdateTleBatch(ctx, tles)
 	if err != nil {
-		return fmt.Errorf("failed to upsert TLE for NORAD ID %s", err)
+		return fmt.Errorf("failed to upsert TLE batch: %v", err)
 	}
+
+	log.Debugf("✅ Successfully processed %d TLEs for category %s", len(tles), category)
+
+	h.emitTleProcessedEvent(category, maxCount, len(tles))
 	return nil
 }
 
-func (h *CelestrackTleUploadHandler) ensureSatelliteExists(ctx context.Context, noradID string, category string) error {
-	satellite, err := h.satelliteRepo.FindByNoradID(ctx, noradID)
-	if err == nil && satellite.NoradID == noradID {
-		return nil
+// emitTleProcessedEvent sends a completion event
+func (h *CelestrackTleUploadHandler) emitTleProcessedEvent(category string, maxRequested, processed int) {
+	eventPayload := map[string]interface{}{
+		"category":      category,
+		"maxRequested":  maxRequested,
+		"processedTLEs": processed,
+		"timestamp":     time.Now().UTC(),
 	}
 
-	nowUtc := time.Now().UTC()
-
-	newSatellite, err := domain.NewSatellite(
-		fmt.Sprintf("Unknown Satellite %s", noradID),
-		noradID,
-		domain.SatelliteType(strings.ToUpper(category)),
-		true,  //active by default
-		false, // not in favourite
-		nowUtc,
-	)
-
-	if err != nil {
-		return err
+	eventData, _ := json.Marshal(eventPayload)
+	event := model.EventRoot{
+		EventType: model.EventTypeSatelliteTlePropagated.String(),
+		Payload:   string(eventData),
 	}
 
-	err = h.satelliteRepo.Save(ctx, newSatellite)
-	if err != nil {
-		return fmt.Errorf("failed to create satellite: %v", err)
+	if err := h.eventEmitter.PublishEvent(event); err != nil {
+		log.Errorf("❌ Failed to emit event: %v", err)
+	} else {
+		log.Tracef("📡 Event emitted: TLE_UPLOAD_COMPLETED for category %s", category)
 	}
-
-	return nil
 }

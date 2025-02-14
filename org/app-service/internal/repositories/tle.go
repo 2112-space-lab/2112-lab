@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/data"
 	"github.com/org/2112-space-lab/org/app-service/internal/data/models"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xtime"
 	"gorm.io/gorm/clause"
 )
@@ -119,7 +119,7 @@ func (r *TleRepository) UpdateTleBatch(ctx context.Context, tles []domain.TLE) e
 		if err := r.db.DbHandler.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Save(&modelTLEs).Error; err != nil {
-			log.Printf("Failed to batch upsert TLEs: %v\n", err)
+			log.Errorf("Failed to batch upsert TLEs: %v\n", err)
 			return err
 		}
 
@@ -135,11 +135,11 @@ func (r *TleRepository) UpdateTleBatch(ctx context.Context, tles []domain.TLE) e
 
 			// Update Redis cache
 			if err := r.redisClient.HSet(ctx, key, cacheData); err != nil {
-				log.Printf("Failed to update Redis cache for key %s: %v\n", key, err)
+				log.Errorf("Failed to update Redis cache for key %s: %v\n", key, err)
 			}
 			// Publish to the message broker
 			if err := r.publishTleToBroker(ctx, tle); err != nil {
-				log.Printf("Failed to publish TLE to message broker for NORAD ID %s: %v\n", tle.NoradID, err)
+				log.Errorf("Failed to publish TLE to message broker for NORAD ID %s: %v\n", tle.NoradID, err)
 			}
 		}
 	}
@@ -155,7 +155,7 @@ func (r *TleRepository) DeleteTle(ctx context.Context, id string) error {
 
 	key := fmt.Sprintf("satellite:tle:%s", id)
 	if err := r.redisClient.Del(ctx, key); err != nil {
-		log.Printf("Failed to delete Redis cache for key %s: %v\n", key, err)
+		log.Errorf("Failed to delete Redis cache for key %s: %v\n", key, err)
 	}
 	return nil
 }
@@ -232,7 +232,7 @@ func (r *TleRepository) QuerySatellitePositions(ctx context.Context, satelliteID
 	for _, result := range results {
 		var position domain.SatellitePosition
 		if err := json.Unmarshal([]byte(result), &position); err != nil {
-			log.Printf("Failed to parse satellite position: %v\n", err)
+			log.Errorf("Failed to parse satellite position: %v\n", err)
 			continue
 		}
 		positions = append(positions, position)
@@ -254,7 +254,7 @@ func (r *TleRepository) updateCache(ctx context.Context, key string, tle domain.
 		"id":     tle.NoradID,
 	}
 	if err := r.redisClient.HSet(ctx, key, cacheData); err != nil {
-		log.Printf("Failed to update Redis cache for key %s: %v\n", key, err)
+		log.Errorf("Failed to update Redis cache for key %s: %v\n", key, err)
 	}
 }
 
@@ -276,6 +276,6 @@ func (r *TleRepository) publishTleToBroker(ctx context.Context, tle domain.TLE) 
 		return fmt.Errorf("failed to publish message to channel %s: %w", channel, err)
 	}
 
-	log.Printf("Successfully published TLE update to channel %s\n", channel)
+	log.Debugf("Successfully published TLE update to channel %s\n", channel)
 	return nil
 }

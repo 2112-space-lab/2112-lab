@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 // ComputeVisibilitiessHandler handles visibility computation for satellites based on user locations.
@@ -47,8 +47,8 @@ func (h *ComputeVisibilitiessHandler) GetTask() Task {
 
 // Run executes the visibility computation process.
 func (h *ComputeVisibilitiessHandler) Run(ctx context.Context, args map[string]string) error {
-	log.Println("Starting Run method")
-	log.Println("Subscribing to visibility_requests channel")
+	log.Debugf("Starting Run method")
+	log.Debugf("Subscribing to visibility_requests channel")
 
 	defaultUserHorizon, ok := args["defaultHorizon"]
 	if !ok || defaultUserHorizon == "" {
@@ -66,7 +66,7 @@ func (h *ComputeVisibilitiessHandler) Run(ctx context.Context, args map[string]s
 
 // Subscribe listens for user location updates and computes visibilities.
 func (h *ComputeVisibilitiessHandler) Subscribe(ctx context.Context, channel string) error {
-	log.Printf("Subscribing to Redis channel: %s\n", channel)
+	log.Debugf("Subscribing to Redis channel: %s\n", channel)
 
 	err := h.redisClient.Subscribe(ctx, channel, func(message string) error {
 		var request struct {
@@ -92,7 +92,7 @@ func (h *ComputeVisibilitiessHandler) Subscribe(ctx context.Context, channel str
 			return fmt.Errorf("failed to parse end time: %w", err)
 		}
 
-		log.Printf("Received visibility request for UID: %s at location (%.6f, %.6f) with radius %.2f, horizon %.2f, from %s to %s\n",
+		log.Debugf("Received visibility request for UID: %s at location (%.6f, %.6f) with radius %.2f, horizon %.2f, from %s to %s\n",
 			request.UID, request.Latitude, request.Longitude, request.Radius, request.Horizon, startTime, endTime)
 
 		return h.computeVisibility(ctx, request.UID, "toprovideincomputeVisibility", request.Latitude, request.Longitude, request.Radius, startTime, endTime)
@@ -102,7 +102,7 @@ func (h *ComputeVisibilitiessHandler) Subscribe(ctx context.Context, channel str
 		return fmt.Errorf("failed to subscribe to channel %s: %w", channel, err)
 	}
 
-	log.Printf("Successfully subscribed to Redis channel: %s\n", channel)
+	log.Debugf("Successfully subscribed to Redis channel: %s\n", channel)
 	return nil
 }
 
@@ -123,7 +123,7 @@ func (h *ComputeVisibilitiessHandler) computeVisibility(ctx context.Context, uid
 		return fmt.Errorf("failed to find tiles intersecting location: %w", err)
 	}
 	if len(tiles) == 0 {
-		log.Printf("No tiles found for location: (%f, %f) with radius: %f\n", latitude, longitude, radius)
+		log.Warnf("No tiles found for location: (%f, %f) with radius: %f\n", latitude, longitude, radius)
 		return nil
 	}
 
@@ -137,7 +137,7 @@ func (h *ComputeVisibilitiessHandler) computeVisibility(ctx context.Context, uid
 		return fmt.Errorf("failed to find satellites for tiles: %w", err)
 	}
 	if len(satellites) == 0 {
-		log.Printf("No satellites found for the identified tiles.\n")
+		log.Warnf("No satellites found for the identified tiles.\n")
 		return nil
 	}
 

@@ -3,12 +3,12 @@ package services
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	propagator "github.com/org/2112-space-lab/org/app-service/internal/clients/propagate"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xspace"
 )
@@ -68,10 +68,10 @@ func (s *SatelliteService) Propagate(ctx context.Context, noradID string, durati
 			firstPos := propagatedPositions[0]
 			lastPos := propagatedPositions[len(propagatedPositions)-1]
 
-			log.Printf("First Position for NORAD ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
+			log.Tracef("First Position for NORAD ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
 				noradID, firstPos.Latitude, firstPos.Longitude, firstPos.Altitude, firstPos.Time)
 
-			log.Printf("Last Position for NORAD ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
+			log.Tracef("Last Position for NORAD ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
 				noradID, lastPos.Latitude, lastPos.Longitude, lastPos.Altitude, lastPos.Time)
 		}
 

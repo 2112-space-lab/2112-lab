@@ -3,11 +3,11 @@ package redis
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 )
 
 func (r *RedisClient) Init() {}
@@ -95,16 +95,16 @@ func (r *RedisClient) Set(ctx context.Context, key string, value interface{}) er
 // Publish sends a message to a Redis Pub/Sub channel.
 func (r *RedisClient) Publish(ctx context.Context, channel string, message interface{}) error {
 	// Log the publishing attempt
-	log.Printf("Publishing message to channel %s\n", channel)
+	log.Debugf("Publishing message to channel %s\n", channel)
 
 	// Attempt to publish the message
 	if err := r.client.Publish(channel, message).Err(); err != nil {
-		log.Printf("Failed to publish message to channel %s: %v\n", channel, err)
+		log.Errorf("Failed to publish message to channel %s: %v\n", channel, err)
 		return fmt.Errorf("failed to publish message to channel %s: %w", channel, err)
 	}
 
 	// Log successful publishing
-	log.Printf("Successfully published message to channel %s\n", channel)
+	log.Debugf("Successfully published message to channel %s\n", channel)
 	return nil
 }
 
@@ -118,26 +118,26 @@ func (r *RedisClient) Subscribe(ctx context.Context, channel string, handler fun
 		return fmt.Errorf("failed to subscribe to channel %s: %w", channel, err)
 	}
 
-	log.Printf("Subscribed to Redis channel: %s\n", channel)
+	log.Debugf("Subscribed to Redis channel: %s\n", channel)
 
 	// Start listening for messages
 	ch := pubsub.Channel()
 	for {
 		select {
 		case msg := <-ch:
-			log.Printf("Received message from channel %s: %s\n", channel, msg.Payload)
+			log.Debugf("Received message from channel %s: %s\n", channel, msg.Payload)
 
 			// Pass the message to the handler function
 			if err := handler(msg.Payload); err != nil {
-				log.Printf("Error processing message from channel %s: %v\n", channel, err)
+				log.Errorf("Error processing message from channel %s: %v\n", channel, err)
 			}
 
 		case <-ctx.Done():
 			// Unsubscribe and stop listening if context is canceled
 			if err := pubsub.Close(); err != nil {
-				log.Printf("Error unsubscribing from channel %s: %v\n", channel, err)
+				log.Errorf("Error unsubscribing from channel %s: %v\n", channel, err)
 			}
-			log.Printf("Unsubscribed from Redis channel: %s\n", channel)
+			log.Debugf("Unsubscribed from Redis channel: %s\n", channel)
 			return nil
 		}
 	}

@@ -34,6 +34,7 @@ const (
 	FEATURE_CELESTRACK string = "celestrack"
 	FEATURE_PROPAGATOR string = "propagator"
 	FEATURE_REDIS      string = "redis"
+	FEATURE_RABBITMQ   string = "rabbitmq"
 
 	// generic words
 	WORD_DATABASE        string = "database"

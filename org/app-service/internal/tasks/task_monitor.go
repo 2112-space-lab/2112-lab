@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/dependencies"
+	"github.com/org/2112-space-lab/org/app-service/internal/events"
 	"github.com/org/2112-space-lab/org/app-service/internal/tasks/handlers"
 )
 
@@ -21,11 +22,15 @@ type TaskMonitor struct {
 
 // TaskMonitor constructor
 func NewTaskMonitor(dependencies *dependencies.Dependencies) (TaskMonitor, error) {
+	eventMonitor := events.NewEventMonitor(dependencies.Clients.RabbitMQClient)
+	eventEmitter := events.NewEventEmitter(dependencies.Clients.RabbitMQClient)
 
 	celestrackTleUpload := handlers.NewCelestrackTleUploadHandler(
 		dependencies.Repositories.SatelliteRepo,
 		dependencies.Repositories.TleRepo,
 		&dependencies.Services.TleService,
+		eventEmitter,
+		eventMonitor,
 	)
 
 	generateTilesHandler := handlers.NewGenerateTilesHandler(
@@ -52,12 +57,16 @@ func NewTaskMonitor(dependencies *dependencies.Dependencies) (TaskMonitor, error
 		dependencies.Clients.RedisClient,
 	)
 
+	eventDetector := handlers.NewEventDetector(
+		eventEmitter, eventMonitor)
+
 	tasks := map[handlers.TaskName]TaskHandler{
 		celestrackTleUpload.GetTask().Name:       &celestrackTleUpload,
 		generateTilesHandler.GetTask().Name:      &generateTilesHandler,
 		mappingHandler.GetTask().Name:            &mappingHandler,
 		celestrackSatelliteUpload.GetTask().Name: &celestrackSatelliteUpload,
 		satelliteVisibilities.GetTask().Name:     &satelliteVisibilities,
+		eventDetector.GetTask().Name:             &eventDetector,
 	}
 	return TaskMonitor{
 		Tasks: tasks,

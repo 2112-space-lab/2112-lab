@@ -13,6 +13,17 @@
                 "command": "cd app-service && go build -o dist/app-service ./internal"
             }
         },
+        "update": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "nx run graphql-apis:go-generate",
+                    "rm -rf app-service/internal/graphql/models/generated",
+                    "mkdir -p app-service/internal/graphql/models/generated",
+                    "cp -r packages/graphql-apis/go-generator/graph/model/* app-service/internal/graphql/models/generated/"
+                ]
+            }
+        },
         "serve": {
             "executor": "nx:run-commands",
             "options": {

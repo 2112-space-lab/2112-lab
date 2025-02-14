@@ -5,6 +5,7 @@ import (
 
 	"github.com/org/2112-space-lab/org/app-service/internal/clients/celestrack"
 	propagator "github.com/org/2112-space-lab/org/app-service/internal/clients/propagate"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/rabbitmq"
 	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
 )
@@ -14,6 +15,7 @@ type Clients struct {
 	RedisClient      *redis.RedisClient
 	PropagatorClient *propagator.PropagatorClient
 	CelestrackClient *celestrack.CelestrackClient
+	RabbitMQClient   *rabbitmq.RabbitMQClient
 }
 
 // NewClients initializes and returns a Clients struct
@@ -22,11 +24,15 @@ func NewClients(env *config.SEnv) *Clients {
 	if err != nil {
 		log.Panic("Failed to initialize Redis client:", err)
 	}
-
+	rabbitMqClient, err := rabbitmq.NewRabbitMQClient(env)
+	if err != nil {
+		log.Panic("Failed to initialize RabbitMq client:", err)
+	}
 	return &Clients{
 		RedisClient:      redisClient,
 		PropagatorClient: propagator.NewPropagatorClient(env),
 		CelestrackClient: celestrack.NewCelestrackClient(env),
+		RabbitMQClient:   rabbitMqClient,
 	}
 }
 

@@ -17,6 +17,24 @@
                     "cd packages/graphql-apis/python-generator && python -m ariadne_codegen client --config pyproject.toml"
                 ]
             }
+        },
+        "go-generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "cd packages/graphql-apis/go-generator && go run github.com/99designs/gqlgen generate"
+                ]
+            }
+        },
+        "python-generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "cd packages/graphql-apis/python-generator && python -m pip install --upgrade pip",
+                    "cd packages/graphql-apis/python-generator && pip install -r requirements.txt",
+                    "cd packages/graphql-apis/python-generator && python -m ariadne_codegen client --config pyproject.toml"
+                ]
+            }
         }
     }
 }

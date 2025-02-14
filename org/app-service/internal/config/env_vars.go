@@ -23,6 +23,7 @@ type EnvVars struct {
 	Celestrack      features.CelestrackConfig `mapstructure:",squash"`
 	Propagator      features.PropagatorConfig `mapstructure:",squash"`
 	Clerk           features.ClerkConfig      `mapstructure:",squash"`
+	RabbitMQ        features.RabbitMQConfig   `mapstructure:",squash"`
 }
 
 func (c *EnvVars) Init() {
