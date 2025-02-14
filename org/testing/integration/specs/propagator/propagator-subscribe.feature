@@ -11,11 +11,11 @@ Feature: Propagator Service allows propagation of TLE from RabbitMQ event
     And a Propagator service is created for service "TEST"
     And Propagator subscribes as consumer "TEST" for "test-subscribe-propagator-output" with registered callbacks:
       | EventType | Action | ActionHandlerArgs | ActionDelay |
-    And I wait "15s" and set now time as checkpoint "ready"
+    And I wait "5s" and set now time as checkpoint "ready"
 
   @Propagator
   Scenario: Propagator subscribes to propagation requests and emits propagation events
     Then I publish propagator events for service "TEST" on "test-subscribe-propagator-input" from file "./resources/tle_propagation_request.json"
     Then Propagator events are expected for service "TEST":
       | EventType                | Occurrence | IsReject | FromTime  | ToTimeWarn | ToTimeErr  | ProduceCheckpointEventTime | AssignRef | XPathQuery | XPathValue |
-      | SATELLITE_TLE_PROPAGATED | 1          |          | ready>+0s |            | ready>+15s |                            |           |            |            |
+      | SATELLITE_TLE_PROPAGATED | 1          |          | ready>+0s |            | ready>+2s |                            |           |            |            |

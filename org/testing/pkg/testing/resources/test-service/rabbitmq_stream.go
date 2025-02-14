@@ -10,7 +10,6 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/blues/jsonata-go"
@@ -102,23 +101,23 @@ func Subscribe(ctx context.Context, scenarioState RabbitMqClientScenarioState, s
 
 					log.Printf("📥 Received event from queue %s: %+v", queueName, event)
 					scenarioState.SaveReceivedEvent(&event, service)
-					// for _, cb := range callbacks {
-					// 	if cb.EventType != event.EventType {
-					// 		continue
-					// 	}
+					for _, cb := range callbacks {
+						if cb.EventType != event.EventType {
+							continue
+						}
 
-					// 	go func(cb models_service.EventCallbackInfo) {
-					// 		if cb.ActionDelay != "" {
-					// 			waitDur, _ := time.ParseDuration(cb.ActionDelay)
-					// 			time.Sleep(waitDur)
-					// 		}
+						go func(cb models_service.EventCallbackInfo) {
+							if cb.ActionDelay != "" {
+								waitDur, _ := time.ParseDuration(cb.ActionDelay)
+								time.Sleep(waitDur)
+							}
 
-					// 		scenarioState.SaveReceivedEvent(&event, service)
-					// 		if err != nil {
-					// 			log.Printf("❌ Error processing callback for event %s in queue %s: %v", event.EventType, queueName, err)
-					// 		}
-					// 	}(cb)
-					// }
+							scenarioState.SaveReceivedEvent(&event, service)
+							if err != nil {
+								log.Printf("❌ Error processing callback for event %s in queue %s: %v", event.EventType, queueName, err)
+							}
+						}(cb)
+					}
 				}
 			}
 		}(queue)
@@ -162,13 +161,13 @@ func getRabbitMQQueues(filter string) ([]string, error) {
 
 	var queueNames []string
 	for _, q := range queues {
-		trimmedLowerQueue := strings.ToLower(strings.TrimSpace(q.Name))
-		trimmedLowerFilter := strings.ToLower(strings.TrimSpace(filter))
+		// trimmedLowerQueue := strings.ToLower(strings.TrimSpace(q.Name))
+		// trimmedLowerFilter := strings.ToLower(strings.TrimSpace(filter))
 
-		if strings.Contains(trimmedLowerQueue, trimmedLowerFilter) {
-			queueNames = append(queueNames, q.Name)
-			log.Printf("Queue matched filter '%s': %s", filter, q.Name)
-		}
+		// if strings.Contains(trimmedLowerQueue, trimmedLowerFilter) {
+		queueNames = append(queueNames, q.Name)
+		log.Printf("Queue matched filter '%s': %s", filter, q.Name)
+		// }
 	}
 
 	if len(queueNames) == 0 {
