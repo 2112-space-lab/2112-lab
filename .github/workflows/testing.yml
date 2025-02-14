@@ -61,6 +61,15 @@ jobs:
         run: make test-it
         working-directory: org/testing
 
+      # Upload artifacts (logs, reports, test results, etc.)
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: org/testing/integration/_artefacts
+          retention-days: 7 
+
       # Cleanup resources after tests
       - name: Tear down Docker containers
         run: |
