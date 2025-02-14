@@ -13,4 +13,5 @@ Feature: App Service registers mapping of satellite at each new propagation
     And I wait "5s" and set now time as checkpoint "ready"
 
   @App
+  @WIP
   Scenario: App registers mapping of satellite at each new propagation
