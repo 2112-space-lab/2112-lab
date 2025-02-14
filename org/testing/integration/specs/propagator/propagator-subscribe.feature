@@ -11,7 +11,7 @@ Feature: Propagator Service allows propagation of TLE from RabbitMQ event
     And a Propagator service is created for service "TEST"
     And Propagator subscribes as consumer "TEST" for "test-subscribe-propagator-output" with registered callbacks:
       | EventType | Action | ActionHandlerArgs | ActionDelay |
-    And I wait "10s" and set now time as checkpoint "ready"
+    And I wait "15s" and set now time as checkpoint "ready"
 
   @Propagator
   Scenario: Propagator subscribes to propagation requests and emits propagation events

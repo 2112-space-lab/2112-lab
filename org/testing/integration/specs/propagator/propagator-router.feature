@@ -11,7 +11,7 @@ Feature: Propagator Service allows propagation of TLE from HTTP request
     And a Propagator service is created for service "TEST_PROPAGATOR"
     And Propagator subscribes as consumer "TEST_PROPAGATOR" for "test-http-propagator-output" with registered callbacks:
       | EventType | Action | ActionHandlerArgs | ActionDelay |
-    And I wait "5s" and set now time as checkpoint "ready"
+    And I wait "15s" and set now time as checkpoint "ready"
 
   @Propagator
   Scenario: Propagator generates satellite positions and store it into Redis
