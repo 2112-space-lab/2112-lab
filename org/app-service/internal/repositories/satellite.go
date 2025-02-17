@@ -338,7 +338,7 @@ func (r *SatelliteRepository) FetchAndLockSatellites(ctx context.Context, locked
 	// Execute query and retrieve locked satellite IDs
 	err := r.db.DbHandler.Select(ctx, &lockedSatellites, query, lockedBy, maxNbSatellites)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch and lock satellites: %w", err)
+		return nil, fmt.Errorf("failed to fetch and lock satellites: %w", err.Error)
 	}
 
 	if len(lockedSatellites) == 0 {
