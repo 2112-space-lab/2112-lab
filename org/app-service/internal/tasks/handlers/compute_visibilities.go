@@ -145,14 +145,14 @@ func (h *ComputeVisibilitiessHandler) computeVisibility(ctx context.Context, uid
 	var visibilities []map[string]interface{}
 	for _, satellite := range satellites {
 
-		// Get the TLE data for the satellite by NORAD ID
-		tle, err := h.tleRepo.GetTle(ctx, satellite.NoradID)
+		// Get the TLE data for the satellite by SPACE ID
+		tle, err := h.tleRepo.GetTle(ctx, satellite.SpaceID)
 		if err != nil {
-			return fmt.Errorf("failed to fetch TLE data for NORAD ID %s: %w", satellite.NoradID, err)
+			return fmt.Errorf("failed to fetch TLE data for SPACE ID %s: %w", satellite.SpaceID, err)
 		}
 
 		visibility := map[string]interface{}{
-			"satelliteID":   satellite.NoradID,
+			"satelliteID":   satellite.SpaceID,
 			"satelliteName": satellite.Name,
 			"startTime":     startTime.Format(time.RFC3339), // start propgated period
 			"endTime":       endTime.Format(time.RFC3339),   // end propgated period

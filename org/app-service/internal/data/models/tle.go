@@ -9,7 +9,7 @@ import (
 // TLE Model
 type TLE struct {
 	ModelBase
-	NoradID string    `gorm:"size:255;not null;index"` // Foreign key to Satellite table via Norad ID
+	SpaceID string    `gorm:"size:255;not null;index"` // Foreign key to Satellite table via Norad ID
 	Line1   string    `gorm:"size:255;not null"`
 	Line2   string    `gorm:"size:255;not null"`
 	Epoch   time.Time `gorm:"not null"` // Time associated with the TLE
@@ -29,7 +29,7 @@ func MapToTLEDomain(t TLE) domain.TLE {
 			IsFavourite: t.IsFavourite,
 			DisplayName: t.DisplayName,
 		},
-		NoradID: t.NoradID,
+		SpaceID: t.SpaceID,
 		Line1:   t.Line1,
 		Line2:   t.Line2,
 		Epoch:   t.Epoch,
@@ -49,7 +49,7 @@ func MapToTLEModel(t domain.TLE) TLE {
 			IsFavourite: t.ModelBase.IsFavourite,
 			DisplayName: t.ModelBase.DisplayName,
 		},
-		NoradID: t.NoradID,
+		SpaceID: t.SpaceID,
 		Line1:   t.Line1,
 		Line2:   t.Line2,
 		Epoch:   t.Epoch,

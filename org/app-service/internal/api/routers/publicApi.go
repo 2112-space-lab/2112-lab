@@ -112,7 +112,7 @@ func (r *PublicRouter) registerPublicAPIRoutes() {
 
 	// Satellite routes
 	satellite := r.Echo.Group("/satellites")
-	satellite.GET("/orbit", satelliteHandler.GetSatellitePositionsByNoradID)
+	satellite.GET("/orbit", satelliteHandler.GetSatellitePositionsBySpaceID)
 	satellite.GET("/paginated", satelliteHandler.GetPaginatedSatellites)
 	satellite.GET("/paginated/tles", satelliteHandler.GetPaginatedSatelliteInfo)
 
@@ -121,8 +121,8 @@ func (r *PublicRouter) registerPublicAPIRoutes() {
 	tile.GET("/all", tileHandler.GetAllTiles)
 	tile.GET("/region", tileHandler.GetTilesInRegionHandler)
 	tile.GET("/mappings", tileHandler.GetPaginatedSatelliteMappings)
-	tile.PUT("/mappings/recompute/bynoradID", tileHandler.RecomputeMappingsByNoradID)
-	tile.GET("/mappings/bynoradID", tileHandler.GetSatelliteMappingsByNoradID)
+	tile.PUT("/mappings/recompute/byspaceID", tileHandler.RecomputeMappingsBySpaceID)
+	tile.GET("/mappings/byspaceID", tileHandler.GetSatelliteMappingsBySpaceID)
 
 	// Context routes
 	context := r.Echo.Group("/contexts")

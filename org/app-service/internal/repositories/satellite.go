@@ -3,11 +3,15 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/lib/pq"
+	"github.com/org/2112-space-lab/org/app-service/internal/clients/redis"
 	"github.com/org/2112-space-lab/org/app-service/internal/data"
 	"github.com/org/2112-space-lab/org/app-service/internal/data/models"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -17,7 +21,7 @@ type SatelliteTLEAggregate struct {
 	// Satellite fields
 	ID             string     `gorm:"column:id"`
 	Name           string     `gorm:"column:name"`
-	NoradID        string     `gorm:"column:norad_id"`
+	SpaceID        string     `gorm:"column:space_id"`
 	Owner          string     `gorm:"column:owner"`
 	LaunchDate     *time.Time `gorm:"column:launch_date"`
 	DecayDate      *time.Time `gorm:"column:decay_date"`
@@ -43,18 +47,20 @@ type SatelliteTLEAggregate struct {
 
 // SatelliteRepository manages satellite data access.
 type SatelliteRepository struct {
-	db *data.Database
+	db      *data.Database
+	redis   *redis.RedisClient
+	lockTTL time.Duration
 }
 
 // NewSatelliteRepository creates a new SatelliteRepository instance.
-func NewSatelliteRepository(db *data.Database) SatelliteRepository {
-	return SatelliteRepository{db: db}
+func NewSatelliteRepository(db *data.Database, redis *redis.RedisClient, lockTTL time.Duration) SatelliteRepository {
+	return SatelliteRepository{db: db, redis: redis, lockTTL: lockTTL}
 }
 
-// FindByNoradID retrieves a satellite by its NORAD ID, excluding deleted ones.
-func (r *SatelliteRepository) FindByNoradID(ctx context.Context, noradID string) (domain.Satellite, error) {
+// FindBySpaceID retrieves a satellite by its SPACE ID, excluding deleted ones.
+func (r *SatelliteRepository) FindBySpaceID(ctx context.Context, spaceID string) (domain.Satellite, error) {
 	var satellite models.Satellite
-	result := r.db.DbHandler.Where("norad_id = ? AND deleted_at IS NULL", noradID).First(&satellite)
+	result := r.db.DbHandler.Where("space_id = ? AND deleted_at IS NULL", spaceID).First(&satellite)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return domain.Satellite{}, nil
 	}
@@ -88,10 +94,10 @@ func (r *SatelliteRepository) Update(ctx context.Context, satellite domain.Satel
 	return r.db.DbHandler.Save(&model).Error
 }
 
-// DeleteByNoradID marks a satellite record as deleted.
-func (r *SatelliteRepository) DeleteByNoradID(ctx context.Context, noradID string) error {
+// DeleteBySpaceID marks a satellite record as deleted.
+func (r *SatelliteRepository) DeleteBySpaceID(ctx context.Context, spaceID string) error {
 	return r.db.DbHandler.Model(&models.Satellite{}).
-		Where("norad_id = ?", noradID).
+		Where("space_id = ?", spaceID).
 		Update("deleted_at", gorm.Expr("NOW()")).Error
 }
 
@@ -108,7 +114,7 @@ func (r *SatelliteRepository) SaveBatch(ctx context.Context, satellites []domain
 
 	return r.db.DbHandler.WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "norad_id"}},
+			Columns:   []clause.Column{{Name: "space_id"}},
 			UpdateAll: true,
 		}).
 		CreateInBatches(modelsBatch, 100).Error
@@ -128,7 +134,7 @@ func (r *SatelliteRepository) FindSatelliteInfoWithPagination(ctx context.Contex
 	// Build the query to retrieve satellites and their most recent TLEs
 	query := r.db.DbHandler.Table("satellites").
 		Select(`
-			satellites.id, satellites.name, satellites.norad_id, satellites.owner,
+			satellites.id, satellites.name, satellites.space_id, satellites.owner,
 			satellites.launch_date, satellites.decay_date, satellites.international_designator,
 			satellites.object_type, satellites.period, satellites.inclination, satellites.apogee,
 			satellites.perigee, satellites.rcs, satellites.altitude, satellites.is_active,
@@ -136,20 +142,20 @@ func (r *SatelliteRepository) FindSatelliteInfoWithPagination(ctx context.Contex
 			latest_tles.line1, latest_tles.line2, latest_tles.updated_at AS tle_updated_at
 		`).
 		Joins(`LEFT JOIN (
-			SELECT t1.norad_id, t1.line1, t1.line2, t1.updated_at
+			SELECT t1.space_id, t1.line1, t1.line2, t1.updated_at
 			FROM tles t1
 			WHERE t1.updated_at = (
 				SELECT MAX(t2.updated_at)
 				FROM tles t2
-				WHERE t2.norad_id = t1.norad_id
+				WHERE t2.space_id = t1.space_id
 			)
-		) AS latest_tles ON satellites.norad_id = latest_tles.norad_id`).
+		) AS latest_tles ON satellites.space_id = latest_tles.space_id`).
 		Where("satellites.deleted_at IS NULL")
 
 	// Apply search filters if a wildcard search is provided
 	if searchRequest != nil && searchRequest.Wildcard != "" {
 		wildcard := "%" + searchRequest.Wildcard + "%"
-		query = query.Where("LOWER(satellites.name) LIKE LOWER(?) OR LOWER(satellites.norad_id) LIKE LOWER(?)", wildcard, wildcard)
+		query = query.Where("LOWER(satellites.name) LIKE LOWER(?) OR LOWER(satellites.space_id) LIKE LOWER(?)", wildcard, wildcard)
 	}
 
 	// Count total records
@@ -168,7 +174,7 @@ func (r *SatelliteRepository) FindSatelliteInfoWithPagination(ctx context.Contex
 		// Map satellite fields from the aggregate struct
 		satellite := domain.Satellite{
 			Name:           result.Name,
-			NoradID:        result.NoradID,
+			SpaceID:        result.SpaceID,
 			Owner:          result.Owner,
 			LaunchDate:     result.LaunchDate,
 			DecayDate:      result.DecayDate,
@@ -274,7 +280,7 @@ func (r *SatelliteRepository) FindAllWithPagination(ctx context.Context, page in
 	if searchRequest != nil && searchRequest.Wildcard != "" {
 		wildcard := "%" + searchRequest.Wildcard + "%"
 		query = query.Where(
-			"LOWER(name) LIKE LOWER(?) OR LOWER(norad_id) LIKE LOWER(?)",
+			"LOWER(name) LIKE LOWER(?) OR LOWER(space_id) LIKE LOWER(?)",
 			wildcard, wildcard,
 		)
 	}
@@ -296,4 +302,72 @@ func (r *SatelliteRepository) FindAllWithPagination(ctx context.Context, page in
 	}
 
 	return satellites, totalRecords, nil
+}
+
+// FetchAndLockSatellites retrieves and locks available satellites within active contexts or returns satellites already locked by the same lockedBy.
+func (r *SatelliteRepository) FetchAndLockSatellites(ctx context.Context, lockedBy string, maxNbSatellites int64) ([]string, error) {
+	query := `
+		WITH existing_locks AS (
+			SELECT s.space_id
+			FROM satellites s
+			INNER JOIN context_satellites cs ON s.space_id = cs.satellite_id
+			INNER JOIN contexts c ON cs.context_id = c.id
+			WHERE s.locked = TRUE
+			AND s.locked_by = $1
+			AND c.is_active = TRUE
+			AND c.deleted_at IS NULL
+		), new_locks AS (
+			UPDATE satellites s
+			SET locked = TRUE, locked_by = $1
+			FROM context_satellites cs
+			INNER JOIN contexts c ON cs.context_id = c.id
+			WHERE s.space_id = cs.satellite_id
+			AND s.locked = FALSE
+			AND c.is_active = TRUE
+			AND c.deleted_at IS NULL
+			RETURNING s.space_id
+		)
+		SELECT space_id FROM existing_locks
+		UNION ALL
+		SELECT space_id FROM new_locks
+		LIMIT $2;
+	`
+
+	var lockedSatellites []string
+
+	// Execute query and retrieve locked satellite IDs
+	err := r.db.DbHandler.Select(ctx, &lockedSatellites, query, lockedBy, maxNbSatellites)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch and lock satellites: %w", err)
+	}
+
+	if len(lockedSatellites) == 0 {
+		log.Warn("No satellites available for locking in active contexts")
+		return nil, nil
+	}
+
+	log.Infof("🔒 Successfully locked %d satellites (including previously locked by %s)", len(lockedSatellites), lockedBy)
+	return lockedSatellites, nil
+}
+
+// ReleaseSatellites unlocks the satellites after processing.
+func (r *SatelliteRepository) ReleaseSatellites(ctx context.Context, satelliteIDs []string) error {
+	if len(satelliteIDs) == 0 {
+		log.Warn("No satellites to release")
+		return nil
+	}
+
+	query := `
+		UPDATE satellites
+		SET locked = FALSE
+		WHERE space_id = ANY($1);
+	`
+
+	err := r.db.DbHandler.Exec(query, pq.Array(satelliteIDs))
+	if err != nil {
+		return fmt.Errorf("failed to release satellite locks: %w", err.Error)
+	}
+
+	log.Infof("🔓 Released lock on %d satellites", len(satelliteIDs))
+	return nil
 }

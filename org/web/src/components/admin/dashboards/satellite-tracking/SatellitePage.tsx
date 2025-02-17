@@ -6,8 +6,8 @@ import { CustomScrollbar } from "components/scrollbar/CustomScrollbar"; // Custo
 import VisibilityTimelineWithData from "./VisibilityTimelineWithData"; // Timeline Component
 
 const SatellitePage: React.FC = () => {
-  // State for selected NORAD ID
-  const [selectedNoradID, setSelectedNoradID] = useState<string | null>(null);
+  // State for selected SPACE ID
+  const [selectedSpaceID, setSelectedSpaceID] = useState<string | null>(null);
 
   // State for user location
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(
@@ -17,9 +17,9 @@ const SatellitePage: React.FC = () => {
   // State to track if the location is explicitly set by the user
   const [isLocationSet, setIsLocationSet] = useState<boolean>(false);
 
-  // Handle NORAD ID selection from the Satellite Table
-  const handleNoradIDChange = (noradID: string) => {
-    setSelectedNoradID(noradID);
+  // Handle SPACE ID selection from the Satellite Table
+  const handleSpaceIDChange = (spaceID: string) => {
+    setSelectedSpaceID(spaceID);
   };
 
   // Handle user location change from the MapCard
@@ -42,14 +42,14 @@ const SatellitePage: React.FC = () => {
         {/* Satellite Table */}
         <div className="row-span-1 overflow-auto">
           <CustomScrollbar style={{ height: "100%" }}>
-            <SatelliteTableWithData onSelectNoradID={handleNoradIDChange} />
+            <SatelliteTableWithData onSelectSpaceID={handleSpaceIDChange} />
           </CustomScrollbar>
         </div>
 
         {/* Satellite Map */}
         <div className="row-span-1 h-full">
           <MapSatelliteWithData
-            noradID={selectedNoradID}
+            spaceID={selectedSpaceID}
             userLocation={userLocation}
           />
         </div>

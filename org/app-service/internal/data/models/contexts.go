@@ -133,6 +133,8 @@ type ContextSatellite struct {
 	SatelliteID string    `gorm:"not null;index"` // Foreign key to Satellite
 	Context     Context   `gorm:"constraint:OnDelete:CASCADE;foreignKey:ContextID;references:ID"`
 	Satellite   Satellite `gorm:"constraint:OnDelete:CASCADE;foreignKey:SatelliteID;references:ID"`
+	LockedSince time.Time
+	LockedBy    string
 }
 
 // MapToContextSatelliteDomain converts a ContextSatellite database model to a GameContextSatellite domain model.
@@ -141,6 +143,8 @@ func MapToContextSatelliteDomain(cs ContextSatellite) domain.GameContextSatellit
 		ContextID:   cs.ContextID,
 		SatelliteID: domain.SatelliteID(cs.SatelliteID),
 		Satellite:   MapToSatelliteDomain(cs.Satellite),
+		LockedSince: xtime.NewUtcTimeIgnoreZone(cs.LockedSince),
+		LockedBy: cs.LockedBy,
 	}
 }
 

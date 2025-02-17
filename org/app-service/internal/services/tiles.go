@@ -104,9 +104,9 @@ func (s *TileService) ListSatellitesMappingWithPagination(ctx context.Context, c
 	return mappings, totalRecords, nil
 }
 
-// GetSatelliteMappingsByNoradID retrieves mappings for a specific NORAD ID and context.
-func (s *TileService) GetSatelliteMappingsByNoradID(ctx context.Context, contextID, noradID string) (ts []domain.TileSatelliteInfo, err error) {
-	ctx, span := tracing.NewSpan(ctx, "GetSatelliteMappingsByNoradID")
+// GetSatelliteMappingsBySpaceID retrieves mappings for a specific SPACE ID and context.
+func (s *TileService) GetSatelliteMappingsBySpaceID(ctx context.Context, contextID, spaceID string) (ts []domain.TileSatelliteInfo, err error) {
+	ctx, span := tracing.NewSpan(ctx, "GetSatelliteMappingsBySpaceID")
 	defer span.EndWithError(err)
 	select {
 	case <-ctx.Done():
@@ -114,19 +114,19 @@ func (s *TileService) GetSatelliteMappingsByNoradID(ctx context.Context, context
 	default:
 	}
 
-	mappings, err := s.mappingRepo.GetSatelliteMappingsByNoradID(ctx, contextID, noradID)
+	mappings, err := s.mappingRepo.GetSatelliteMappingsBySpaceID(ctx, contextID, spaceID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve satellite mappings for NORAD ID [%s] in context [%s]: %w", noradID, contextID, err)
+		return nil, fmt.Errorf("failed to retrieve satellite mappings for SPACE ID [%s] in context [%s]: %w", spaceID, contextID, err)
 	}
 
 	return mappings, nil
 }
 
-// RecomputeMappings deletes existing mappings for a NORAD ID in a specific context and computes new ones.
-func (s *TileService) RecomputeMappings(ctx context.Context, contextID, noradID string, startTime, endTime time.Time) (err error) {
+// RecomputeMappings deletes existing mappings for a SPACE ID in a specific context and computes new ones.
+func (s *TileService) RecomputeMappings(ctx context.Context, contextID, spaceID string, startTime, endTime time.Time) (err error) {
 	ctx, span := tracing.NewSpan(ctx, "RecomputeMappings")
 	defer span.EndWithError(err)
-	log.Tracef("Recomputing mappings for NORAD ID: %s in context: %s\n", noradID, contextID)
+	log.Tracef("Recomputing mappings for SPACE ID: %s in context: %s\n", spaceID, contextID)
 
 	select {
 	case <-ctx.Done():
@@ -135,39 +135,39 @@ func (s *TileService) RecomputeMappings(ctx context.Context, contextID, noradID 
 	}
 
 	// Step 1: Delete existing mappings
-	if err := s.mappingRepo.DeleteMappingsByNoradID(ctx, contextID, noradID); err != nil {
-		return fmt.Errorf("failed to delete existing mappings for NORAD ID [%s] in context [%s]: %w", noradID, contextID, err)
+	if err := s.mappingRepo.DeleteMappingsBySpaceID(ctx, contextID, spaceID); err != nil {
+		return fmt.Errorf("failed to delete existing mappings for SPACE ID [%s] in context [%s]: %w", spaceID, contextID, err)
 	}
-	log.Tracef("Deleted existing mappings for NORAD ID: %s in context: %s\n", noradID, contextID)
+	log.Tracef("Deleted existing mappings for SPACE ID: %s in context: %s\n", spaceID, contextID)
 
 	// Step 2: Fetch satellite data
-	satellite, err := s.satelliteRepo.FindByNoradID(ctx, noradID)
+	satellite, err := s.satelliteRepo.FindBySpaceID(ctx, spaceID)
 	if err != nil {
-		return fmt.Errorf("failed to fetch satellite for NORAD ID [%s]: %w", noradID, err)
+		return fmt.Errorf("failed to fetch satellite for SPACE ID [%s]: %w", spaceID, err)
 	}
 
 	// Step 3: Fetch satellite positions
-	positions, err := s.tleRepo.QuerySatellitePositions(ctx, satellite.NoradID, startTime, endTime)
+	positions, err := s.tleRepo.QuerySatellitePositions(ctx, satellite.SpaceID, startTime, endTime)
 	if err != nil {
-		return fmt.Errorf("failed to fetch satellite positions for NORAD ID [%s]: %w", noradID, err)
+		return fmt.Errorf("failed to fetch satellite positions for SPACE ID [%s]: %w", spaceID, err)
 	}
 
 	if len(positions) < 2 {
-		log.Warnf("Not enough positions to compute mappings for NORAD ID: %s\n", noradID)
+		log.Warnf("Not enough positions to compute mappings for SPACE ID: %s\n", spaceID)
 		return nil
 	}
 
 	// Step 4: Compute new mappings
 	mappings, err := s.repo.FindTilesVisibleFromLine(ctx, satellite, positions)
 	if err != nil {
-		return fmt.Errorf("failed to compute tile mappings for NORAD ID [%s]: %w", noradID, err)
+		return fmt.Errorf("failed to compute tile mappings for SPACE ID [%s]: %w", spaceID, err)
 	}
 
 	// Step 5: Save new mappings
 	if err := s.mappingRepo.SaveBatch(ctx, mappings); err != nil {
-		return fmt.Errorf("failed to save new mappings for NORAD ID [%s]: %w", noradID, err)
+		return fmt.Errorf("failed to save new mappings for SPACE ID [%s]: %w", spaceID, err)
 	}
 
-	log.Debugf("Recomputed and saved %d mappings for NORAD ID: %s in context: %s\n", len(mappings), noradID, contextID)
+	log.Debugf("Recomputed and saved %d mappings for SPACE ID: %s in context: %s\n", len(mappings), spaceID, contextID)
 	return nil
 }

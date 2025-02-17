@@ -12,7 +12,7 @@ import (
 
 // ComputeVisibilityWindow computes the visibility window for a satellite over a given tile.
 func ComputeVisibilityWindow(
-	noradID, tleLine1, tleLine2 string,
+	spaceID, tleLine1, tleLine2 string,
 	point xpolygon.Point,
 	radius float64,
 	startTime, endTime time.Time, timeStep time.Duration,
@@ -28,7 +28,7 @@ func ComputeVisibilityWindow(
 	if aos.IsZero() {
 		return aos, maxElevation
 	} else {
-		log.Printf("AOS detected at %v for NORAD ID %s", aos, noradID)
+		log.Printf("AOS detected at %v for SPACE ID %s", aos, spaceID)
 	}
 
 	return aos, maxElevation

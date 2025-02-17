@@ -13,7 +13,7 @@ import (
 type TLE struct {
 	ModelBase
 	ID      string    // Unique identifier
-	NoradID string    // NORAD ID associated with the satellite
+	SpaceID string    // SPACE ID associated with the satellite
 	Line1   string    // First line of the TLE
 	Line2   string    // Second line of the TLE
 	Epoch   time.Time // Time associated with the TLE
@@ -21,8 +21,8 @@ type TLE struct {
 
 // Validate ensures that the TLE fields are valid.
 func (tle *TLE) Validate() error {
-	if tle.NoradID == "" {
-		return errors.New("NORAD ID cannot be empty")
+	if tle.SpaceID == "" {
+		return errors.New("SPACE ID cannot be empty")
 	}
 	if tle.Line1 == "" || tle.Line2 == "" {
 		return errors.New("TLE lines cannot be empty")
@@ -35,7 +35,7 @@ func (tle *TLE) Validate() error {
 
 // NewTLE creates a new TLE instance with the provided data.
 // It validates the input and returns an error if any field is invalid.
-func NewTLE(noradID string, line1 string, line2 string, createdAt time.Time, displayName string, isActive bool, isFavourite bool) (TLE, error) {
+func NewTLE(spaceID string, line1 string, line2 string, createdAt time.Time, displayName string, isActive bool, isFavourite bool) (TLE, error) {
 
 	tleEpoch, err := xtime.ParseEpoch(line1)
 	if err != nil {
@@ -53,7 +53,7 @@ func NewTLE(noradID string, line1 string, line2 string, createdAt time.Time, dis
 			IsFavourite: isFavourite,
 		},
 		ID:      uuid.NewString(),
-		NoradID: noradID,
+		SpaceID: spaceID,
 		Line1:   line1,
 		Line2:   line2,
 		Epoch:   tleEpoch,

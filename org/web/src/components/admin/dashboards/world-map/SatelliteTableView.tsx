@@ -10,8 +10,8 @@ interface SatelliteTableViewProps {
     onSelectSatelliteID: (satelliteID: string) => void;
     searchQuery: string;
     onTilesSelected: (tileIDs: string[], zoonmTo: boolean) => void;
-    onTargetSatellite: (noradID: string, positionData: Record<string, OrbitDataItem[]>) => void; // Callback for targeting satellite with position data
-    onPropagateSatellite: (noradID: string) => void; // Callback for targeting satellite
+    onTargetSatellite: (spaceID: string, positionData: Record<string, OrbitDataItem[]>) => void; // Callback for targeting satellite with position data
+    onPropagateSatellite: (spaceID: string) => void; // Callback for targeting satellite
 }
 
 export default function SatelliteTableView({
@@ -31,7 +31,7 @@ export default function SatelliteTableView({
         fetchSatellitePositionsWithPropagation,
     } = useSatelliteServiceStore();
 
-    const { fetchSatelliteMappingsByNoradID, satelliteMappingsByNoradID, recomputeMappingsByNoradID } =
+    const { fetchSatelliteMappingsBySpaceID, satelliteMappingsBySpaceID, recomputeMappingsBySpaceID } =
         useTileServiceStore();
 
     const [pageIndex, setPageIndex] = useState<number>(0);
@@ -47,55 +47,55 @@ export default function SatelliteTableView({
     };
 
     const handleSatelliteSelection = async (satellite: SatelliteInfo) => {
-        const noradId = satellite.Satellite.NoradID;
+        const noradId = satellite.Satellite.SpaceID;
 
         try {
-            await fetchSatelliteMappingsByNoradID(noradId);
+            await fetchSatelliteMappingsBySpaceID(noradId);
 
-            const matchingTileIDs = satelliteMappingsByNoradID[noradId]?.map((tile) => tile.TileID) || [];
+            const matchingTileIDs = satelliteMappingsBySpaceID[noradId]?.map((tile) => tile.TileID) || [];
             onSelectSatelliteID(noradId);
             onTilesSelected(matchingTileIDs, false);
         } catch (err) {
-            console.error("Error fetching tiles for NORAD ID:", err);
+            console.error("Error fetching tiles for SPACE ID:", err);
         }
     };
 
-    const handleTargetSatellite = async (noradID: string) => {
+    const handleTargetSatellite = async (spaceID: string) => {
         const startTime = new Date(Date.now()).toISOString(); // UTC format
         const endTime = new Date(Date.now() + 60 * 60 * 1000 * 24).toISOString(); // UTC format
 
         try {
-            await fetchSatellitePositions(noradID, startTime, endTime);
+            await fetchSatellitePositions(spaceID, startTime, endTime);
 
-            localOrbitDataRef.current = { [noradID]: orbitData[noradID] || [] };
-            onTargetSatellite(noradID, localOrbitDataRef.current);
+            localOrbitDataRef.current = { [spaceID]: orbitData[spaceID] || [] };
+            onTargetSatellite(spaceID, localOrbitDataRef.current);
         } catch (error) {
             console.error("Error fetching satellite positions:", error);
             localOrbitDataRef.current = {};
         }
     };
 
-    const handlePropagateSatellite = async (noradID: string) => {
+    const handlePropagateSatellite = async (spaceID: string) => {
         const durationHours = 24;
         const intervalMinutes = 1;
 
         try {
-            await fetchSatellitePositionsWithPropagation(noradID, durationHours, intervalMinutes);
-            onPropagateSatellite(noradID);
+            await fetchSatellitePositionsWithPropagation(spaceID, durationHours, intervalMinutes);
+            onPropagateSatellite(spaceID);
         } catch (err) {
             console.error("Error propagating satellite:", err);
         }
     };
 
-    const handleRecomputeMapping = async (noradID: string) => {
+    const handleRecomputeMapping = async (spaceID: string) => {
         const startTime = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 minutes earlier in UTC
         const endTime = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours ahead in UTC
 
         try {
-            await recomputeMappingsByNoradID(noradID, startTime, endTime);
-            console.log(`Mappings recomputed successfully for NORAD ID: ${noradID}`);
+            await recomputeMappingsBySpaceID(spaceID, startTime, endTime);
+            console.log(`Mappings recomputed successfully for SPACE ID: ${spaceID}`);
         } catch (err) {
-            console.error(`Error recomputing mapping for NORAD ID: ${noradID}`, err);
+            console.error(`Error recomputing mapping for SPACE ID: ${spaceID}`, err);
         }
     };
 
@@ -118,8 +118,8 @@ export default function SatelliteTableView({
             },
         },
         {
-            accessorKey: "Satellite.NoradID",
-            header: "NORAD ID",
+            accessorKey: "Satellite.SpaceID",
+            header: "SPACE ID",
             cell: (info: any) => <p className="text-sm">{info.getValue()}</p>,
         },
         {
@@ -157,7 +157,7 @@ export default function SatelliteTableView({
     return (
         <Box className="grid w-full gap-4 rounded-lg shadow-md">
             <GenericTableComponent
-                getRowId={(row: SatelliteInfo) => row.Satellite.NoradID}
+                getRowId={(row: SatelliteInfo) => row.Satellite.SpaceID}
                 columns={columns}
                 data={satelliteInfo}
                 totalItems={totalSatelliteInfo}
@@ -166,23 +166,23 @@ export default function SatelliteTableView({
                 onPageChange={handleOnPaginationChange}
                 onRowClick={handleSatelliteSelection}
                 actions={(row: SatelliteInfo) => {
-                    const noradID = row.Satellite.NoradID;
-                    const isTargetDisabled = !orbitData[noradID]; // Disable if no orbit data for the NORAD ID
+                    const spaceID = row.Satellite.SpaceID;
+                    const isTargetDisabled = !orbitData[spaceID]; // Disable if no orbit data for the SPACE ID
 
                     return [
                         {
                             label: "Target",
-                            onClick: () => handleTargetSatellite(row.Satellite.NoradID),
+                            onClick: () => handleTargetSatellite(row.Satellite.SpaceID),
                             icon: <BiTargetLock />,
                             isDisabled: isTargetDisabled,
                         },
                         {
                             label: "Propagate",
-                            onClick: () => handlePropagateSatellite(row.Satellite.NoradID),
+                            onClick: () => handlePropagateSatellite(row.Satellite.SpaceID),
                         },
                         {
                             label: "Recompute Mapping",
-                            onClick: () => handleRecomputeMapping(row.Satellite.NoradID),
+                            onClick: () => handleRecomputeMapping(row.Satellite.SpaceID),
                             icon: <BiStation />,
                             isDisabled: true
                         },

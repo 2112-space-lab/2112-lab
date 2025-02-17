@@ -19,10 +19,10 @@ func NewTileSatelliteMappingRepository(db *data.Database) TileSatelliteMappingRe
 	return TileSatelliteMappingRepository{db: db}
 }
 
-func (r *TileSatelliteMappingRepository) FindByNoradIDAndTile(ctx context.Context, contextID, noradID, tileID string) ([]domain.TileSatelliteMapping, error) {
+func (r *TileSatelliteMappingRepository) FindBySpaceIDAndTile(ctx context.Context, contextID, spaceID, tileID string) ([]domain.TileSatelliteMapping, error) {
 	var mappings []domain.TileSatelliteMapping
 	result := r.db.DbHandler.WithContext(ctx).
-		Where("context_id = ? AND norad_id = ? AND tile_id = ?", contextID, noradID, tileID).
+		Where("context_id = ? AND space_id = ? AND tile_id = ?", contextID, spaceID, tileID).
 		Find(&mappings)
 	return mappings, result.Error
 }
@@ -69,7 +69,7 @@ func (r *TileSatelliteMappingRepository) FindSatellitesForTiles(ctx context.Cont
 	err := r.db.DbHandler.WithContext(ctx).
 		Table("tile_satellite_mappings").
 		Select("satellites.*").
-		Joins("JOIN satellites ON tile_satellite_mappings.norad_id = satellites.norad_id").
+		Joins("JOIN satellites ON tile_satellite_mappings.space_id = satellites.space_id").
 		Where("tile_satellite_mappings.context_id = ? AND tile_satellite_mappings.tile_id IN ?", contextID, tileIDs).
 		Find(&satellites).Error
 	if err != nil {
@@ -82,10 +82,10 @@ func (r *TileSatelliteMappingRepository) FindSatellitesForTiles(ctx context.Cont
 	return domainSatellites, nil
 }
 
-func (r *TileSatelliteMappingRepository) FindAllVisibleTilesByNoradIDSortedByAOSTime(ctx context.Context, contextID, noradID string) ([]domain.TileSatelliteInfo, error) {
+func (r *TileSatelliteMappingRepository) FindAllVisibleTilesBySpaceIDSortedByAOSTime(ctx context.Context, contextID, spaceID string) ([]domain.TileSatelliteInfo, error) {
 	var mappings []domain.TileSatelliteMapping
 	result := r.db.DbHandler.WithContext(ctx).
-		Where("context_id = ? AND norad_id = ?", contextID, noradID).
+		Where("context_id = ? AND space_id = ?", contextID, spaceID).
 		Order("aos ASC").
 		Find(&mappings)
 	if result.Error != nil {
@@ -118,7 +118,7 @@ func (r *TileSatelliteMappingRepository) FindAllVisibleTilesByNoradIDSortedByAOS
 			TileCenterLat: tile.CenterLat,
 			TileCenterLon: tile.CenterLon,
 			TileZoomLevel: tile.ZoomLevel,
-			NoradID:       mapping.NoradID,
+			SpaceID:       mapping.SpaceID,
 		})
 	}
 	return infos, nil
@@ -138,7 +138,7 @@ func (r *TileSatelliteMappingRepository) ListSatellitesMappingWithPagination(ctx
 
 	if search != nil && search.Wildcard != "" {
 		wildcard := "%" + search.Wildcard + "%"
-		query = query.Where("norad_id LIKE ? OR tile_id LIKE ?", wildcard, wildcard)
+		query = query.Where("space_id LIKE ? OR tile_id LIKE ?", wildcard, wildcard)
 	}
 
 	if err := query.Count(&totalRecords).Error; err != nil {
@@ -174,17 +174,17 @@ func (r *TileSatelliteMappingRepository) ListSatellitesMappingWithPagination(ctx
 			TileCenterLat: tile.CenterLat,
 			TileCenterLon: tile.CenterLon,
 			TileZoomLevel: tile.ZoomLevel,
-			NoradID:       mapping.NoradID,
+			SpaceID:       mapping.SpaceID,
 		})
 	}
 
 	return tileSatelliteInfos, totalRecords, nil
 }
 
-func (r *TileSatelliteMappingRepository) GetSatelliteMappingsByNoradID(ctx context.Context, contextID, noradID string) ([]domain.TileSatelliteInfo, error) {
+func (r *TileSatelliteMappingRepository) GetSatelliteMappingsBySpaceID(ctx context.Context, contextID, spaceID string) ([]domain.TileSatelliteInfo, error) {
 	var mappings []domain.TileSatelliteMapping
 	err := r.db.DbHandler.WithContext(ctx).
-		Where("context_id = ? AND norad_id = ?", contextID, noradID).
+		Where("context_id = ? AND space_id = ?", contextID, spaceID).
 		Find(&mappings).Error
 	if err != nil {
 		return nil, err
@@ -216,14 +216,14 @@ func (r *TileSatelliteMappingRepository) GetSatelliteMappingsByNoradID(ctx conte
 			TileCenterLat: tile.CenterLat,
 			TileCenterLon: tile.CenterLon,
 			TileZoomLevel: tile.ZoomLevel,
-			NoradID:       mapping.NoradID,
+			SpaceID:       mapping.SpaceID,
 		})
 	}
 	return infos, nil
 }
 
-func (r *TileSatelliteMappingRepository) DeleteMappingsByNoradID(ctx context.Context, contextID, noradID string) error {
+func (r *TileSatelliteMappingRepository) DeleteMappingsBySpaceID(ctx context.Context, contextID, spaceID string) error {
 	return r.db.DbHandler.WithContext(ctx).
-		Where("context_id = ? AND norad_id = ?", contextID, noradID).
+		Where("context_id = ? AND space_id = ?", contextID, spaceID).
 		Delete(&domain.TileSatelliteMapping{}).Error
 }

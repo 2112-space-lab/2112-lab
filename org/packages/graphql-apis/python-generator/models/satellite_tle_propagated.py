@@ -8,11 +8,13 @@ class SatelliteTlePropagated:
     """
     Represents a TLE propagation event with time interval and event metadata.
     """
-    norad_id: str
+    satellited_id: str
     tle_line_1: str 
     tle_line_2: str 
-    time_interval: int 
-    store_key: str
+    start_time_utc: str
+    redis_key: str
+    duration_minutes: int
+    interval_seconds: int
 
     def to_dict(self) -> Dict:
         return asdict(self)

@@ -9,7 +9,7 @@ import (
 // TileSatelliteMapping defines the relationship between a satellite and a tile.
 type TileSatelliteMapping struct {
 	ModelBase
-	NoradID               string    `gorm:"size:255;not null;index"`                       // Foreign key to Satellite table via NORAD ID
+	SpaceID               string    `gorm:"size:255;not null;index"`                       // Foreign key to Satellite table via SPACE ID
 	TileID                string    `gorm:"type:char(36);not null;uniqueIndex:norad_tile"` // Foreign key to Tile table
 	IntersectionLatitude  float64   `gorm:"type:double precision;not null;"`               // Latitude of the intersection point
 	IntersectionLongitude float64   `gorm:"type:double precision;not null;"`               // Longitude of the intersection point
@@ -30,7 +30,7 @@ func MapToTileSatelliteMappingDomain(t TileSatelliteMapping) (domain.TileSatelli
 			IsFavourite: t.IsFavourite,
 			DisplayName: t.DisplayName,
 		},
-		NoradID:               t.NoradID,
+		SpaceID:               t.SpaceID,
 		TileID:                t.TileID,
 		IntersectionLatitude:  t.IntersectionLatitude,
 		IntersectionLongitude: t.IntersectionLongitude,

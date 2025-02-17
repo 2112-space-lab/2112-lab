@@ -4,7 +4,7 @@
 
 export type TileSatelliteMapping = {
     MappingID: string;
-    NoradID: string;
+    SpaceID: string;
     TileID: string;
     TileCenterLat: string;
     TileCenterLon: string;

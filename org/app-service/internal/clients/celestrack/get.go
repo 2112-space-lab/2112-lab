@@ -62,17 +62,17 @@ func (client *CelestrackClient) FetchTLEFromSatCatByCategory(ctx context.Context
 			continue
 		}
 
-		// Extract NORAD ID from Line 1 (positions 3–7 as per TLE format)
+		// Extract SPACE ID from Line 1 (positions 3–7 as per TLE format)
 		line1 := strings.TrimSpace(string(lines[i+1]))
 		if len(line1) < 7 {
 			continue // Skip invalid lines
 		}
-		noradID := strings.TrimSpace(line1[2:7]) // Extract NORAD ID
+		spaceID := strings.TrimSpace(line1[2:7]) // Extract SPACE ID
 
 		line2 := strings.TrimSpace(string(lines[i+2]))
 
 		tles = append(tles, &mappers.RawTLE{
-			NoradID: noradID,
+			SpaceID: spaceID,
 			Line1:   line1,
 			Line2:   line2,
 		})
@@ -145,7 +145,7 @@ func (client *CelestrackClient) FetchSatelliteMetadata(ctx context.Context) ([]*
 		altitude := xspace.ComputeAverageAltitude(apogee, perigee)
 
 		satellite := &mappers.SatelliteMetadata{
-			NoradID:        record[indices["NORAD_CAT_ID"]],
+			SpaceID:        record[indices["NORAD_CAT_ID"]],
 			Name:           record[indices["OBJECT_NAME"]],
 			IntlDesignator: record[indices["OBJECT_ID"]],
 			LaunchDate:     launchDate,

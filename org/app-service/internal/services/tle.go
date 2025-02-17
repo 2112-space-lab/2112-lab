@@ -55,7 +55,7 @@ func (s *TleService) FetchTLEFromSatCatByCategory(ctx context.Context, category 
 	tles := make([]domain.TLE, len(rawTLEs))
 	for idx, raw := range rawTLEs {
 		tle, err := domain.NewTLE(
-			raw.NoradID,
+			raw.SpaceID,
 			raw.Line1,
 			raw.Line2,
 			nowUtc,
@@ -65,7 +65,7 @@ func (s *TleService) FetchTLEFromSatCatByCategory(ctx context.Context, category 
 		)
 
 		if err != nil {
-			return nil, fmt.Errorf("error creating TLE for NORAD ID [%s]: %w", raw.NoradID, err)
+			return nil, fmt.Errorf("error creating TLE for SPACE ID [%s]: %w", raw.SpaceID, err)
 		}
 		tles[idx] = tle
 	}
@@ -92,7 +92,7 @@ func (s *TleService) FetchSatelliteMetadata(ctx context.Context, contextName dom
 	satellites := make([]domain.Satellite, len(metadata))
 	for idx, raw := range metadata {
 		sat := domain.Satellite{
-			NoradID:    raw.NoradID,
+			SpaceID:    raw.SpaceID,
 			Name:       raw.Name,
 			Owner:      raw.Owner,
 			LaunchDate: &raw.LaunchDate,

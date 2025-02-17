@@ -1,6 +1,6 @@
 export interface TLE {
     ID: string;
-    NoradID: string;
+    SpaceID: string;
     Line1: string;
     Line2: string;
     Epoch: string; // ISO 8601 formatted timestamp
@@ -11,7 +11,7 @@ export interface Satellite {
     CreatedAt: string; // ISO 8601 formatted timestamp
     UpdatedAt: string; // ISO 8601 formatted timestamp
     Name: string;
-    NoradID: string;
+    SpaceID: string;
     Type: string;
     LaunchDate?: string | null; // Nullable ISO 8601 formatted date
     DecayDate?: string | null; // Nullable ISO 8601 formatted date

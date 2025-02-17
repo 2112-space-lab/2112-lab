@@ -7,12 +7,12 @@ import ApolloClient from "lib/ApolloClient";
 interface SatelliteServiceState {
     satelliteInfo: SatelliteInfo[];
     totalSatelliteInfo: number;
-    orbitData: Record<string, OrbitDataItem[]>; // Orbit data keyed by NORAD ID
+    orbitData: Record<string, OrbitDataItem[]>; 
     loading: boolean;
     error: string | null;
     fetchPaginatedSatelliteInfo: (pageIndex: number, pageSize: number, search: string) => Promise<void>;
-    fetchSatellitePositions: (noradID: string, startTime: string, endTime: string) => Promise<void>;
-    fetchSatellitePositionsWithPropagation: (noradID: string, durationHours: number, intervalMinutes: number) => Promise<void>;
+    fetchSatellitePositions: (spaceID: string, startTime: string, endTime: string) => Promise<void>;
+    fetchSatellitePositionsWithPropagation: (spaceID: string, durationHours: number, intervalMinutes: number) => Promise<void>;
 }
 
 const GET_SATELLITE_POSITIONS = gql`
@@ -59,13 +59,13 @@ const useSatelliteServiceStore = create<SatelliteServiceState>((set) => ({
         }
     },
 
-    fetchSatellitePositions: async (noradID: string, startTime: string, endTime: string): Promise<void> => {
+    fetchSatellitePositions: async (spaceID: string, startTime: string, endTime: string): Promise<void> => {
         set({ loading: true, error: null });
 
         try {
             const { data } = await ApolloClient.query({
                 query: GET_SATELLITE_POSITIONS,
-                variables: { id: noradID, startTime, endTime },
+                variables: { id: spaceID, startTime, endTime },
             });
 
             const orbitData: OrbitDataItem[] = data?.satellitePositionsInRange?.map((item: any) => ({
@@ -77,7 +77,7 @@ const useSatelliteServiceStore = create<SatelliteServiceState>((set) => ({
 
             if (orbitData.length > 0) {
                 set((state) => ({
-                    orbitData: { ...state.orbitData, [noradID]: orbitData },
+                    orbitData: { ...state.orbitData, [spaceID]: orbitData },
                     loading: false,
                 }));
             } else {
@@ -95,13 +95,13 @@ const useSatelliteServiceStore = create<SatelliteServiceState>((set) => ({
         }
     },
 
-    fetchSatellitePositionsWithPropagation: async (noradID: string, durationHours: number, intervalMinutes: number): Promise<void> => {
+    fetchSatellitePositionsWithPropagation: async (spaceID: string, durationHours: number, intervalMinutes: number): Promise<void> => {
         set({ loading: true, error: null });
 
         try {
             const response = await apiClient.get(`/satellites/orbit`, {
                 params: {
-                    noradID,
+                    spaceID,
                     durationHours,
                     intervalMinutes,
                 },
@@ -118,7 +118,7 @@ const useSatelliteServiceStore = create<SatelliteServiceState>((set) => ({
                 }));
 
                 set((state) => ({
-                    orbitData: { ...state.orbitData, [noradID]: orbitData },
+                    orbitData: { ...state.orbitData, [spaceID]: orbitData },
                     loading: false,
                 }));
             } else {

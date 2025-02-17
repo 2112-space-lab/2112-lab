@@ -55,24 +55,24 @@ func (h *SatellitesTilesMappingsHandler) Run(ctx context.Context, args map[strin
 // Exec executes the visibility computation process, considering satellite paths.
 func (h *SatellitesTilesMappingsHandler) Exec(ctx context.Context, id string, startTime time.Time, endTime time.Time) error {
 	log.Debugf("Starting Exec method for satellite ID: %s, from %s to %s\n", id, startTime, endTime)
-	sat, err := h.satelliteRepo.FindByNoradID(ctx, id)
+	sat, err := h.satelliteRepo.FindBySpaceID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to fetch satellite: %w", err)
 	}
 
-	positions, err := h.tleRepo.QuerySatellitePositions(ctx, sat.NoradID, startTime, endTime)
+	positions, err := h.tleRepo.QuerySatellitePositions(ctx, sat.SpaceID, startTime, endTime)
 	if err != nil {
-		return fmt.Errorf("error querying satellite positions for satellite %s: %w", sat.NoradID, err)
+		return fmt.Errorf("error querying satellite positions for satellite %s: %w", sat.SpaceID, err)
 	}
 
 	if len(positions) < 2 {
-		log.Warnf("Not enough positions to compute mappings for satellite %s\n", sat.NoradID)
+		log.Warnf("Not enough positions to compute mappings for satellite %s\n", sat.SpaceID)
 		return nil
 	}
 
-	log.Debugf("Computing mappings for satellite %s\n", sat.NoradID)
+	log.Debugf("Computing mappings for satellite %s\n", sat.SpaceID)
 	if err := h.computeTileMappings(ctx, "todoSatellitesTilesMappingsHandler", sat, positions); err != nil {
-		return fmt.Errorf("error computing mappings for satellite %s: %w", sat.NoradID, err)
+		return fmt.Errorf("error computing mappings for satellite %s: %w", sat.SpaceID, err)
 	}
 
 	log.Debugf("Completed Exec method for satellite ID: %s\n", id)
@@ -86,9 +86,9 @@ func (h *SatellitesTilesMappingsHandler) computeTileMappings(
 	sat domain.Satellite,
 	positions []domain.SatellitePosition,
 ) error {
-	log.Debugf("Finding visible tiles for satellite %s along its path\n", sat.NoradID)
+	log.Debugf("Finding visible tiles for satellite %s along its path\n", sat.SpaceID)
 
-	err := h.mappingRepo.DeleteMappingsByNoradID(ctx, contextID, sat.NoradID)
+	err := h.mappingRepo.DeleteMappingsBySpaceID(ctx, contextID, sat.SpaceID)
 	if err != nil {
 		return fmt.Errorf("failed to delete visible tiles along the path: %w", err)
 	}
@@ -99,14 +99,14 @@ func (h *SatellitesTilesMappingsHandler) computeTileMappings(
 	}
 
 	if len(mappings) == 0 {
-		log.Warnf("No visible tiles found for satellite %s along its path\n", sat.NoradID)
+		log.Warnf("No visible tiles found for satellite %s along its path\n", sat.SpaceID)
 		return nil
 	}
 
 	if err := h.mappingRepo.SaveBatch(ctx, mappings); err != nil {
 		return fmt.Errorf("failed to save mappings: %w", err)
 	}
-	log.Debugf("Saved %d mappings for satellite %s\n", len(mappings), sat.NoradID)
+	log.Debugf("Saved %d mappings for satellite %s\n", len(mappings), sat.SpaceID)
 
 	return nil
 }

@@ -12,13 +12,13 @@ interface OrbitData {
 
 interface MapSatelliteProps {
   orbitData?: OrbitData[];
-  noradID?: string;
+  spaceID?: string;
   userLocation?: { latitude: number; longitude: number };
 }
 
 const MapSatellite: React.FC<MapSatelliteProps> = ({
   orbitData = [],
-  noradID = "Unknown",
+  spaceID = "Unknown",
   userLocation,
 }) => {
   const cesiumContainerRef = useRef<HTMLDivElement | null>(null);
@@ -70,7 +70,7 @@ const MapSatellite: React.FC<MapSatelliteProps> = ({
         );
 
         viewer.entities.add({
-          name: `Orbit Path for Satellite ${noradID}`,
+          name: `Orbit Path for Satellite ${spaceID}`,
           polyline: {
             positions: orbitPositions,
             width: 1,
@@ -79,14 +79,14 @@ const MapSatellite: React.FC<MapSatelliteProps> = ({
         });
 
         viewer.entities.add({
-          name: `Satellite ${noradID}`,
+          name: `Satellite ${spaceID}`,
           position: positionProperty,
           point: {
             pixelSize: 12,
             color: Cesium.Color.PURPLE,
           },
           label: {
-            text: `Satellite: ${noradID}`,
+            text: `Satellite: ${spaceID}`,
             font: "16pt Arial",
             fillColor: Cesium.Color.WHITE,
             style: Cesium.LabelStyle.FILL,
@@ -177,7 +177,7 @@ const MapSatellite: React.FC<MapSatelliteProps> = ({
         viewerRef.current = null;
       }
     };
-  }, [orbitData, noradID, userLocation]);
+  }, [orbitData, spaceID, userLocation]);
 
   return (
     <Card extra={"w-full h-full bg-white px-3 py-[18px]"} style={{ borderRadius: "20px" }}>

@@ -32,8 +32,8 @@ export default function MappingTableView({
 
     const columns = [
         {
-            accessorKey: "NoradID",
-            header: "NORAD ID",
+            accessorKey: "SpaceID",
+            header: "SPACE ID",
             cell: (info: any) => <p className="text-sm">{info.getValue()}</p>,
         },
         {

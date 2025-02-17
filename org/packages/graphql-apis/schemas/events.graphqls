@@ -9,10 +9,12 @@ type EventRoot {
 
 # New type for TLE propagation data
 type SatelliteTlePropagated {
-  noradId: String!  # NORAD ID of the satellite
+  spaceID: String!  # ID of the satellite
   tleLine1: String!  # First line of the Two-Line Element set (TLE)
   tleLine2: String!  # Second line of the Two-Line Element set (TLE)
-  timeInterval: Int!  # Time interval for updates
-  store_key: String!  # Unique key in Redis associated with the propagated data
+  redis_key: String!  # Unique key in Redis associated with the propagated data
+  startTimeUtc: String! 
+	durationMinutes: Int 
+	intervalSeconds: Int
 }
 

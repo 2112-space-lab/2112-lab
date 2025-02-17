@@ -1,6 +1,7 @@
 package events
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -10,7 +11,7 @@ import (
 
 // EventHandler is a non-generic interface that all handlers must implement.
 type EventHandler interface {
-	Run(event model.EventRoot) error // Parses the event payload and processes it
+	Run(ctx context.Context, event model.EventRoot) error // Parses the event payload and processes it
 }
 
 // BaseHandler provides reusable logic for event handlers (uses generics for payloads).

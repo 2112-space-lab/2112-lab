@@ -58,7 +58,7 @@ func NewTaskMonitor(dependencies *dependencies.Dependencies) (TaskMonitor, error
 	)
 
 	eventDetector := handlers.NewEventDetector(
-		eventEmitter, eventMonitor)
+		eventEmitter, eventMonitor, dependencies)
 
 	tasks := map[handlers.TaskName]TaskHandler{
 		celestrackTleUpload.GetTask().Name:       &celestrackTleUpload,

@@ -66,11 +66,13 @@ type SatelliteTle struct {
 }
 
 type SatelliteTlePropagated struct {
-	NoradID      string `json:"noradId"`
-	TleLine1     string `json:"tleLine1"`
-	TleLine2     string `json:"tleLine2"`
-	TimeInterval int32  `json:"timeInterval"`
-	StoreKey     string `json:"store_key"`
+	SpaceID         string `json:"spaceID"`
+	TleLine1        string `json:"tleLine1"`
+	TleLine2        string `json:"tleLine2"`
+	RedisKey        string `json:"redis_key"`
+	StartTimeUtc    string `json:"startTimeUtc"`
+	DurationMinutes *int32 `json:"durationMinutes,omitempty"`
+	IntervalSeconds *int32 `json:"intervalSeconds,omitempty"`
 }
 
 type SatelliteVisibility struct {

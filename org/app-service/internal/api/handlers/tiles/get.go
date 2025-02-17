@@ -116,28 +116,28 @@ func (h *TileHandler) GetPaginatedSatelliteMappings(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-// GetSatelliteMappingByNoradID handles requests to fetch tiles in a region.
-func (h *TileHandler) GetSatelliteMappingsByNoradID(c echo.Context) error {
+// GetSatelliteMappingsBySpaceID handles requests to fetch tiles in a region.
+func (h *TileHandler) GetSatelliteMappingsBySpaceID(c echo.Context) error {
 	// Parse query parameters for bounding box
-	noradID := c.QueryParam("noradID")
+	spaceID := c.QueryParam("spaceID")
 
 	// Call the service to fetch mappings
-	mappings, err := h.Service.GetSatelliteMappingsByNoradID(c.Request().Context(), "todoTileHandler", noradID)
+	mappings, err := h.Service.GetSatelliteMappingsBySpaceID(c.Request().Context(), "todoTileHandler", spaceID)
 	if err != nil {
 		c.Logger().Error("Failed to fetch mappings:", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "unable to fetch mappings by norad ID [%s]", noradID)
+		return echo.NewHTTPError(http.StatusInternalServerError, "unable to fetch mappings by space ID [%s]", spaceID)
 	}
 
 	// Return tiles in JSON response
 	return c.JSON(http.StatusOK, mappings)
 }
 
-// RecomputeMappingsByNoradID handles requests to recompute satellite mappings for a given NORAD ID.
-func (h *TileHandler) RecomputeMappingsByNoradID(c echo.Context) error {
-	// Extract the NORAD ID from the query parameter
-	noradID := c.QueryParam("noradID")
-	if noradID == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Missing noradID parameter")
+// RecomputeMappingsBySpaceID handles requests to recompute satellite mappings for a given SPACE ID.
+func (h *TileHandler) RecomputeMappingsBySpaceID(c echo.Context) error {
+	// Extract the SPACE ID from the query parameter
+	spaceID := c.QueryParam("spaceID")
+	if spaceID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Missing spaceID parameter")
 	}
 
 	// Extract startTime and endTime from query parameters
@@ -165,16 +165,16 @@ func (h *TileHandler) RecomputeMappingsByNoradID(c echo.Context) error {
 	}
 
 	// Call the service method to recompute mappings
-	err = h.Service.RecomputeMappings(c.Request().Context(), "todoTileHandler", noradID, startTime, endTime)
+	err = h.Service.RecomputeMappings(c.Request().Context(), "todoTileHandler", spaceID, startTime, endTime)
 	if err != nil {
-		c.Logger().Error("Failed to recompute mappings for NORAD ID:", noradID, "Error:", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to recompute mappings for NORAD ID")
+		c.Logger().Error("Failed to recompute mappings for SPACE ID:", spaceID, "Error:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to recompute mappings for SPACE ID")
 	}
 
 	// Return a success response
 	return c.JSON(http.StatusOK, map[string]string{
 		"message":   "Mappings recomputed successfully",
-		"noradID":   noradID,
+		"spaceID":   spaceID,
 		"startTime": startTime.Format(time.RFC3339),
 		"endTime":   endTime.Format(time.RFC3339),
 	})

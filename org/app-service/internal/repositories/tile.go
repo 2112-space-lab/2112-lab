@@ -11,8 +11,8 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/data"
 	"github.com/org/2112-space-lab/org/app-service/internal/data/models"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
-	"gorm.io/gorm"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
+	"gorm.io/gorm"
 )
 
 type TileRepository struct {
@@ -260,7 +260,7 @@ func (r *TileRepository) FindTilesVisibleFromLine(ctx context.Context, sat domai
 
 		nowUtc := time.Now().UTC()
 		mapping := domain.NewMapping(
-			sat.NoradID,
+			sat.SpaceID,
 			tile.ID,
 			interestPoint,
 			nowUtc,

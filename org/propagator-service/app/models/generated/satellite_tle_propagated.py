@@ -10,7 +10,7 @@ class SatelliteTlePropagated:
     """
     Represents a TLE propagation event with time interval and event metadata.
     """
-    norad_id: str
+    space_id: str
     tle_line_1: str 
     tle_line_2: str 
     time_interval: int 

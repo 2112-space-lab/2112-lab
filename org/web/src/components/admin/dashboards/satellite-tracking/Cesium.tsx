@@ -11,10 +11,10 @@ interface OrbitData {
 
 interface CesiumViewerProps {
   orbitData?: OrbitData[];
-  noradID?: string;
+  spaceID?: string;
 }
 
-const CesiumViewer: React.FC<CesiumViewerProps> = ({ orbitData = [], noradID = "Unknown" }) => {
+const CesiumViewer: React.FC<CesiumViewerProps> = ({ orbitData = [], spaceID = "Unknown" }) => {
   useEffect(() => {
     let viewer: Cesium.Viewer | null = new Cesium.Viewer("cesiumContainer", {
       terrainProvider: new Cesium.EllipsoidTerrainProvider(),
@@ -50,7 +50,7 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({ orbitData = [], noradID = "
       );
 
       viewer.entities.add({
-        name: `Orbit Path for NORAD ID: ${noradID}`,
+        name: `Orbit Path for SPACE ID: ${spaceID}`,
         polyline: {
           positions: orbitPositions,
           width: 2,
@@ -59,14 +59,14 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({ orbitData = [], noradID = "
       });
 
       viewer.entities.add({
-        name: `Satellite ${noradID}`,
+        name: `Satellite ${spaceID}`,
         position: positionProperty,
         point: {
           pixelSize: 10,
           color: Cesium.Color.RED,
         },
         label: {
-          text: `Satellite ${noradID}`,
+          text: `Satellite ${spaceID}`,
           font: "14pt sans-serif",
           fillColor: Cesium.Color.WHITE,
           showBackground: true,
@@ -115,18 +115,18 @@ const CesiumViewer: React.FC<CesiumViewerProps> = ({ orbitData = [], noradID = "
         viewer = null;
       }
     };
-  }, [orbitData, noradID]);
+  }, [orbitData, spaceID]);
 
   return <div>
-  <style>
-    {`
+    <style>
+      {`
       .cesium-viewer .cesium-widget-credits {
         display: none !important;
       }
     `}
-  </style>
-  <div id="cesiumContainer" style={{ width: "100%", height: "100%" }} />
-</div>
+    </style>
+    <div id="cesiumContainer" style={{ width: "100%", height: "100%" }} />
+  </div>
 };
 
 export default CesiumViewer;

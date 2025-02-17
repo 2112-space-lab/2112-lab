@@ -30,6 +30,8 @@ type GameContextSatellite struct {
 	ContextID   string      // ID of the Context
 	SatelliteID SatelliteID // ID of the Satellite
 	Satellite   Satellite
+	LockedSince xtime.UtcTime
+	LockedBy    string
 }
 
 // GameContextTLE represents the relationship between Context and TLE in the domain layer.

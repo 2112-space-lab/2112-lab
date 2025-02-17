@@ -4,14 +4,14 @@ import "time"
 
 // RawTLE definition
 type RawTLE struct {
-	NoradID string `json:"norad_id"`
+	SpaceID string `json:"space_id"`
 	Line1   string `json:"line1"`
 	Line2   string `json:"line2"`
 }
 
 // SatelliteMetadata represents basic information about a satellite.
 type SatelliteMetadata struct {
-	NoradID        string
+	SpaceID        string
 	Name           string
 	IntlDesignator string
 	LaunchDate     time.Time

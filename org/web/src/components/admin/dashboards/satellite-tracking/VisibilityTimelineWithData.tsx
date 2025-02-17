@@ -149,7 +149,7 @@ const VisibilityTimelineWithData: React.FC<VisibilityTimelineWithDataProps> = ({
         hours: `${aosDate.toUTCString().split(" ")[4]} - ${losDate.toUTCString().split(" ")[4]}`,
         title: "Visibility Window",
         satellite: visibility.satelliteName || "Unknown Satellite",
-        noradID: visibility.satelliteId || "N/A",
+        spaceID: visibility.satelliteId || "N/A",
         aosDate,
       };
     }).sort((a, b) => a.aosDate.getTime() - b.aosDate.getTime());

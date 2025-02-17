@@ -43,13 +43,13 @@ class Propagator:
         try:
             start_time = self.normalize_and_parse_iso_date(request.start_time)
             ts = load.timescale()
-            satellite = EarthSatellite(request.tle_line_1, request.tle_line_2, str(request.norad_id), ts)
+            satellite = EarthSatellite(request.tle_line_1, request.tle_line_2, str(request.space_id), ts)
 
             end_time = start_time + timedelta(minutes=request.duration_minutes)
             current_time = start_time
             positions = []
 
-            store_key = f"satellite:{request.norad_id}:positions:{uuid.uuid4()}"
+            store_key = f"satellite:{request.space_id}:positions:{uuid.uuid4()}"
 
             while current_time <= end_time:
                 if not isinstance(current_time, datetime):
@@ -63,8 +63,8 @@ class Propagator:
                 subpoint = wgs84.subpoint(geocentric)
 
                 position = SatellitePosition(
-                    id=str(request.norad_id),
-                    name=f"Satellite {request.norad_id}",
+                    id=str(request.space_id),
+                    name=f"Satellite {request.space_id}",
                     latitude=subpoint.latitude.degrees,
                     longitude=subpoint.longitude.degrees,
                     altitude=subpoint.elevation.km,

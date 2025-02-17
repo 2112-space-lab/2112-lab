@@ -8,6 +8,21 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+const (
+	ExhangeDefaultName     = "headers.exchange"
+	ExchangeTypeHeaders    = "headers"
+	RabbitMQFormat         = "application/json"
+	DefaultAutoAcknowledge = true
+	DefaultAutoDelete      = false
+	DefaultNotExclusive    = false
+	DefaultNoLocal         = false
+	DefaultNoWait          = false
+	DefaultDurable         = true
+	DefaultImmediate       = false
+	DefaultMandatory       = false
+	DefaultKey             = ""
+)
+
 // RabbitMQClient wraps the RabbitMQ connection and channel.
 type RabbitMQClient struct {
 	conn        *amqp.Connection
@@ -15,11 +30,12 @@ type RabbitMQClient struct {
 	env         *config.SEnv
 	outputQueue string
 	inputQueue  string
+	exchange    string
+	defaultArgs amqp.Table
 }
 
 // NewRabbitMQClient initializes a new RabbitMQ client.
 func NewRabbitMQClient(env *config.SEnv) (*RabbitMQClient, error) {
-	// Connect to RabbitMQ
 	conn, err := amqp.Dial(env.EnvVars.RabbitMQ.GetAddr())
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)
@@ -35,11 +51,12 @@ func NewRabbitMQClient(env *config.SEnv) (*RabbitMQClient, error) {
 		conn:        conn,
 		channel:     ch,
 		env:         env,
-		outputQueue: env.EnvVars.RabbitMQ.OutputQueue, // Get output queue name from config
-		inputQueue:  env.EnvVars.RabbitMQ.InputQueue,  // Get input queue name from config
+		outputQueue: env.EnvVars.RabbitMQ.OutputQueue,
+		inputQueue:  env.EnvVars.RabbitMQ.InputQueue,
+		exchange:    ExhangeDefaultName,
+		defaultArgs: amqp.Table{},
 	}
 
-	// Setup queues
 	if err := client.SetupQueues(); err != nil {
 		client.Close()
 		return nil, fmt.Errorf("failed to setup queues: %w", err)
@@ -58,40 +75,34 @@ func (r *RabbitMQClient) Close() {
 	}
 }
 
-// SetupQueues ensures both input and output queues exist and are bound correctly.
+// SetupQueues ensures queues and the exchange exist and are bound correctly.
 func (r *RabbitMQClient) SetupQueues() error {
-	exchangeName := "app.exchange" // Default exchange name, replace if needed
+	if err := r.DeclareExchange(r.exchange, ExchangeTypeHeaders); err != nil {
+		return fmt.Errorf("failed to declare headers exchange: %w", err)
+	}
 
-	// Declare and bind input queue
 	if _, err := r.DeclareQueue(r.inputQueue); err != nil {
 		return fmt.Errorf("failed to declare input queue: %w", err)
 	}
-	if err := r.BindQueue(r.inputQueue, r.inputQueue, exchangeName); err != nil {
-		return fmt.Errorf("failed to bind input queue: %w", err)
-	}
 
-	// Declare and bind output queue
 	if _, err := r.DeclareQueue(r.outputQueue); err != nil {
 		return fmt.Errorf("failed to declare output queue: %w", err)
 	}
-	if err := r.BindQueue(r.outputQueue, r.outputQueue, exchangeName); err != nil {
-		return fmt.Errorf("failed to bind output queue: %w", err)
-	}
 
-	log.Debugf("✅ Queues setup complete: Input=%s, Output=%s", r.inputQueue, r.outputQueue)
+	log.Debugf("✅ Queues and exchange setup complete: Exchange=%s, Input=%s, Output=%s", r.exchange, r.inputQueue, r.outputQueue)
 	return nil
 }
 
-// DeclareExchange declares an exchange in RabbitMQ.
+// DeclareExchange declares a headers exchange in RabbitMQ.
 func (r *RabbitMQClient) DeclareExchange(exchangeName, exchangeType string) error {
 	return r.channel.ExchangeDeclare(
 		exchangeName,
 		exchangeType,
-		true,
-		false,
-		false,
-		false,
-		nil,
+		DefaultDurable,
+		DefaultAutoDelete,
+		DefaultNoLocal,
+		DefaultNoWait,
+		r.defaultArgs,
 	)
 }
 
@@ -99,59 +110,66 @@ func (r *RabbitMQClient) DeclareExchange(exchangeName, exchangeType string) erro
 func (r *RabbitMQClient) DeclareQueue(queueName string) (amqp.Queue, error) {
 	return r.channel.QueueDeclare(
 		queueName,
-		true,
-		false,
-		false,
-		false,
-		nil,
+		DefaultDurable,
+		DefaultAutoDelete,
+		DefaultNoLocal,
+		DefaultNoWait,
+		r.defaultArgs,
 	)
 }
 
-// BindQueue binds a queue to an exchange with a routing key.
-func (r *RabbitMQClient) BindQueue(queueName, routingKey, exchangeName string) error {
-	return r.channel.QueueBind(
-		queueName,
-		routingKey,
-		exchangeName,
-		false,
-		nil,
-	)
-}
-
-// PublishMessage sends a message to the configured output queue.
-func (r *RabbitMQClient) PublishMessage(body []byte) error {
+// PublishMessage sends a message with dynamic headers.
+func (r *RabbitMQClient) PublishMessage(body []byte, headers *Header) error {
 	err := r.channel.Publish(
-		"",
-		r.outputQueue, // Use the output queue from config
-		false,
-		false,
+		r.exchange,
+		DefaultKey,
+		DefaultMandatory,
+		DefaultImmediate,
 		amqp.Publishing{
-			ContentType: "application/json",
+			ContentType: RabbitMQFormat,
 			Body:        body,
+			Headers:     headers.Fields,
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to publish message to output queue: %w", err)
+		return fmt.Errorf("failed to publish message to exchange: %w", err)
 	}
 
-	log.Debugf("[x] Message published to output queue: %s", r.outputQueue)
+	log.Debugf("[x] Message published with headers: %+v", headers.Fields)
 	return nil
 }
 
-// ConsumeMessages listens for messages from the configured input queue.
-func (r *RabbitMQClient) ConsumeMessages() (<-chan amqp.Delivery, error) {
-	msgs, err := r.channel.Consume(
-		r.inputQueue, // Use the input queue from config
-		"",
-		true,  // Auto-Acknowledge
-		false, // Exclusive
-		false, // No-local
-		false, // No-Wait
-		nil,   // Arguments
+// ConsumeMessages listens for messages that match specific headers.
+func (r *RabbitMQClient) ConsumeMessages(filterHeaders *Header) (<-chan amqp.Delivery, error) {
+	_, err := r.DeclareQueue(r.inputQueue)
+	if err != nil {
+		return nil, fmt.Errorf("failed to declare queue: %w", err)
+	}
+
+	err = r.channel.QueueBind(
+		r.inputQueue,
+		DefaultKey,
+		r.exchange,
+		DefaultNoWait,
+		amqp.Table(filterHeaders.Fields),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to register consumer on input queue: %w", err)
+		return nil, fmt.Errorf("failed to bind queue with headers: %w", err)
 	}
-	log.Debugf("📥 Listening for messages on input queue: %s", r.inputQueue)
+
+	msgs, err := r.channel.Consume(
+		r.inputQueue,
+		DefaultKey,
+		DefaultAutoAcknowledge,
+		DefaultNotExclusive,
+		DefaultNoLocal,
+		DefaultNoWait,
+		r.defaultArgs,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to register consumer: %w", err)
+	}
+
+	log.Debugf("📥 Listening for messages with filters: %+v", filterHeaders.Fields)
 	return msgs, nil
 }

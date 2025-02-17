@@ -5,21 +5,21 @@ import { Tile, TileSatelliteMapping } from "types/tiles";
 interface TileServiceState {
     tiles: Tile[];
     tileMappings: TileSatelliteMapping[];
-    satelliteMappingsByNoradID: Record<string, TileSatelliteMapping[]>; // Store mappings per NORAD ID
+    satelliteMappingsBySpaceID: Record<string, TileSatelliteMapping[]>; // Store mappings per SPACE ID
     totalTileMappings: number;
     totalTiles: number;
     loading: boolean;
     error: string | null;
     fetchTileMappings: (pageIndex: number, pageSize: number, search: string) => Promise<void>;
     fetchTilesForLocation: (location: { latitude: number; longitude: number }) => Promise<void>;
-    fetchSatelliteMappingsByNoradID: (noradID: string) => Promise<void>;
-    recomputeMappingsByNoradID: (noradID: string, startTime: string, endTime: string) => Promise<void>; // New method
+    fetchSatelliteMappingsBySpaceID: (spaceID: string) => Promise<void>;
+    recomputeMappingsBySpaceID: (spaceID: string, startTime: string, endTime: string) => Promise<void>; // New method
 }
 
 const useTileServiceStore = create<TileServiceState>((set) => ({
     tiles: [],
     tileMappings: [],
-    satelliteMappingsByNoradID: {}, // Initialize as an empty object
+    satelliteMappingsBySpaceID: {},
     totalTileMappings: 0,
     totalTiles: 0,
     loading: false,
@@ -77,7 +77,7 @@ const useTileServiceStore = create<TileServiceState>((set) => ({
         }
     },
 
-    fetchSatelliteMappingsByNoradID: async (noradID: string) => {
+    fetchSatelliteMappingsBySpaceID: async (spaceID: string) => {
         set((state) => ({
             ...state,
             loading: true,
@@ -85,27 +85,27 @@ const useTileServiceStore = create<TileServiceState>((set) => ({
         }));
 
         try {
-            const response = await apiClient.get("/tiles/mappings/bynoradID", {
-                params: { noradID },
+            const response = await apiClient.get("/tiles/mappings/byspaceID", {
+                params: { spaceID },
             });
 
             set((state) => ({
-                satelliteMappingsByNoradID: {
-                    ...state.satelliteMappingsByNoradID,
-                    [noradID]: response.data || [],
+                satelliteMappingsBySpaceID: {
+                    ...state.satelliteMappingsBySpaceID,
+                    [spaceID]: response.data || [],
                 },
                 loading: false,
             }));
         } catch (err) {
-            console.error("Error fetching satellite mappings by NORAD ID:", err);
+            console.error("Error fetching satellite mappings by SPACE ID:", err);
             set({
-                error: `Failed to fetch satellite mappings for NORAD ID: ${noradID}.`,
+                error: `Failed to fetch satellite mappings for SPACE ID: ${spaceID}.`,
                 loading: false,
             });
         }
     },
 
-    recomputeMappingsByNoradID: async (noradID: string, startTime: string, endTime: string) => {
+    recomputeMappingsBySpaceID: async (spaceID: string, startTime: string, endTime: string) => {
         set((state) => ({
             ...state,
             loading: true,
@@ -114,12 +114,12 @@ const useTileServiceStore = create<TileServiceState>((set) => ({
 
         try {
             const response = await apiClient.put(
-                "/tiles/mappings/recompute/bynoradID",
+                "/tiles/mappings/recompute/byspaceID",
                 {},
                 {
                     headers: { Accept: "application/json", "Content-Type": "application/json" },
                     params: {
-                        noradID: noradID,
+                        spaceID: spaceID,
                         startTime: startTime,
                         endTime: endTime,
                     },
@@ -127,16 +127,16 @@ const useTileServiceStore = create<TileServiceState>((set) => ({
             );
 
             set((state) => ({
-                satelliteMappingsByNoradID: {
-                    ...state.satelliteMappingsByNoradID,
-                    [noradID]: response.data || [],
+                satelliteMappingsBySpaceID: {
+                    ...state.satelliteMappingsBySpaceID,
+                    [spaceID]: response.data || [],
                 },
                 loading: false,
             }));
         } catch (err) {
-            console.error("Error recomputing satellite mappings by NORAD ID:", err);
+            console.error("Error recomputing satellite mappings by SPACE ID:", err);
             set({
-                error: `Failed to recompute satellite mappings for NORAD ID: ${noradID}.`,
+                error: `Failed to recompute satellite mappings for SPACE ID: ${spaceID}.`,
                 loading: false,
             });
         }

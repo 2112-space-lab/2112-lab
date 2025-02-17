@@ -68,7 +68,7 @@ const VisibilityTimeline = (props: { location: { latitude: number; longitude: nu
               hours={item.hours}
               title={item.title}
               satellite={item.satellite}
-              noradID={item.noradID}
+              spaceID={item.spaceID}
             />
           ))}
         </div>
@@ -96,7 +96,7 @@ const VisibilityTimelineItem = (props: {
   hours: string;
   title: string;
   satellite: string;
-  noradID: string;
+  spaceID: string;
 }) => {
   const {
     current,
@@ -107,7 +107,7 @@ const VisibilityTimelineItem = (props: {
     hours,
     title,
     satellite,
-    noradID,
+    spaceID,
   } = props;
 
   return (

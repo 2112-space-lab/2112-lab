@@ -18,23 +18,27 @@ class SatellitePropagationService(BaseService):
         Calls Propagator to compute positions, then stores in Redis and publishes an event.
         """
         try:
-            store_key, positions = self.propagator.propagate(request)
+            redis_key, positions = self.propagator.propagate(request)
 
-            self.store_in_redis(store_key, positions)
+            self.store_in_redis(redis_key, positions)
+
+            event = SatelliteTlePropagated(
+                satellited_id=request.space_id,
+                tle_line_1=request.tle_line_1,
+                tle_line_2=request.tle_line_2,
+                start_time_utc=request.startTime,
+                redis_key=redis_key,
+                duration_minutes=request.duration_minutes,
+                interval_seconds=request.interval_seconds
+            )
 
             self.publish_event(
                 event_type=EventType.SATELLITE_TLE_PROPAGATED,
-                model=SatelliteTlePropagated(
-                    norad_id=request.norad_id,
-                    tle_line_1=request.tle_line_1,
-                    tle_line_2=request.tle_line_2,
-                    time_interval=request.interval_seconds,
-                    store_key=store_key
-                )
+                model=event
             )
 
-            return store_key
+            return redis_key
 
         except Exception as e:
-            logger.error(f"❌ Error in SatellitePropagationService: {e}")
+            logger.error(f"❌ Error in propagate_and_store: {e}", exc_info=True)
             raise

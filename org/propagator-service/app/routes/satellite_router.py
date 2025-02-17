@@ -56,13 +56,13 @@ class SatelliteRouter:
                     return jsonify({"error": f"Invalid request data: {str(e)}"}), 400
 
                 self.logger.info(
-                    f"Propagating satellite {propagation_request.norad_id} from {propagation_request.start_time}"
+                    f"Propagating satellite {propagation_request.space_id} from {propagation_request.start_time}"
                 )
 
                 store_key = self.propagation_service.propagate_and_store(propagation_request)
 
                 self.logger.info(
-                    f"Propagation complete for NORAD ID {propagation_request.norad_id} | Stored under key: {store_key}"
+                    f"Propagation complete for SPACE ID {propagation_request.space_id} | Stored under key: {store_key}"
                 )
 
                 return jsonify({"message": "Propagation successful", "store_key": store_key}), 200

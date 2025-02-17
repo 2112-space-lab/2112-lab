@@ -20,15 +20,15 @@ func NewSatelliteHandler(service services.SatelliteService) *SatelliteHandler {
 	return &SatelliteHandler{Service: service}
 }
 
-// GetSatellitePositionsByNoradID fetches satellite positions by NORAD ID.
-func (h *SatelliteHandler) GetSatellitePositionsByNoradID(c echo.Context) error {
-	noradID := c.QueryParam("noradID")
-	if noradID == "" {
+// GetSatellitePositionsBySpaceID fetches satellite positions by SPACE ID.
+func (h *SatelliteHandler) GetSatellitePositionsBySpaceID(c echo.Context) error {
+	spaceID := c.QueryParam("spaceID")
+	if spaceID == "" {
 		c.Echo().Logger.Error(constants.ERROR_ID_NOT_FOUND)
 		return constants.ERROR_ID_NOT_FOUND
 	}
 
-	positions, err := h.Service.Propagate(c.Request().Context(), noradID, 24*time.Hour, 1*time.Minute)
+	positions, err := h.Service.Propagate(c.Request().Context(), spaceID, 24*time.Hour, 1*time.Minute)
 	if err != nil {
 		c.Echo().Logger.Error("Failed to propagate positions: ", err)
 		return err

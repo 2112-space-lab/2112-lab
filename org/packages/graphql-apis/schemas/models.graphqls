@@ -9,7 +9,7 @@ input UserLocationInput {
 
 # Request for propagating satellite positions
 input PropagationRequestInput {
-  noradId: String!  # NORAD ID of the satellite
+  noradId: String!  # SPACE ID of the satellite
   tleLine1: String!  # First line of the Two-Line Element set (TLE)
   tleLine2: String!  # Second line of the Two-Line Element set (TLE)
   startTime: String!  # Start time for propagation (ISO 8601 format)

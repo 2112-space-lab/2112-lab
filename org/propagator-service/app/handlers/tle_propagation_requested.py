@@ -23,7 +23,7 @@ class TLEPropagationHandler(EventHandler):
             logger.info(f"📦 Processed Payload: {json.dumps(payload_data, indent=2)}")
 
             propagation_request = PropagationRequestInput(
-                norad_id=payload_data.get("norad_id"),
+                space_id=payload_data.get("space_id"),
                 tle_line_1=payload_data.get("tle_line1"),
                 tle_line_2=payload_data.get("tle_line2"),
                 start_time=payload_data.get("start_time"),
@@ -31,7 +31,7 @@ class TLEPropagationHandler(EventHandler):
                 interval_seconds=payload_data.get("interval_seconds", 15), 
             )
 
-            logger.info(f"📡 Starting propagation for NORAD ID: {propagation_request.norad_id}")
+            logger.info(f"📡 Starting propagation for SPACE ID: {propagation_request.space_id}")
             store_key = await asyncio.to_thread(self.propagation_service.propagate_and_store, propagation_request)
             logger.info(f"✅ Propagation completed and stored with key: {store_key}")
 

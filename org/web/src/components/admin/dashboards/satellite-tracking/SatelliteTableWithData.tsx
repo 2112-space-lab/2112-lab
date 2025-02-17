@@ -4,11 +4,11 @@ import SatelliteTableComponent from "./SatelliteTable";
 import axios from "axios";
 
 interface SatelliteTableWithDataProps {
-  onSelectNoradID: (noradID: string) => void; // Callback for selected NORAD ID
+  onSelectSpaceID: (spaceID: string) => void; // Callback for selected SPACE ID
 }
 
 export default function SatelliteTableWithData({
-  onSelectNoradID,
+  onSelectSpaceID,
 }: SatelliteTableWithDataProps) {
   const [satellites, setSatellites] = useState([]); // Satellite data
   const [loading, setLoading] = useState(true); // Loading state
@@ -61,8 +61,8 @@ export default function SatelliteTableWithData({
     setSubmit(true);
   };
 
-  const handleSatelliteSelection = (noradID: string) => {
-    onSelectNoradID(noradID); // Pass the NORAD ID to the parent component
+  const handleSatelliteSelection = (spaceID: string) => {
+    onSelectSpaceID(spaceID); // Pass the SPACE ID to the parent component
   };
 
   if (loading) {
@@ -95,7 +95,7 @@ export default function SatelliteTableWithData({
         onSearchChange={handleSearchChange}
         onSearchSubmit={handleSearchSubmit}
         totalItems={totalItems}
-        onRowClick={handleSatelliteSelection} // Handle row click to get NORAD ID
+        onRowClick={handleSatelliteSelection} // Handle row click to get SPACE ID
       />
     </Box>
   );

@@ -8,23 +8,23 @@ import (
 )
 
 type MappingRepository interface {
-	FindByNoradIDAndTile(ctx context.Context, contextID, noradID, tileID string) ([]TileSatelliteMapping, error)
+	FindBySpaceIDAndTile(ctx context.Context, contextID, spaceID, tileID string) ([]TileSatelliteMapping, error)
 	FindAll(ctx context.Context, contextID string) ([]TileSatelliteMapping, error) // Updated to include contextID
 	Save(ctx context.Context, visibility TileSatelliteMapping) error
 	Update(ctx context.Context, visibility TileSatelliteMapping) error
 	Delete(ctx context.Context, id string) error
 	SaveBatch(ctx context.Context, visibilities []TileSatelliteMapping) error
 	FindSatellitesForTiles(ctx context.Context, contextID string, tileIDs []string) ([]Satellite, error)
-	FindAllVisibleTilesByNoradIDSortedByAOSTime(ctx context.Context, contextID, noradID string) ([]TileSatelliteInfo, error)
+	FindAllVisibleTilesBySpaceIDSortedByAOSTime(ctx context.Context, contextID, spaceID string) ([]TileSatelliteInfo, error)
 	ListSatellitesMappingWithPagination(ctx context.Context, contextID string, page int, pageSize int, search *SearchRequest) ([]TileSatelliteInfo, int64, error)
-	GetSatelliteMappingsByNoradID(ctx context.Context, contextID, noradID string) ([]TileSatelliteInfo, error)
-	DeleteMappingsByNoradID(ctx context.Context, contextID, noradID string) error
+	GetSatelliteMappingsBySpaceID(ctx context.Context, contextID, spaceID string) ([]TileSatelliteInfo, error)
+	DeleteMappingsBySpaceID(ctx context.Context, contextID, spaceID string) error
 }
 
 // TileSatelliteMapping represents the domain entity TileSatelliteMapping
 type TileSatelliteMapping struct {
 	ModelBase
-	NoradID               string
+	SpaceID               string
 	TileID                string
 	IntersectionLongitude float64
 	IntersectionLatitude  float64
@@ -33,7 +33,7 @@ type TileSatelliteMapping struct {
 }
 
 // NewMapping constructor
-func NewMapping(noradID string,
+func NewMapping(spaceID string,
 	tileID string, intersection Point, interestedTime time.Time, createdAt time.Time, displayName string, isActive bool, isFavourite bool) TileSatelliteMapping {
 
 	return TileSatelliteMapping{
@@ -46,7 +46,7 @@ func NewMapping(noradID string,
 			IsFavourite: isFavourite,
 			ProcessedAt: &createdAt,
 		},
-		NoradID:               noradID,
+		SpaceID:               spaceID,
 		TileID:                tileID,
 		IntersectionLongitude: intersection.Longitude,
 		IntersectionLatitude:  intersection.Latitude,
@@ -63,7 +63,7 @@ type TileSatelliteInfo struct {
 	TileCenterLat float64 // Latitude of the tile center
 	TileCenterLon float64 // Longitude of the tile center
 	TileZoomLevel int     // Zoom level of the tile
-	NoradID       string  // The NORAD ID of the satellite
+	SpaceID       string  // The SPACE ID of the satellite
 	Intersection  Point
 }
 

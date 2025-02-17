@@ -156,3 +156,32 @@ func (r *RedisClient) ZRangeByScore(ctx context.Context, key string, min, max st
 
 	return results, nil
 }
+
+// Lock tries to acquire a lock on a given key with expiration.
+func (r *RedisClient) Lock(ctx context.Context, key string, ttl time.Duration) (bool, error) {
+	locked, err := r.client.SetNX(key, "locked", ttl).Result()
+	if err != nil {
+		return false, fmt.Errorf("failed to set lock for %s: %w", key, err)
+	}
+	if locked {
+		log.Debugf("Lock acquired for %s", key)
+	} else {
+		log.Debugf("Lock already exists for %s", key)
+	}
+	return locked, nil
+}
+
+// Unlock releases the lock on a given key.
+func (r *RedisClient) Unlock(ctx context.Context, key string) error {
+	deleted, err := r.client.Del(key).Result()
+	if err != nil {
+		return fmt.Errorf("failed to release lock for %s: %w", key, err)
+	}
+	if deleted > 0 {
+		log.Debugf("Lock released for %s", key)
+	} else {
+		log.Debugf("No lock found for %s", key)
+	}
+	return nil
+}
+

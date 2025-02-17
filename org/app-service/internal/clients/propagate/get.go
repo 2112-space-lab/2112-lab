@@ -23,7 +23,7 @@ type SatellitePropagationRequest struct {
 	StartTime       string `json:"start_time"`
 	DurationMinutes int    `json:"duration_minutes"`
 	IntervalSeconds int    `json:"interval_seconds"`
-	NoradID         string `json:"norad_id"`
+	SpaceID         string `json:"space_id"`
 }
 
 // SatellitePosition represents the propagated position of a satellite.
@@ -50,7 +50,7 @@ func NewPropagatorClient(env *config.SEnv) *PropagatorClient {
 func (client *PropagatorClient) FetchPropagation(
 	ctx context.Context,
 	tle1, tle2, startTime string,
-	durationMinutes, intervalSeconds int, noradID string,
+	durationMinutes, intervalSeconds int, spaceID string,
 ) (<-chan []*SatellitePosition, <-chan error) {
 	// Create channels for results and errors
 	resultChan := make(chan []*SatellitePosition, 1)
@@ -77,7 +77,7 @@ func (client *PropagatorClient) FetchPropagation(
 			StartTime:       startTime,
 			DurationMinutes: durationMinutes,
 			IntervalSeconds: intervalSeconds,
-			NoradID:         noradID,
+			SpaceID:         spaceID,
 		}
 		payloadBytes, err := json.Marshal(requestPayload)
 		if err != nil {

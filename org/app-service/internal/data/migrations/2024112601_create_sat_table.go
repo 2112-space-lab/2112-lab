@@ -42,7 +42,7 @@ func init() {
 			type Satellite struct {
 				models.ModelBase
 				Name           string     `gorm:"size:255;not null"`
-				NoradID        string     `gorm:"size:255;unique;not null"`
+				SpaceID        string     `gorm:"size:255;unique;not null"`
 				Type           string     `gorm:"size:255"`
 				LaunchDate     *time.Time `gorm:"type:date"`
 				DecayDate      *time.Time `gorm:"type:date"`
@@ -60,7 +60,7 @@ func init() {
 			// Define the TLE table
 			type TLE struct {
 				models.ModelBase
-				NoradID string    `gorm:"not null;index"`
+				SpaceID string    `gorm:"not null;index"`
 				Line1   string    `gorm:"size:255;not null"`
 				Line2   string    `gorm:"size:255;not null"`
 				Epoch   time.Time `gorm:"not null"`
@@ -82,7 +82,7 @@ func init() {
 			// Define the TileSatelliteMapping table
 			type TileSatelliteMapping struct {
 				models.ModelBase
-				NoradID               string    `gorm:"not null;index"`
+				SpaceID               string    `gorm:"not null;index"`
 				TileID                string    `gorm:"not null;index"`
 				TLEID                 string    `gorm:"not null;index"`
 				ContextID             string    `gorm:"not null;index"`
@@ -99,6 +99,8 @@ func init() {
 				SatelliteID string    `gorm:"not null;index;uniqueIndex:unique_context_satellite"`
 				Context     Context   `gorm:"constraint:OnDelete:CASCADE;foreignKey:ContextID;references:ID"`
 				Satellite   Satellite `gorm:"constraint:OnDelete:CASCADE;foreignKey:SatelliteID;references:ID"`
+				LockedSince time.Time
+				LockedBy    string
 			}
 
 			type ContextTLE struct {
@@ -115,6 +117,14 @@ func init() {
 				Tile      Tile    `gorm:"constraint:OnDelete:CASCADE;foreignKey:TileID;references:ID"`
 			}
 
+			type GlobalProperty struct {
+				models.ModelBase
+				Key         string `gorm:"primaryKey;size:255;not null" json:"key"`
+				Value       string `gorm:"type:text;not null" json:"value"`
+				Description string `gorm:"type:text" json:"description"`
+				ValueType   string `gorm:"size:50;not null" json:"value_type"`
+			}
+
 			// AutoMigrate all tables
 			if err := db.AutoMigrate(
 				&Context{},
@@ -126,6 +136,7 @@ func init() {
 				&ContextTLE{},
 				&ContextTile{},
 				&AuditTrail{},
+				&GlobalProperty{},
 			); err != nil {
 				return err
 			}
@@ -159,6 +170,7 @@ func init() {
 				"satellites",
 				"contexts",
 				"audit_trails",
+				"global_configurations",
 			)
 		},
 	}

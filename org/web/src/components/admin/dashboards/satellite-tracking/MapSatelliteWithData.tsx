@@ -12,7 +12,7 @@ type OrbitDataItem = {
 };
 
 interface MapSatelliteWithDataProps {
-  noradID: string; // NORAD ID passed as a prop
+  spaceID: string; // SPACE ID passed as a prop
   userLocation?: { latitude: number; longitude: number }; // Optional user location
 }
 
@@ -29,7 +29,7 @@ const GET_SATELLITE_POSITIONS = gql`
 `;
 
 const MapSatelliteWithData: React.FC<MapSatelliteWithDataProps> = ({
-  noradID,
+  spaceID,
   userLocation,
 }) => {
   // Set up query parameters
@@ -37,8 +37,8 @@ const MapSatelliteWithData: React.FC<MapSatelliteWithDataProps> = ({
   const endTime = useMemo(() => new Date(Date.now() + 60 * 60 * 1000 * 24).toISOString(), []); // 24 hours ahead
 
   const { data, loading, error } = useQuery(GET_SATELLITE_POSITIONS, {
-    variables: { id: noradID, startTime, endTime },
-    skip: !noradID,
+    variables: { id: spaceID, startTime, endTime },
+    skip: !spaceID,
   });
 
 
@@ -63,7 +63,7 @@ const MapSatelliteWithData: React.FC<MapSatelliteWithDataProps> = ({
         {/* MapSatellite Component */}
         <MapSatellite
           orbitData={orbitData}
-          noradID={noradID}
+          spaceID={spaceID}
           userLocation={userLocation}
         />
 

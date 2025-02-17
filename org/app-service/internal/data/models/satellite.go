@@ -10,7 +10,7 @@ import (
 type Satellite struct {
 	ModelBase
 	Name           string     `gorm:"size:255;not null"`        // Satellite name
-	NoradID        string     `gorm:"size:255;unique;not null"` // NORAD ID
+	SpaceID        string     `gorm:"size:255;unique;not null"` // SPACE ID
 	Type           string     `gorm:"size:255"`                 // Satellite type (e.g., telescope, communication)
 	LaunchDate     *time.Time `gorm:"type:date"`                // Launch date
 	DecayDate      *time.Time `gorm:"type:date"`                // Decay date (optional)
@@ -39,7 +39,7 @@ func MapToSatelliteDomain(s Satellite) domain.Satellite {
 			DisplayName: s.DisplayName,
 		},
 		Name:           s.Name,
-		NoradID:        s.NoradID,
+		SpaceID:        s.SpaceID,
 		Type:           domain.SatelliteType(s.Type),
 		LaunchDate:     s.LaunchDate,
 		DecayDate:      s.DecayDate,
@@ -69,7 +69,7 @@ func MapToSatelliteModel(d domain.Satellite) Satellite {
 			DisplayName: d.ModelBase.DisplayName,
 		},
 		Name:           d.Name,
-		NoradID:        d.NoradID,
+		SpaceID:        d.SpaceID,
 		Type:           string(d.Type),
 		LaunchDate:     d.LaunchDate,
 		DecayDate:      d.DecayDate,

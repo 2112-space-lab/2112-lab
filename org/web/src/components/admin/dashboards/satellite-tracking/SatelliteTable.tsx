@@ -14,7 +14,7 @@ import {
 type Satellite = {
   Id: string;
   Name: string;
-  NoradID: string;
+  SpaceID: string;
   Owner: string;
   LaunchDate: string | null;
   Apogee: number | null;
@@ -87,7 +87,7 @@ function TableBody({
   setSelectedRowId,
 }: {
   rows: any[];
-  onRowClick: (noradID: string) => void;
+  onRowClick: (spaceID: string) => void;
   selectedRowId: string | null;
   setSelectedRowId: (id: string | null) => void;
 }) {
@@ -97,12 +97,11 @@ function TableBody({
         <tr
           key={row.id}
           onClick={() => setSelectedRowId(row.id)}
-          onDoubleClick={() => onRowClick(row.original.NoradID)}
-          className={`cursor-pointer ${
-            selectedRowId === row.id
-              ? "bg-brand-900 text-white dark:bg-brand-400"
-              : ""
-          }`}
+          onDoubleClick={() => onRowClick(row.original.SpaceID)}
+          className={`cursor-pointer ${selectedRowId === row.id
+            ? "bg-brand-900 text-white dark:bg-brand-400"
+            : ""
+            }`}
         >
           {row.getVisibleCells().map((cell) => (
             <td key={cell.id} className="py-2 px-4 text-sm">
@@ -167,7 +166,7 @@ export default function SatelliteTableComponent(props: {
   searchValue: string;
   onSearchChange: (search: string) => void;
   onSearchSubmit: () => void;
-  onRowClick: (noradID: string) => void;
+  onRowClick: (spaceID: string) => void;
 }) {
   const {
     tableData,
@@ -191,7 +190,7 @@ export default function SatelliteTableComponent(props: {
         return row.TleUpdatedAt ? (
           <button
             className="text-blue-500 hover:text-blue-700"
-            onClick={() => onRowClick(row.NoradID)}
+            onClick={() => onRowClick(row.SpaceID)}
           >
             <BiTargetLock size={20} />
           </button>
@@ -210,8 +209,8 @@ export default function SatelliteTableComponent(props: {
       header: "NAME",
       cell: (info) => <p className="text-sm">{info.getValue()}</p>,
     }),
-    columnHelper.accessor("NoradID", {
-      header: "NORAD ID",
+    columnHelper.accessor("SpaceID", {
+      header: "SPACE ID",
       cell: (info) => <p className="text-sm">{info.getValue()}</p>,
     }),
     columnHelper.accessor("Owner", {

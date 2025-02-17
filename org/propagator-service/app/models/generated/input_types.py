@@ -17,7 +17,7 @@ class UserLocationInput(BaseModel):
 
 
 class PropagationRequestInput(BaseModel):
-    norad_id: str = Field(alias="noradId")
+    space_id: str = Field(alias="noradId")
     tle_line_1: str = Field(alias="tleLine1")
     tle_line_2: str = Field(alias="tleLine2")
     start_time: str = Field(alias="startTime")

@@ -18,6 +18,7 @@ type SatelliteService struct {
 	propagateClient  *propagator.PropagatorClient
 	celestrackClient celestrackClient
 	repo             repository.SatelliteRepository
+	globalPropRepo   repository.GlobalPropertyRepository
 }
 
 // NewSatelliteService creates a new instance of SatelliteService.
@@ -25,21 +26,21 @@ func NewSatelliteService(tleRepo repository.TleRepository, propagateClient *prop
 	return SatelliteService{tleRepo: tleRepo, propagateClient: propagateClient, celestrackClient: celestrackClient, repo: repo}
 }
 
-func (s *SatelliteService) Propagate(ctx context.Context, noradID string, duration time.Duration, interval time.Duration) (pos []xspace.SatellitePosition, err error) {
+func (s *SatelliteService) Propagate(ctx context.Context, spaceID string, duration time.Duration, interval time.Duration) (pos []xspace.SatellitePosition, err error) {
 	ctx, span := tracing.NewSpan(ctx, "Propagate")
 	defer span.EndWithError(err)
 	// Validate inputs
-	if noradID == "" {
-		return nil, fmt.Errorf("NORAD ID is required")
+	if spaceID == "" {
+		return nil, fmt.Errorf("SPACE ID is required")
 	}
 	if duration <= 0 || interval <= 0 {
 		return nil, fmt.Errorf("invalid duration or interval: both must be greater than zero")
 	}
 
-	// Get the TLE data for the satellite by NORAD ID
-	tle, err := s.tleRepo.GetTle(ctx, noradID)
+	// Get the TLE data for the satellite by SPACE ID
+	tle, err := s.tleRepo.GetTle(ctx, spaceID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch TLE data for NORAD ID %s: %w", noradID, err)
+		return nil, fmt.Errorf("failed to fetch TLE data for SPACE ID %s: %w", spaceID, err)
 	}
 
 	// Set up the time range
@@ -53,14 +54,14 @@ func (s *SatelliteService) Propagate(ctx context.Context, noradID string, durati
 		startTime.Format(time.RFC3339),
 		int(duration.Minutes()),
 		int(interval.Seconds()),
-		noradID,
+		spaceID,
 	)
 
 	// Wait for results or errors
 	select {
 	case propagatedPositions := <-resultChan:
 		if propagatedPositions == nil {
-			return nil, fmt.Errorf("received nil propagated positions for NORAD ID %s", noradID)
+			return nil, fmt.Errorf("received nil propagated positions for SPACE ID %s", spaceID)
 		}
 
 		// Log the first and last positions
@@ -68,11 +69,11 @@ func (s *SatelliteService) Propagate(ctx context.Context, noradID string, durati
 			firstPos := propagatedPositions[0]
 			lastPos := propagatedPositions[len(propagatedPositions)-1]
 
-			log.Tracef("First Position for NORAD ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
-				noradID, firstPos.Latitude, firstPos.Longitude, firstPos.Altitude, firstPos.Time)
+			log.Tracef("First Position for SPACE ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
+				spaceID, firstPos.Latitude, firstPos.Longitude, firstPos.Altitude, firstPos.Time)
 
-			log.Tracef("Last Position for NORAD ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
-				noradID, lastPos.Latitude, lastPos.Longitude, lastPos.Altitude, lastPos.Time)
+			log.Tracef("Last Position for SPACE ID %s: Latitude: %f, Longitude: %f, Altitude: %f, Time: %s",
+				spaceID, lastPos.Latitude, lastPos.Longitude, lastPos.Altitude, lastPos.Time)
 		}
 
 		// Convert the API response to the internal SatellitePosition format
@@ -81,7 +82,7 @@ func (s *SatelliteService) Propagate(ctx context.Context, noradID string, durati
 			// Parse the time from the API response
 			parsedTime, err := time.Parse(time.RFC3339, pos.Time)
 			if err != nil {
-				return nil, fmt.Errorf("failed to parse time %s for NORAD ID %s: %w", pos.Time, noradID, err)
+				return nil, fmt.Errorf("failed to parse time %s for SPACE ID %s: %w", pos.Time, spaceID, err)
 			}
 
 			positions = append(positions, xspace.SatellitePosition{
@@ -95,20 +96,20 @@ func (s *SatelliteService) Propagate(ctx context.Context, noradID string, durati
 
 	case err := <-errorChan:
 		if err != nil {
-			return nil, fmt.Errorf("failed to fetch propagated positions for NORAD ID %s: %w", noradID, err)
+			return nil, fmt.Errorf("failed to fetch propagated positions for SPACE ID %s: %w", spaceID, err)
 		}
 	case <-ctx.Done():
-		return nil, fmt.Errorf("operation canceled for NORAD ID %s: %w", noradID, ctx.Err())
+		return nil, fmt.Errorf("operation canceled for SPACE ID %s: %w", spaceID, ctx.Err())
 	}
 
-	return nil, fmt.Errorf("unexpected end of Propagate function for NORAD ID %s", noradID)
+	return nil, fmt.Errorf("unexpected end of Propagate function for SPACE ID %s", spaceID)
 }
 
-// GetSatelliteByNoradID retrieves a satellite by NORAD ID.
-func (s *SatelliteService) GetSatelliteByNoradID(ctx context.Context, noradID string) (satellite domain.Satellite, err error) {
-	ctx, span := tracing.NewSpan(ctx, "GetSatelliteByNoradID")
+// GetSatelliteBySpaceID retrieves a satellite by SPACE ID.
+func (s *SatelliteService) GetSatelliteBySpaceID(ctx context.Context, spaceID string) (satellite domain.Satellite, err error) {
+	ctx, span := tracing.NewSpan(ctx, "GetSatelliteBySpaceID")
 	defer span.EndWithError(err)
-	return s.repo.FindByNoradID(ctx, noradID)
+	return s.repo.FindBySpaceID(ctx, spaceID)
 }
 
 // ListAllSatellites retrieves all stored satellites.
@@ -136,7 +137,7 @@ func (s *SatelliteService) FetchAndStoreAllSatellites(ctx context.Context, maxCo
 		// Use the updated constructor to create a Satellite
 		satellite, err := domain.NewSatelliteFromStatCat(
 			rawSatellite.Name,
-			rawSatellite.NoradID,
+			rawSatellite.SpaceID,
 			domain.Other, // Default type; adjust based on metadata if available
 			&rawSatellite.LaunchDate,
 			rawSatellite.DecayDate,
@@ -151,7 +152,7 @@ func (s *SatelliteService) FetchAndStoreAllSatellites(ctx context.Context, maxCo
 			rawSatellite.Altitude,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create satellite for NORAD ID %s: %w", rawSatellite.NoradID, err)
+			return nil, fmt.Errorf("failed to create satellite for SPACE ID %s: %w", rawSatellite.SpaceID, err)
 		}
 		// Add the satellite to the result list
 		storedSatellites = append(storedSatellites, satellite)
@@ -210,4 +211,31 @@ func (s *SatelliteService) ListSatelliteInfoWithPagination(ctx context.Context, 
 	}
 
 	return satelliteInfos, totalRecords, nil
+}
+
+// GetAndLockSatellites fetches and locks satellites for processing
+func (s *SatelliteService) GetAndLockSatellites(ctx context.Context, processorName string) ([]string, error) {
+
+	maxNbSatellites, err := s.globalPropRepo.GetMaxSatellitesPerEventDetector(ctx, repository.MaxSatellitesPerEventDetectorDefault)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch global property: %w", err)
+	}
+
+	lockedSatellites, err := s.repo.FetchAndLockSatellites(ctx, processorName, maxNbSatellites)
+	if err != nil {
+		return nil, fmt.Errorf("failed to lock satellites: %w", err)
+	}
+
+	if len(lockedSatellites) == 0 {
+		log.Warn("No satellites available for locking")
+		return nil, nil
+	}
+
+	log.Infof("Successfully locked %d satellites", len(lockedSatellites))
+	return lockedSatellites, nil
+}
+
+// UnlockSatellites releases the locks after processing is complete
+func (s *SatelliteService) UnlockSatellites(ctx context.Context, satelliteIDs []string) error {
+	return s.repo.ReleaseSatellites(ctx, satelliteIDs)
 }

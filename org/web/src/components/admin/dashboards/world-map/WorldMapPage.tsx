@@ -13,7 +13,7 @@ const WorldMapPage: React.FC = () => {
     const [zoomTo, setZoomTo] = useState<boolean>(false);
     const [appliedSearchQuery, setAppliedSearchQuery] = useState<string>("");
     const [satellitePositionData, setSatellitePositionData] = useState<Record<string, OrbitDataItem[]> | null>(null);
-    const [selectedSatelliteNoradID, setSelectedSatelliteNoradID] = useState<string | null>(null); // Track the selected satellite
+    const [selectedSatelliteSpaceID, setSelectedSatelliteSpaceID] = useState<string | null>(null); // Track the selected satellite
 
     const handleTileSelection = (tileIDs: string[], zoomTo: boolean) => {
         setSelectedTileIDs(tileIDs);
@@ -26,9 +26,9 @@ const WorldMapPage: React.FC = () => {
         console.log(tileIDs.length);
     };
 
-    const handleSatelliteSelection = (noradID: string, positionData: Record<string, OrbitDataItem[]>) => {
-        console.log("Selected Satellite NORAD ID:", noradID);
-        setSelectedSatelliteNoradID(noradID);
+    const handleSatelliteSelection = (spaceID: string, positionData: Record<string, OrbitDataItem[]>) => {
+        console.log("Selected Satellite SPACE ID:", spaceID);
+        setSelectedSatelliteSpaceID(spaceID);
         setSatellitePositionData(positionData);
     };
 
@@ -43,8 +43,8 @@ const WorldMapPage: React.FC = () => {
 
     // Filter position data to only include the selected satellite
     const filteredSatellitePositionData =
-        selectedSatelliteNoradID && satellitePositionData
-            ? { [selectedSatelliteNoradID]: satellitePositionData[selectedSatelliteNoradID] }
+        selectedSatelliteSpaceID && satellitePositionData
+            ? { [selectedSatelliteSpaceID]: satellitePositionData[selectedSatelliteSpaceID] }
             : null;
 
     return (
@@ -92,7 +92,7 @@ const WorldMapPage: React.FC = () => {
                     <Box flex="1" h="100%" overflow="hidden">
                         <SatelliteTableView
                             searchQuery={appliedSearchQuery}
-                            onSelectSatelliteID={(noradID) => console.log("Satellite Selected:", noradID)}
+                            onSelectSatelliteID={(spaceID) => console.log("Satellite Selected:", spaceID)}
                             onTilesSelected={(tileIDs, zoomTo) => handleSatelliteTileSelection(tileIDs, zoomTo)}
                             onPropagateSatellite={null}
                             onTargetSatellite={handleSatelliteSelection} // Pass the handler to SatelliteTableView

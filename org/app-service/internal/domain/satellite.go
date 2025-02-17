@@ -33,7 +33,7 @@ func (t SatelliteType) IsValid() error {
 type Satellite struct {
 	ModelBase
 	Name           string
-	NoradID        string
+	SpaceID        string
 	Type           SatelliteType
 	LaunchDate     *time.Time // Added field for launch date
 	DecayDate      *time.Time // Added field for decay date, if applicable
@@ -52,7 +52,7 @@ type Satellite struct {
 // NewSatelliteFromStatCat creates a new Satellite instance with optional SATCAT data.
 func NewSatelliteFromStatCat(
 	name string,
-	noradID string,
+	spaceID string,
 	satType SatelliteType,
 	launchDate *time.Time,
 	decayDate *time.Time,
@@ -81,7 +81,7 @@ func NewSatelliteFromStatCat(
 			IsFavourite: false,
 		},
 		Name:           name,
-		NoradID:        noradID,
+		SpaceID:        spaceID,
 		Type:           satType,
 		LaunchDate:     launchDate,
 		DecayDate:      decayDate,
@@ -97,7 +97,7 @@ func NewSatelliteFromStatCat(
 }
 
 // NewSatellite creates a new Satellite instance.
-func NewSatellite(name string, noradID string, satType SatelliteType, isFavourite bool, isActive bool, createdAt time.Time) (Satellite, error) {
+func NewSatellite(name string, spaceID string, satType SatelliteType, isFavourite bool, isActive bool, createdAt time.Time) (Satellite, error) {
 	if err := satType.IsValid(); err != nil {
 		return Satellite{}, err
 	}
@@ -112,7 +112,7 @@ func NewSatellite(name string, noradID string, satType SatelliteType, isFavourit
 			IsFavourite: isFavourite,
 		},
 		Name:    name,
-		NoradID: noradID,
+		SpaceID: spaceID,
 		Type:    satType,
 	}, nil
 }
@@ -120,11 +120,11 @@ func NewSatellite(name string, noradID string, satType SatelliteType, isFavourit
 // SatelliteRepository defines the interface for Satellite operations.
 type SatelliteRepository interface {
 	// Existing Methods
-	FindByNoradID(ctx context.Context, noradID string) (Satellite, error)
+	FindBySpaceID(ctx context.Context, spaceID string) (Satellite, error)
 	FindAll(ctx context.Context) ([]Satellite, error)
 	Save(ctx context.Context, satellite Satellite) error
 	Update(ctx context.Context, satellite Satellite) error
-	DeleteByNoradID(ctx context.Context, noradID string) error
+	DeleteBySpaceID(ctx context.Context, spaceID string) error
 	SaveBatch(ctx context.Context, satellites []Satellite) error
 	FindAllWithPagination(ctx context.Context, page int, pageSize int, searchRequest *SearchRequest) ([]Satellite, int64, error)
 	FindSatelliteInfoWithPagination(ctx context.Context, page int, pageSize int, searchRequest *SearchRequest) ([]SatelliteInfo, int64, error)

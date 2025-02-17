@@ -18,7 +18,7 @@ type ModelBase struct {
 }
 
 // NewModelBase creates a new instance.
-func NewModelBase(name string, noradID string, satType SatelliteType, isFavourite bool, isActive bool, createdAt time.Time) (ModelBase, error) {
+func NewModelBase(name string, spaceID string, satType SatelliteType, isFavourite bool, isActive bool, createdAt time.Time) (ModelBase, error) {
 	if err := satType.IsValid(); err != nil {
 		return ModelBase{}, err
 	}

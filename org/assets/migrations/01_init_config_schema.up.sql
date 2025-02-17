@@ -39,7 +39,7 @@ CREATE TABLE config_schema.satellites (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP NULL,
     name VARCHAR(255) NOT NULL,
-    norad_id VARCHAR(255) UNIQUE NOT NULL,
+    space_id VARCHAR(255) UNIQUE NOT NULL,
     type VARCHAR(255),
     launch_date DATE,
     decay_date DATE,
@@ -60,13 +60,13 @@ CREATE TABLE config_schema.tles (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP NULL,
-    norad_id VARCHAR(255) NOT NULL,
+    space_id VARCHAR(255) NOT NULL,
     line1 VARCHAR(255) NOT NULL,
     line2 VARCHAR(255) NOT NULL,
     epoch TIMESTAMP NOT NULL
 );
 
-CREATE INDEX tle_norad_id_idx ON config_schema.tles(norad_id);
+CREATE INDEX tle_space_id_idx ON config_schema.tles(space_id);
 
 -- Create Tile table
 CREATE TABLE config_schema.tiles (
@@ -90,7 +90,7 @@ CREATE TABLE config_schema.tile_satellite_mappings (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP NULL,
-    norad_id VARCHAR(255) NOT NULL,
+    space_id VARCHAR(255) NOT NULL,
     tile_id UUID NOT NULL,
     tle_id UUID NOT NULL,
     context_id UUID NOT NULL,
@@ -129,7 +129,7 @@ CREATE TABLE config_schema.context_tiles (
 );
 
 -- Add indexes
-CREATE INDEX idx_tile_satellite_mappings_norad_id ON config_schema.tile_satellite_mappings(norad_id);
+CREATE INDEX idx_tile_satellite_mappings_space_id ON config_schema.tile_satellite_mappings(space_id);
 CREATE INDEX idx_tile_satellite_mappings_tile_id ON config_schema.tile_satellite_mappings(tile_id);
 CREATE INDEX idx_tile_satellite_mappings_tle_id ON config_schema.tile_satellite_mappings(tle_id);
 CREATE INDEX idx_tile_satellite_mappings_context_id ON config_schema.tile_satellite_mappings(context_id);

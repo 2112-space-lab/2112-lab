@@ -28,7 +28,7 @@ func (e *EventEmitter) PublishEvent(event model.EventRoot) error {
 		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
-	err = e.rabbitClient.PublishMessage(body)
+	err = e.rabbitClient.PublishMessage(body, rabbitmq.NewHeader())
 	if err != nil {
 		return fmt.Errorf("failed to publish event: %w", err)
 	}

@@ -32,7 +32,7 @@ func NewTLERepository(db *data.Database, redisClient *redis.RedisClient) TleRepo
 func mapToDomainTLE(model models.TLE) domain.TLE {
 	return domain.TLE{
 		ID:      model.ID,
-		NoradID: model.NoradID,
+		SpaceID: model.SpaceID,
 		Line1:   model.Line1,
 		Line2:   model.Line2,
 		Epoch:   model.Epoch,
@@ -42,7 +42,7 @@ func mapToDomainTLE(model models.TLE) domain.TLE {
 // mapToModelTLE converts a domain.TLE to a models.TLE.
 func mapToModelTLE(domainTLE domain.TLE) models.TLE {
 	return models.TLE{
-		NoradID: domainTLE.NoradID,
+		SpaceID: domainTLE.SpaceID,
 		Line1:   domainTLE.Line1,
 		Line2:   domainTLE.Line2,
 		Epoch:   domainTLE.Epoch,
@@ -50,8 +50,8 @@ func mapToModelTLE(domainTLE domain.TLE) models.TLE {
 }
 
 // GetTle retrieves a TLE from cache or database.
-func (r *TleRepository) GetTle(ctx context.Context, noradID string) (domain.TLE, error) {
-	key := fmt.Sprintf("satellite:tle:%s", noradID)
+func (r *TleRepository) GetTle(ctx context.Context, spaceID string) (domain.TLE, error) {
+	key := fmt.Sprintf("satellite:tle:%s", spaceID)
 
 	// Check Redis cache
 	data, err := r.redisClient.HGetAll(ctx, key)
@@ -59,7 +59,7 @@ func (r *TleRepository) GetTle(ctx context.Context, noradID string) (domain.TLE,
 		epoch, parseErr := xtime.ParseEpoch(data["epoch"])
 		if parseErr == nil {
 			return domain.TLE{
-				ID:    noradID,
+				ID:    spaceID,
 				Line1: data["line_1"],
 				Line2: data["line_2"],
 				Epoch: epoch,
@@ -69,7 +69,7 @@ func (r *TleRepository) GetTle(ctx context.Context, noradID string) (domain.TLE,
 
 	// Fallback to database
 	var modelTLE models.TLE
-	result := r.db.DbHandler.First(&modelTLE, "norad_id = ?", noradID)
+	result := r.db.DbHandler.First(&modelTLE, "space_id = ?", spaceID)
 	if result.Error != nil {
 		return domain.TLE{}, result.Error
 	}
@@ -130,7 +130,7 @@ func (r *TleRepository) UpdateTleBatch(ctx context.Context, tles []domain.TLE) e
 				"line_1": tle.Line1,
 				"line_2": tle.Line2,
 				"epoch":  tle.Epoch,
-				"id":     tle.NoradID,
+				"id":     tle.SpaceID,
 			}
 
 			// Update Redis cache
@@ -139,7 +139,7 @@ func (r *TleRepository) UpdateTleBatch(ctx context.Context, tles []domain.TLE) e
 			}
 			// Publish to the message broker
 			if err := r.publishTleToBroker(ctx, tle); err != nil {
-				log.Errorf("Failed to publish TLE to message broker for NORAD ID %s: %v\n", tle.NoradID, err)
+				log.Errorf("Failed to publish TLE to message broker for SPACE ID %s: %v\n", tle.SpaceID, err)
 			}
 		}
 	}
@@ -251,7 +251,7 @@ func (r *TleRepository) updateCache(ctx context.Context, key string, tle domain.
 		"line_1": tle.Line1,
 		"line_2": tle.Line2,
 		"epoch":  tle.Epoch,
-		"id":     tle.NoradID,
+		"id":     tle.SpaceID,
 	}
 	if err := r.redisClient.HSet(ctx, key, cacheData); err != nil {
 		log.Errorf("Failed to update Redis cache for key %s: %v\n", key, err)
@@ -261,7 +261,7 @@ func (r *TleRepository) updateCache(ctx context.Context, key string, tle domain.
 // publishTleToBroker sends TLE updates to the message broker.
 func (r *TleRepository) publishTleToBroker(ctx context.Context, tle domain.TLE) error {
 	message := map[string]interface{}{
-		"id":     tle.NoradID,
+		"id":     tle.SpaceID,
 		"line_1": tle.Line1,
 		"line_2": tle.Line2,
 		"epoch":  tle.Epoch,
