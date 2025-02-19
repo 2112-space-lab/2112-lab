@@ -154,8 +154,6 @@ func (c *ContextService) FindAllWithPagination(ctx context.Context, page int, pa
 	return contexts, nil
 }
 
-// Setters and Unsetters for timestamps
-
 func (c *ContextService) SetActivatedAt(ctx context.Context, name domain.GameContextName, activatedAt time.Time) (err error) {
 	ctx, span := tracing.NewSpan(ctx, "SetActivatedAt")
 	defer span.EndWithError(err)

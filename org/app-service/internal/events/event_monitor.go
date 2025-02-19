@@ -10,6 +10,7 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/clients/rabbitmq"
 	model "github.com/org/2112-space-lab/org/app-service/internal/graphql/models/generated"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -26,24 +27,39 @@ type EventMonitor struct {
 }
 
 // NewEventMonitor initializes an EventMonitor.
-func NewEventMonitor(rabbitClient *rabbitmq.RabbitMQClient) *EventMonitor {
+func NewEventMonitor(ctx context.Context, rabbitClient *rabbitmq.RabbitMQClient) (e *EventMonitor, err error) {
+	_, span := tracing.NewSpan(ctx, "EventMonitor.NewEventMonitor")
+	defer span.EndWithError(err)
+
 	return &EventMonitor{
 		rabbitClient:  rabbitClient,
 		eventQueue:    make(chan []byte, DefaultEventQueueSize),
 		eventHandlers: make(map[model.EventType][]EventHandler),
-	}
+	}, nil
 }
 
 // RegisterHandler associates an event type with a handler.
-func (m *EventMonitor) RegisterHandler(ctx context.Context, eventType model.EventType, handler EventHandler) {
+func (m *EventMonitor) RegisterHandler(ctx context.Context, eventType model.EventType, handler EventHandler) (err error) {
+	_, span := tracing.NewSpan(ctx, "EventMonitor.RegisterHandler")
+	defer span.EndWithError(err)
+
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
+
+	if m.eventHandlers == nil {
+		m.eventHandlers = make(map[model.EventType][]EventHandler)
+	}
+
 	m.eventHandlers[eventType] = append(m.eventHandlers[eventType], handler)
 	log.Infof("✅ Registered handler for event: %s", eventType)
+	return nil
 }
 
 // StartMonitoring continuously listens for RabbitMQ messages and dispatches events with automatic reconnection.
-func (m *EventMonitor) StartMonitoring(ctx context.Context, header *rabbitmq.Header) error {
+func (m *EventMonitor) StartMonitoring(ctx context.Context, header *rabbitmq.Header) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "StartMonitoring")
+	defer span.EndWithError(err)
+
 	log.Info("📡 Event Monitor started. Waiting for messages...")
 
 	go m.processEvents(ctx)

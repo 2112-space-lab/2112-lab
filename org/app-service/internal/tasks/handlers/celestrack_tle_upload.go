@@ -12,6 +12,7 @@ import (
 	model "github.com/org/2112-space-lab/org/app-service/internal/graphql/models/generated"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
 // TleServiceClient defines an interface for fetching TLE data
@@ -54,7 +55,10 @@ func (h *CelestrackTleUploadHandler) GetTask() Task {
 }
 
 // Run executes the task manually or via an event
-func (h *CelestrackTleUploadHandler) Run(ctx context.Context, args map[string]string) error {
+func (h *CelestrackTleUploadHandler) Run(ctx context.Context, args map[string]string) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "Run")
+	defer span.EndWithError(err)
+
 	category, ok := args["category"]
 	if !ok || category == "" {
 		return fmt.Errorf("missing required argument: category")
@@ -91,12 +95,14 @@ func (h *CelestrackTleUploadHandler) Run(ctx context.Context, args map[string]st
 
 	log.Debugf("✅ Successfully processed %d TLEs for category %s", len(tles), category)
 
-	h.emitTleProcessedEvent(category, maxCount, len(tles))
-	return nil
+	err = h.emitTleProcessedEvent(ctx, category, maxCount, len(tles))
+	return err
 }
 
 // emitTleProcessedEvent sends a completion event
-func (h *CelestrackTleUploadHandler) emitTleProcessedEvent(category string, maxRequested, processed int) {
+func (h *CelestrackTleUploadHandler) emitTleProcessedEvent(ctx context.Context, category string, maxRequested, processed int) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "emitTleProcessedEvent")
+	defer span.EndWithError(err)
 	eventPayload := map[string]interface{}{
 		"category":      category,
 		"maxRequested":  maxRequested,
@@ -110,9 +116,10 @@ func (h *CelestrackTleUploadHandler) emitTleProcessedEvent(category string, maxR
 		Payload:   string(eventData),
 	}
 
-	if err := h.eventEmitter.PublishEvent(event); err != nil {
+	if err := h.eventEmitter.PublishEvent(ctx, event); err != nil {
 		log.Errorf("❌ Failed to emit event: %v", err)
-	} else {
-		log.Tracef("📡 Event emitted: TLE_UPLOAD_COMPLETED for category %s", category)
+		return err
 	}
+	log.Tracef("📡 Event emitted: TLE_UPLOAD_COMPLETED for category %s", category)
+	return nil
 }

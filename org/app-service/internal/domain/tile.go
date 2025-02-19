@@ -10,7 +10,6 @@ import (
 
 // TileRepository defines the interface for Tile repository operations.
 type TileRepository interface {
-	// Existing methods
 	FindByQuadkey(ctx context.Context, key string) (*Tile, error)                                                            // Find a tile by Quadkey
 	FindBySpatialLocation(ctx context.Context, lat, lon float64) (*Tile, error)                                              // Find a tile by spatial location
 	FindTilesInRegion(ctx context.Context, contextID string, minLat, minLon, maxLat, maxLon float64) ([]Tile, error)         // Find tiles intersecting a region
@@ -22,8 +21,6 @@ type TileRepository interface {
 	DeleteBySpatialLocation(ctx context.Context, lat float64, lon float64) error                                             // Delete a tile by spatial location
 	FindTilesVisibleFromLine(ctx context.Context, sat Satellite, points []SatellitePosition) ([]TileSatelliteMapping, error) // Find tiles visible from a satellite trajectory
 	FindTilesIntersectingLocation(ctx context.Context, contextID string, lat, lon, radius float64) ([]Tile, error)           // Find tiles intersecting a location with a radius
-
-	// New methods for context support
 	AssociateTileWithContext(ctx context.Context, contextID string, tileID string) error // Associate a tile with a context
 	GetTilesByContext(ctx context.Context, contextID string) ([]Tile, error)             // Retrieve all tiles associated with a context
 	RemoveTileFromContext(ctx context.Context, contextID string, tileID string) error    // Remove a tile from a context
@@ -41,7 +38,6 @@ type Tile struct {
 	Vertices  []xpolygon.Point // Vertices representing the boundary of the tile
 }
 
-// NewTile constructor
 // NewTile constructor
 func NewTile(polygon xpolygon.Polygon, createdAt time.Time, isFavourite bool, isActive bool, displayName string) Tile {
 	return Tile{

@@ -195,7 +195,9 @@ func (s *SatelliteService) ListSatelliteInfoWithPagination(ctx context.Context, 
 }
 
 // GetAndLockSatellites fetches and locks satellites for processing
-func (s *SatelliteService) GetAndLockSatellites(ctx context.Context, processorName string) ([]string, error) {
+func (s *SatelliteService) GetAndLockSatellites(ctx context.Context, processorName string) (keys []string, err error) {
+	ctx, span := tracing.NewSpan(ctx, "GetAndLockSatellites")
+	defer span.EndWithError(err)
 
 	maxNbSatellites, err := s.globalPropRepo.GetMaxSatellitesPerEventDetector(ctx, repository.MaxSatellitesPerEventDetectorDefault)
 	if err != nil {
@@ -217,6 +219,8 @@ func (s *SatelliteService) GetAndLockSatellites(ctx context.Context, processorNa
 }
 
 // UnlockSatellites releases the locks after processing is complete
-func (s *SatelliteService) UnlockSatellites(ctx context.Context, satelliteIDs []string) error {
+func (s *SatelliteService) UnlockSatellites(ctx context.Context, satelliteIDs []string) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "UnlockSatellites")
+	defer span.EndWithError(err)
 	return s.repo.ReleaseSatellites(ctx, satelliteIDs)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/dependencies"
 	"github.com/org/2112-space-lab/org/app-service/internal/events"
 	"github.com/org/2112-space-lab/org/app-service/internal/tasks/handlers"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
 // TaskHandler definition
@@ -21,9 +22,19 @@ type TaskMonitor struct {
 }
 
 // TaskMonitor constructor
-func NewTaskMonitor(dependencies *dependencies.Dependencies) (TaskMonitor, error) {
-	eventMonitor := events.NewEventMonitor(dependencies.Clients.RabbitMQClient)
-	eventEmitter := events.NewEventEmitter(dependencies.Clients.RabbitMQClient)
+func NewTaskMonitor(ctx context.Context, dependencies *dependencies.Dependencies) (t TaskMonitor, err error) {
+	ctx, span := tracing.NewSpan(ctx, "TaskMonitor.NewTaskMonitor")
+	defer span.EndWithError(err)
+
+	eventMonitor, err := events.NewEventMonitor(ctx, dependencies.Clients.RabbitMQClient)
+	if err != nil {
+		return t, err
+	}
+
+	eventEmitter, err := events.NewEventEmitter(ctx, dependencies.Clients.RabbitMQClient)
+	if err != nil {
+		return t, err
+	}
 
 	celestrackTleUpload := handlers.NewCelestrackTleUploadHandler(
 		dependencies.Repositories.SatelliteRepo,
@@ -57,8 +68,11 @@ func NewTaskMonitor(dependencies *dependencies.Dependencies) (TaskMonitor, error
 		dependencies.Clients.RedisClient,
 	)
 
-	eventDetector := handlers.NewEventDetector(
-		eventEmitter, eventMonitor, dependencies)
+	eventDetector, err := handlers.NewEventDetector(
+		ctx, eventEmitter, eventMonitor, dependencies)
+	if err != nil {
+		return t, err
+	}
 
 	tasks := map[handlers.TaskName]TaskHandler{
 		celestrackTleUpload.GetTask().Name:       &celestrackTleUpload,
@@ -70,12 +84,15 @@ func NewTaskMonitor(dependencies *dependencies.Dependencies) (TaskMonitor, error
 	}
 	return TaskMonitor{
 		Tasks: tasks,
-	}, nil
+	}, err
 }
 
 // Process execute processor
-func (t *TaskMonitor) Process(ctx context.Context, taskName handlers.TaskName, args map[string]string) error {
-	handler, err := t.GetMatchingTask(taskName)
+func (t *TaskMonitor) Process(ctx context.Context, taskName handlers.TaskName, args map[string]string) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "TaskMonitor.Process")
+	defer span.EndWithError(err)
+
+	handler, err := t.GetMatchingTask(ctx, taskName)
 	if err != nil {
 		return err
 	}
@@ -83,7 +100,10 @@ func (t *TaskMonitor) Process(ctx context.Context, taskName handlers.TaskName, a
 }
 
 // GetMatchingTask finds matching task
-func (t *TaskMonitor) GetMatchingTask(taskName handlers.TaskName) (task TaskHandler, err error) {
+func (t *TaskMonitor) GetMatchingTask(ctx context.Context, taskName handlers.TaskName) (task TaskHandler, err error) {
+	_, span := tracing.NewSpan(ctx, "TaskMonitor.GetMatchingTask")
+	defer span.EndWithError(err)
+
 	hh, ok := t.Tasks[taskName]
 	if !ok {
 		return task, fmt.Errorf("task no found for [%s]", taskName)
@@ -92,8 +112,11 @@ func (t *TaskMonitor) GetMatchingTask(taskName handlers.TaskName) (task TaskHand
 }
 
 // RunTaskAsGoroutine runs as go routine
-func (t *TaskMonitor) RunTaskAsGoroutine(ctx context.Context, taskName handlers.TaskName, args map[string]string) error {
-	handler, err := t.GetMatchingTask(taskName)
+func (t *TaskMonitor) RunTaskAsGoroutine(ctx context.Context, taskName handlers.TaskName, args map[string]string) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "TaskMonitor.RunTaskAsGoroutine")
+	defer span.EndWithError(err)
+
+	handler, err := t.GetMatchingTask(ctx, taskName)
 	if err != nil {
 		return err
 	}

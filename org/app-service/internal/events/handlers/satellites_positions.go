@@ -14,6 +14,7 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/services"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
 // SatellitePositionHandler listens for SATELLITE_TLE_PROPAGATED events.
@@ -41,7 +42,10 @@ func NewSatellitePositionHandler(
 }
 
 // Run processes the SATELLITE_TLE_PROPAGATED event.
-func (h *SatellitePositionHandler) Run(ctx context.Context, event model.EventRoot) error {
+func (h *SatellitePositionHandler) Run(ctx context.Context, event model.EventRoot) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "Run")
+	defer span.EndWithError(err)
+
 	log.Infof("📡 Processing SatelliteTlePropagated event: UID=%s", event.EventUID)
 
 	payload, err := h.Parse(event.Payload)
@@ -54,7 +58,10 @@ func (h *SatellitePositionHandler) Run(ctx context.Context, event model.EventRoo
 }
 
 // HandleSatellitePositionEvent fetches positions from Redis, updates the in-memory list, and starts simulation.
-func (h *SatellitePositionHandler) HandleSatellitePositionEvent(ctx context.Context, event model.EventRoot, payload *model.SatelliteTlePropagated) error {
+func (h *SatellitePositionHandler) HandleSatellitePositionEvent(ctx context.Context, event model.EventRoot, payload *model.SatelliteTlePropagated) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "HandleSatellitePositionEvent")
+	defer span.EndWithError(err)
+
 	log.Infof("🔍 Fetching positions from Redis for key: %s", payload.RedisKey)
 	positionsJSON, err := h.redisClient.Get(ctx, payload.RedisKey)
 	if err != nil {
@@ -125,7 +132,10 @@ func (h *SatellitePositionHandler) HandleSatellitePositionEvent(ctx context.Cont
 }
 
 // startSimulation simulates the movement of the satellite over time.
-func (h *SatellitePositionHandler) startSimulation(ctx context.Context, satelliteKey string, startTime xtime.UtcTime, simulationInterval time.Duration, simulationDuration time.Duration, positionIndex int, positions []model.SatellitePosition) error {
+func (h *SatellitePositionHandler) startSimulation(ctx context.Context, satelliteKey string, startTime xtime.UtcTime, simulationInterval time.Duration, simulationDuration time.Duration, positionIndex int, positions []model.SatellitePosition) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "startSimulation")
+	defer span.EndWithError(err)
+
 	log.Infof("🛰 Starting simulation for satellite %s", satelliteKey)
 
 	simulationSteps, err := h.globalRepo.GetEventDetectorSimulationSteps(ctx, repository.DefaultSimulationSteps)
@@ -150,7 +160,7 @@ func (h *SatellitePositionHandler) startSimulation(ctx context.Context, satellit
 			return err
 		}
 
-		h.eventEmitter.PublishEvent(model.EventRoot{
+		h.eventEmitter.PublishEvent(ctx, model.EventRoot{
 			EventType: string(model.EventTypeSatellitePositionUpdated),
 			EventUID:  fmt.Sprintf("%s-%d", satelliteKey, positionIndex),
 			Payload:   string(eventJSON),

@@ -1,10 +1,12 @@
 package rabbitmq
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
+	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -119,8 +121,10 @@ func (r *RabbitMQClient) DeclareQueue(queueName string) (amqp.Queue, error) {
 }
 
 // PublishMessage sends a message with dynamic headers.
-func (r *RabbitMQClient) PublishMessage(body []byte, headers *Header) error {
-	err := r.channel.Publish(
+func (r *RabbitMQClient) PublishMessage(ctx context.Context, body []byte, headers *Header) (err error) {
+	_, span := tracing.NewSpan(ctx, "PublishMessage")
+	defer span.EndWithError(err)
+	err = r.channel.Publish(
 		r.exchange,
 		DefaultKey,
 		DefaultMandatory,

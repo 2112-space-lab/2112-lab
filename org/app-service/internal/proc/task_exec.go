@@ -21,7 +21,7 @@ func TaskExec(ctx context.Context, args []string) {
 	taskArgs := xutils.ResolveArgs(args[1:])
 
 	deps := dependencies.NewDependencies(config.Env)
-	monitor, err := tasks.NewTaskMonitor(deps)
+	monitor, err := tasks.NewTaskMonitor(ctx, deps)
 	if err != nil {
 		log.Println(err.Error())
 		return
