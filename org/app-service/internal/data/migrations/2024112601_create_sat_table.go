@@ -55,6 +55,7 @@ func init() {
 				Perigee        *float64   `gorm:"type:float"`
 				RCS            *float64   `gorm:"type:float"`
 				Altitude       *float64   `gorm:"type:float"`
+				OrbitType      string     `gorm:"size:255;not null"`
 			}
 
 			// Define the TLE table

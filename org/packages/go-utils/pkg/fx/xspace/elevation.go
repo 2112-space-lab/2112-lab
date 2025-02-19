@@ -8,6 +8,16 @@ import (
 	xpolygon "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xpolygon"
 )
 
+type OrbitType string
+
+const (
+	OrbitTypeUnknown OrbitType = "UNKNOWN"
+	OrbitTypeLEO     OrbitType = "LEO" // Low Earth Orbit: 160 - 2000 km
+	OrbitTypeMEO     OrbitType = "MEO" // Medium Earth Orbit: 2000 - 35786 km
+	OrbitTypeGEO     OrbitType = "GEO" // Geostationary Orbit: ~35786 km
+	OrbitTypeHEO     OrbitType = "HEO" // High Earth Orbit: > 35786 km
+)
+
 // LatLonToCartesian converts latitude, longitude, and altitude to Cartesian coordinates
 func LatLonToCartesian(latitude, longitude, altitude float64) (float64, float64, float64) {
 
@@ -115,4 +125,21 @@ func CalculateOptimalTimestep(altitude, tileRadius float64) time.Duration {
 	optimalTimestep := timeOverTile * fraction
 
 	return time.Duration(optimalTimestep) * time.Second
+}
+
+// ComputeOrbitType determines the orbit type based on altitude in kilometers.
+func ComputeOrbitType(alt float64) OrbitType {
+
+	switch {
+	case alt < 160:
+		return OrbitTypeUnknown
+	case alt < 2000:
+		return OrbitTypeLEO
+	case alt < 35786:
+		return OrbitTypeMEO
+	case alt == 35786:
+		return OrbitTypeGEO
+	default:
+		return OrbitTypeHEO
+	}
 }

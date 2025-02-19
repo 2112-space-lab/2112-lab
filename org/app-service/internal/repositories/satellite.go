@@ -120,21 +120,18 @@ func (r *SatelliteRepository) SaveBatch(ctx context.Context, satellites []domain
 		CreateInBatches(modelsBatch, 100).Error
 }
 
-// FindSatelliteInfoWithPagination retrieves satellites and their TLEs with pagination.
 func (r *SatelliteRepository) FindSatelliteInfoWithPagination(ctx context.Context, page, pageSize int, searchRequest *domain.SearchRequest) ([]domain.SatelliteInfo, int64, error) {
 	var results []SatelliteTLEAggregate
 	var totalRecords int64
 
-	// Calculate the offset for pagination
 	offset := (page - 1) * pageSize
 	if offset < 0 {
 		offset = 0
 	}
 
-	// Build the query to retrieve satellites and their most recent TLEs
 	query := r.db.DbHandler.Table("satellites").
 		Select(`
-			satellites.id, satellites.name, satellites.space_id, satellites.owner,
+			satellites.id, satellites.name, satellites.space_id, satellites.owner, satellites.type,
 			satellites.launch_date, satellites.decay_date, satellites.international_designator,
 			satellites.object_type, satellites.period, satellites.inclination, satellites.apogee,
 			satellites.perigee, satellites.rcs, satellites.altitude, satellites.is_active,
@@ -152,51 +149,42 @@ func (r *SatelliteRepository) FindSatelliteInfoWithPagination(ctx context.Contex
 		) AS latest_tles ON satellites.space_id = latest_tles.space_id`).
 		Where("satellites.deleted_at IS NULL")
 
-	// Apply search filters if a wildcard search is provided
 	if searchRequest != nil && searchRequest.Wildcard != "" {
 		wildcard := "%" + searchRequest.Wildcard + "%"
 		query = query.Where("LOWER(satellites.name) LIKE LOWER(?) OR LOWER(satellites.space_id) LIKE LOWER(?)", wildcard, wildcard)
 	}
 
-	// Count total records
 	if err := query.Count(&totalRecords).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Retrieve paginated results
 	if err := query.Limit(pageSize).Offset(offset).Scan(&results).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Map results to domain objects
 	var satelliteInfos []domain.SatelliteInfo
 	for _, result := range results {
-		// Map satellite fields from the aggregate struct
-		satellite := domain.Satellite{
-			Name:           result.Name,
-			SpaceID:        result.SpaceID,
-			Owner:          result.Owner,
-			LaunchDate:     result.LaunchDate,
-			DecayDate:      result.DecayDate,
-			IntlDesignator: result.IntlDesignator,
-			ObjectType:     result.ObjectType,
-			Period:         result.Period,
-			Inclination:    result.Inclination,
-			Apogee:         result.Apogee,
-			Perigee:        result.Perigee,
-			RCS:            result.RCS,
-			Altitude:       result.Altitude,
-			ModelBase: domain.ModelBase{
-				ID:          result.ID,
-				IsActive:    result.IsActive,
-				CreatedAt:   result.CreatedAt,
-				UpdatedAt:   result.UpdatedAt,
-				ProcessedAt: result.ProcessedAt,
-				IsFavourite: result.IsFavourite,
-			},
+		satellite, err := domain.NewSatelliteFromParameters(
+			result.Name,
+			result.SpaceID,
+			domain.SatelliteType(domain.Other),
+			result.LaunchDate,
+			result.DecayDate,
+			result.IntlDesignator,
+			result.Owner,
+			result.ObjectType,
+			result.Period,
+			result.Inclination,
+			result.Apogee,
+			result.Perigee,
+			result.RCS,
+			result.Altitude,
+		)
+
+		if err != nil {
+			continue
 		}
 
-		// Map TLE data if available
 		var tles []domain.TLE
 		if result.Line1 != nil && result.Line2 != nil && result.TLEUpdatedAt != nil {
 			tles = append(tles, domain.TLE{
@@ -206,7 +194,6 @@ func (r *SatelliteRepository) FindSatelliteInfoWithPagination(ctx context.Contex
 			})
 		}
 
-		// Create SatelliteInfo and append to result list
 		satelliteInfos = append(satelliteInfos, domain.NewSatelliteInfo(satellite, tles))
 	}
 
@@ -335,7 +322,6 @@ func (r *SatelliteRepository) FetchAndLockSatellites(ctx context.Context, locked
 
 	var lockedSatellites []string
 
-	// Execute query and retrieve locked satellite IDs
 	err := r.db.DbHandler.Select(ctx, &lockedSatellites, query, lockedBy, maxNbSatellites)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch and lock satellites: %w", err.Error)

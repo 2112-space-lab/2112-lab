@@ -112,3 +112,28 @@ func ConvertOption[T any, U any](input Option[T], transform func(T) U) Option[U]
 	}
 	return NewValueOption(transform(input.Value))
 }
+
+// ConvertPointer converts a pointer *T to a new object U using a provided mapper function.
+// If the pointer is nil, it returns an empty Option[U].
+func ConvertPointer[T any, U any](ptr *T, mapper func(T) U) Option[U] {
+	if ptr == nil {
+		return NewEmptyOption[U]()
+	}
+	return NewValueOption(mapper(*ptr))
+}
+
+// ConvertToFloatOption *float64 to fx.Option[float64]
+func ConvertToFloatOption(f *float64) Option[float64] {
+	if f == nil {
+		return NewEmptyOption[float64]()
+	}
+	return NewValueOption(*f)
+}
+
+// ConvertToFloatPtr converts fx.Option[float64] to *float64
+func ConvertToFloatPtr(opt Option[float64]) *float64 {
+	if !opt.HasValue {
+		return nil
+	}
+	return &opt.Value
+}

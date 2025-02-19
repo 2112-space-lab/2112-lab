@@ -211,3 +211,20 @@ func (t UtcTime) String() string {
 func (t UtcTime) GoString() string {
 	return string(t.FormatStr(time.RFC3339Nano))
 }
+
+// ConvertToUtcTime *time.Time to xtime.UtcTime before using fx.AsOption
+func ConvertToUtcTime(t *time.Time) fx.Option[UtcTime] {
+	if t == nil {
+		return fx.NewEmptyOption[UtcTime]()
+	}
+	return fx.NewValueOption(NewUtcTimeIgnoreZone(*t))
+}
+
+// ConvertToTimePtr converts fx.Option[xtime.UtcTime] to *time.Time
+func ConvertToTimePtr(opt fx.Option[UtcTime]) *time.Time {
+	if !opt.HasValue {
+		return nil
+	}
+	t := time.Time(opt.Value.Inner())
+	return &t
+}

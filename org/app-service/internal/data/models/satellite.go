@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	fx "github.com/org/2112-space-lab/org/app-service/pkg/option"
+	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
 )
 
 // Satellite represents a satellite database model.
@@ -23,36 +25,33 @@ type Satellite struct {
 	Perigee        *float64   `gorm:"type:float"`               // Perigee altitude in kilometers (optional)
 	RCS            *float64   `gorm:"type:float"`               // Radar cross-section in square meters (optional)
 	Altitude       *float64   `gorm:"type:float"`               // Altitude in kilometers (optional)
+	OrbitType      string     `gorm:"size:255;not null"`
 }
 
-// MapToDomain converts a Satellite database model to a Satellite domain model.
+// MapToSatelliteDomain converts a Satellite database model to a Satellite domain model.
 func MapToSatelliteDomain(s Satellite) domain.Satellite {
-	return domain.Satellite{
-		ModelBase: domain.ModelBase{
-			ID:          s.ID,
-			CreatedAt:   s.CreatedAt,
-			UpdatedAt:   &s.UpdatedAt,
-			DeleteAt:    s.DeleteAt,
-			ProcessedAt: s.ProcessedAt,
-			IsActive:    s.IsActive,
-			IsFavourite: s.IsFavourite,
-			DisplayName: s.DisplayName,
-		},
-		Name:           s.Name,
-		SpaceID:        s.SpaceID,
-		Type:           domain.SatelliteType(s.Type),
-		LaunchDate:     s.LaunchDate,
-		DecayDate:      s.DecayDate,
-		IntlDesignator: s.IntlDesignator,
-		Owner:          s.Owner,
-		ObjectType:     s.ObjectType,
-		Period:         s.Period,
-		Inclination:    s.Inclination,
-		Apogee:         s.Apogee,
-		Perigee:        s.Perigee,
-		RCS:            s.RCS,
-		Altitude:       s.Altitude,
+	domainSatellite, err := domain.NewSatelliteFromParameters(
+		s.Name,
+		s.SpaceID,
+		domain.SatelliteType(s.Type),
+		s.LaunchDate,
+		s.DecayDate,
+		s.IntlDesignator,
+		s.Owner,
+		s.ObjectType,
+		s.Period,
+		s.Inclination,
+		s.Apogee,
+		s.Perigee,
+		s.RCS,
+		s.Altitude,
+	)
+
+	if err != nil {
+		return domain.Satellite{}
 	}
+
+	return domainSatellite
 }
 
 // MapToSatelliteModel converts a Satellite domain model to a Satellite database model.
@@ -61,7 +60,7 @@ func MapToSatelliteModel(d domain.Satellite) Satellite {
 		ModelBase: ModelBase{
 			ID:          d.ModelBase.ID,
 			CreatedAt:   d.ModelBase.CreatedAt,
-			UpdatedAt:   *d.ModelBase.UpdatedAt,
+			UpdatedAt:   *d.ModelBase.UpdatedAt, // Ensure it's not nil
 			DeleteAt:    d.ModelBase.DeleteAt,
 			ProcessedAt: d.ModelBase.ProcessedAt,
 			IsActive:    d.ModelBase.IsActive,
@@ -71,16 +70,17 @@ func MapToSatelliteModel(d domain.Satellite) Satellite {
 		Name:           d.Name,
 		SpaceID:        d.SpaceID,
 		Type:           string(d.Type),
-		LaunchDate:     d.LaunchDate,
-		DecayDate:      d.DecayDate,
+		LaunchDate:     xtime.ConvertToTimePtr(d.LaunchDate),
+		DecayDate:      xtime.ConvertToTimePtr(d.DecayDate),
 		IntlDesignator: d.IntlDesignator,
 		Owner:          d.Owner,
 		ObjectType:     d.ObjectType,
-		Period:         d.Period,
-		Inclination:    d.Inclination,
-		Apogee:         d.Apogee,
-		Perigee:        d.Perigee,
-		RCS:            d.RCS,
-		Altitude:       d.Altitude,
+		Period:         fx.ConvertToFloatPtr(d.PeriodInMinutes),
+		Inclination:    fx.ConvertToFloatPtr(d.InclinationInDegrees),
+		Apogee:         fx.ConvertToFloatPtr(d.ApogeeInKm),
+		Perigee:        fx.ConvertToFloatPtr(d.PerigeeInKm),
+		RCS:            fx.ConvertToFloatPtr(d.RCS),
+		Altitude:       fx.ConvertToFloatPtr(d.Altitude),
+		OrbitType:      string(d.OrbitType),
 	}
 }

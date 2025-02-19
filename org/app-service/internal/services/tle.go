@@ -8,6 +8,7 @@ import (
 	"github.com/org/2112-space-lab/org/app-service/internal/api/mappers"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
 	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
@@ -95,8 +96,8 @@ func (s *TleService) FetchSatelliteMetadata(ctx context.Context, contextName dom
 			SpaceID:    raw.SpaceID,
 			Name:       raw.Name,
 			Owner:      raw.Owner,
-			LaunchDate: &raw.LaunchDate,
-			DecayDate:  raw.DecayDate,
+			LaunchDate: xtime.ConvertToUtcTime(&raw.LaunchDate),
+			DecayDate:  xtime.ConvertToUtcTime(raw.DecayDate),
 			ObjectType: raw.ObjectType,
 			ModelBase: domain.ModelBase{
 				CreatedAt: nowUtc,
