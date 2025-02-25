@@ -17,8 +17,8 @@ const (
 	PropagatorAppName ServiceAppName = "propagator"
 )
 
-type NamedAppEventReference string
-type AppEventRawJSON json.RawMessage
+type NamedEventReference string
+type EventRawJSON json.RawMessage
 
 type EventRoot struct {
 	EventTimeUtc string          `json:"event_time_utc"`    // ISO-8601 string format (matches Python)

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/org/2112-space-lab/org/app-service/internal/api/mappers"
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
+	api_mappers "github.com/org/2112-space-lab/org/app-service/pkg/api"
 	"github.com/org/2112-space-lab/org/go-utils/pkg/fx/xspace"
 )
 
@@ -29,7 +29,7 @@ func NewCelestrackClient(env *config.SEnv) *CelestrackClient {
 }
 
 // FetchTLEFromSatCatByCategory fetches TLE from satcat catalog
-func (client *CelestrackClient) FetchTLEFromSatCatByCategory(ctx context.Context, category string) ([]*mappers.RawTLE, error) {
+func (client *CelestrackClient) FetchTLEFromSatCatByCategory(ctx context.Context, category string) ([]*api_mappers.RawTLE, error) {
 	if category == "" {
 		return nil, fmt.Errorf("category is required")
 	}
@@ -56,7 +56,7 @@ func (client *CelestrackClient) FetchTLEFromSatCatByCategory(ctx context.Context
 	}
 
 	lines := bytes.Split(body, []byte("\n"))
-	var tles []*mappers.RawTLE
+	var tles []*api_mappers.RawTLE
 	for i := 0; i < len(lines)-1; i += 3 {
 		if len(lines[i]) == 0 || len(lines[i+1]) == 0 || len(lines[i+2]) == 0 {
 			continue
@@ -71,7 +71,7 @@ func (client *CelestrackClient) FetchTLEFromSatCatByCategory(ctx context.Context
 
 		line2 := strings.TrimSpace(string(lines[i+2]))
 
-		tles = append(tles, &mappers.RawTLE{
+		tles = append(tles, &api_mappers.RawTLE{
 			SpaceID: spaceID,
 			Line1:   line1,
 			Line2:   line2,
@@ -82,7 +82,7 @@ func (client *CelestrackClient) FetchTLEFromSatCatByCategory(ctx context.Context
 }
 
 // FetchSatelliteMetadata fetches metadata for satellites from CelesTrak's SATCAT.
-func (client *CelestrackClient) FetchSatelliteMetadata(ctx context.Context) ([]*mappers.SatelliteMetadata, error) {
+func (client *CelestrackClient) FetchSatelliteMetadata(ctx context.Context) ([]*api_mappers.SatelliteMetadata, error) {
 	// Create an HTTP request with the provided context
 	satcatUrl := client.env.EnvVars.Celestrack.Satcat
 	req, err := http.NewRequestWithContext(ctx, "GET", satcatUrl, nil)
@@ -119,7 +119,7 @@ func (client *CelestrackClient) FetchSatelliteMetadata(ctx context.Context) ([]*
 	}
 
 	// Parse records into SatelliteMetadata
-	var satellites []*mappers.SatelliteMetadata
+	var satellites []*api_mappers.SatelliteMetadata
 	for _, record := range records[1:] {
 		launchDate, err := time.Parse("2006-01-02", record[indices["LAUNCH_DATE"]])
 		if err != nil {
@@ -144,7 +144,7 @@ func (client *CelestrackClient) FetchSatelliteMetadata(ctx context.Context) ([]*
 
 		altitude := xspace.ComputeAverageAltitude(apogee, perigee)
 
-		satellite := &mappers.SatelliteMetadata{
+		satellite := &api_mappers.SatelliteMetadata{
 			SpaceID:        record[indices["NORAD_CAT_ID"]],
 			Name:           record[indices["OBJECT_NAME"]],
 			IntlDesignator: record[indices["OBJECT_ID"]],

@@ -1,4 +1,4 @@
-package mappers
+package api_mappers
 
 import "time"
 

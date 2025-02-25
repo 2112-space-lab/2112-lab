@@ -7,14 +7,14 @@ import (
 	"math/rand"
 	"net/http"
 
-	"github.com/org/2112-space-lab/org/app-service/internal/api/mappers"
+	api_mappers "github.com/org/2112-space-lab/org/app-service/pkg/api"
 	xconstants "github.com/org/2112-space-lab/org/go-utils/pkg/fx/xconstants"
 )
 
 const TILE_URL = "https://%s.basemaps.cartocdn.com/light_all/%d/%d/%d.png" // CartoDB Positron URL
 
 // FetchTile fetches a tile for the given zoom level and geographical latitude/longitude.
-func FetchTile(zoom int, lat float64, lon float64) (*mappers.RawTile, error) {
+func FetchTile(zoom int, lat float64, lon float64) (*api_mappers.RawTile, error) {
 	// Ensure the zoom level is valid
 	if zoom <= 0 {
 		return nil, fmt.Errorf("invalid zoom level")
@@ -49,7 +49,7 @@ func FetchTile(zoom int, lat float64, lon float64) (*mappers.RawTile, error) {
 	}
 
 	// Return the RawTile object with calculated x, y coordinates
-	return &mappers.RawTile{
+	return &api_mappers.RawTile{
 		ZoomLevel: zoom,
 		X:         x,
 		Y:         y,

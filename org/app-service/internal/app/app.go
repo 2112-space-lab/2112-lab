@@ -45,10 +45,17 @@ func NewApp(ctx context.Context, serviceName string, version string) (App, error
 
 	// Finalize app instance creation
 	logger.Debug("Creating service component...")
-	deps := dependencies.NewDependencies(config.Env)
+	deps, err := dependencies.NewDependencies(ctx, config.Env)
+	if err != nil {
+		return App{}, err
+	}
 	logger.Info("Service component created.")
 
 	logger.Infof("App instance successfully initialized for serviceName=%s, version=%s", serviceName, version)
+
+	go deps.EventLoop.StartProcessing(ctx)
+
+	logger.Info("Service start processing events.")
 
 	return App{
 		Dependencies: deps,

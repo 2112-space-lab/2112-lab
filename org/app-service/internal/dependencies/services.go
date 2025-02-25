@@ -3,6 +3,7 @@ package dependencies
 import (
 	"log"
 
+	"github.com/org/2112-space-lab/org/app-service/internal/events"
 	"github.com/org/2112-space-lab/org/app-service/internal/services"
 )
 
@@ -16,11 +17,11 @@ type Services struct {
 }
 
 // NewServices initializes and returns a Services struct
-func NewServices(repos *Repositories, clients *Clients) *Services {
+func NewServices(repos *Repositories, clients *Clients, emitter *events.EventEmitter) *Services {
 	return &Services{
 		SatelliteService:  services.NewSatelliteService(repos.TleRepo, clients.PropagatorClient, clients.CelestrackClient, repos.SatelliteRepo),
 		TileService:       services.NewTileService(repos.TileRepo, repos.TleRepo, repos.SatelliteRepo, repos.MappingRepo),
-		ContextService:    services.NewContextService(repos.ContextRepo),
+		ContextService:    services.NewContextService(repos.ContextRepo, emitter),
 		AuditTrailService: services.NewAuditTrailService(repos.AuditRepo),
 		TleService:        services.NewTleService(clients.CelestrackClient, repos.TleRepo, &repos.ContextRepo),
 	}

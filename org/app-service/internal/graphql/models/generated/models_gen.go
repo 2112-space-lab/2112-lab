@@ -47,6 +47,10 @@ type PropagationRequestInput struct {
 type Query struct {
 }
 
+type RehydrateGameContext struct {
+	Name string `json:"name"`
+}
+
 type SatellitePosition struct {
 	ID        string  `json:"id"`
 	Name      string  `json:"name"`
@@ -114,6 +118,7 @@ const (
 	EventTypeDataStoredInRedis                EventType = "DATA_STORED_IN_REDIS"
 	EventTypeMessagePublishedToRabbitmq       EventType = "MESSAGE_PUBLISHED_TO_RABBITMQ"
 	EventTypeSatelliteTlePropagationRequested EventType = "SATELLITE_TLE_PROPAGATION_REQUESTED"
+	EventTypeRehydrateGameContext             EventType = "REHYDRATE_GAME_CONTEXT"
 )
 
 var AllEventType = []EventType{
@@ -125,11 +130,12 @@ var AllEventType = []EventType{
 	EventTypeDataStoredInRedis,
 	EventTypeMessagePublishedToRabbitmq,
 	EventTypeSatelliteTlePropagationRequested,
+	EventTypeRehydrateGameContext,
 }
 
 func (e EventType) IsValid() bool {
 	switch e {
-	case EventTypeSatelliteTlePropagated, EventTypeSatellitePositionUpdated, EventTypeSatelliteVisibilityChecked, EventTypeSatelliteOrbitPredicted, EventTypeSystemHealthChecked, EventTypeDataStoredInRedis, EventTypeMessagePublishedToRabbitmq, EventTypeSatelliteTlePropagationRequested:
+	case EventTypeSatelliteTlePropagated, EventTypeSatellitePositionUpdated, EventTypeSatelliteVisibilityChecked, EventTypeSatelliteOrbitPredicted, EventTypeSystemHealthChecked, EventTypeDataStoredInRedis, EventTypeMessagePublishedToRabbitmq, EventTypeSatelliteTlePropagationRequested, EventTypeRehydrateGameContext:
 		return true
 	}
 	return false

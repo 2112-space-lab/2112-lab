@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	"github.com/org/2112-space-lab/org/app-service/internal/services"
+	api_mappers "github.com/org/2112-space-lab/org/app-service/pkg/api"
 )
 
 // ContextHandler handles API requests related to GameContexts.
@@ -94,6 +95,29 @@ func (h *ContextHandler) ActivateContext(c echo.Context) error {
 	if err := h.Service.ActiveContext(c.Request().Context(), domain.GameContextName(name)); err != nil {
 		c.Echo().Logger.Error("Failed to activate GameContext: ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to activate context")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+// AssignSatellites assigns a list of satellites to GameContext by its unique name and ID.
+func (h *ContextHandler) AssignSatellites(c echo.Context) error {
+	var gameSatelliteContext api_mappers.ContextSatelliteRequest
+
+	// Bind JSON request body to the domain.GameContext struct
+	if err := c.Bind(&gameSatelliteContext); err != nil {
+		c.Echo().Logger.Error("Failed to bind ContextSatelliteRequest: ", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request payload")
+	}
+
+	satelliteIDs := make([]domain.SatelliteID, len(gameSatelliteContext.SatelliteNames))
+	for _, satelliteName := range gameSatelliteContext.SatelliteNames {
+		satelliteIDs = append(satelliteIDs, domain.SatelliteID(satelliteName))
+	}
+
+	if err := h.Service.AssignSatellites(c.Request().Context(), domain.GameContextName(gameSatelliteContext.Name), satelliteIDs); err != nil {
+		c.Echo().Logger.Error("Failed to assign satellite GameContext: ", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to assign satellite to context")
 	}
 
 	return c.NoContent(http.StatusNoContent)

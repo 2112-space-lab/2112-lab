@@ -152,7 +152,7 @@ func (h *SatellitePositionHandler) startSimulation(ctx context.Context, satellit
 		}
 
 		currentPosition := positions[positionIndex]
-		log.Infof("📍 Satellite %s - Position: Lat=%.6f, Lon=%.6f, Alt=%.2f", satelliteKey, currentPosition.Latitude, currentPosition.Longitude, currentPosition.Altitude)
+		log.Tracef("📍 Satellite %s - Position: Lat=%.6f, Lon=%.6f, Alt=%.2f", satelliteKey, currentPosition.Latitude, currentPosition.Longitude, currentPosition.Altitude)
 
 		eventJSON, err := json.Marshal(currentPosition)
 		if err != nil {

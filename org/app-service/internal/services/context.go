@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	"github.com/org/2112-space-lab/org/app-service/internal/events"
+	event_builder "github.com/org/2112-space-lab/org/app-service/internal/events/builder"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
@@ -12,12 +14,13 @@ import (
 
 // ContextService definition
 type ContextService struct {
-	repo repository.ContextRepository
+	repo    repository.ContextRepository
+	emitter *events.EventEmitter
 }
 
 // NewContextService creates a new instance of ContextService.
-func NewContextService(repo repository.ContextRepository) ContextService {
-	return ContextService{repo: repo}
+func NewContextService(repo repository.ContextRepository, emitter *events.EventEmitter) ContextService {
+	return ContextService{repo: repo, emitter: emitter}
 }
 
 // Create creates a new GameContext.
@@ -132,6 +135,22 @@ func (c *ContextService) AssignSatellite(ctx context.Context, name domain.GameCo
 	return nil
 }
 
+// AssignSatellite associates a satellite with a GameContext.
+func (c *ContextService) AssignSatellites(ctx context.Context, name domain.GameContextName, satelliteID []domain.SatelliteID) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "AssignSatellite")
+	defer span.EndWithError(err)
+
+	for _, id := range satelliteID {
+		err = c.repo.AssignSatellite(ctx, name, id)
+		ctxLog := log.WithFields(log.Fields{"func": "AssignSatellite"})
+		if err != nil {
+			ctxLog.WithError(err).Error("failed to assign satellite")
+			return err
+		}
+	}
+	return nil
+}
+
 // RemoveSatellite removes the association between a satellite and a GameContext.
 func (c *ContextService) RemoveSatellite(ctx context.Context, name domain.GameContextName, satelliteID domain.SatelliteID) (err error) {
 	ctx, span := tracing.NewSpan(ctx, "RemoveSatellite")
@@ -212,4 +231,16 @@ func (c *ContextService) UnsetTriggerImportedSatelliteAt(ctx context.Context, na
 	ctx, span := tracing.NewSpan(ctx, "UnsetTriggerImportedSatelliteAt")
 	defer span.EndWithError(err)
 	return c.repo.UnsetTriggerImportedSatelliteAt(ctx, name)
+}
+
+func (c *ContextService) Rehydrate(ctx context.Context, name domain.GameContextName) (err error) {
+	ctx, span := tracing.NewSpan(ctx, "Rehydrate")
+	defer span.EndWithError(err)
+
+	ev, err := event_builder.NewRehydrateEvent(string(name), nil)
+	if err != nil {
+		return err
+	}
+
+	return c.emitter.PublishEvent(ctx, *ev)
 }

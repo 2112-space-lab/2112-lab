@@ -133,6 +133,7 @@ func (r *PublicRouter) registerPublicAPIRoutes() {
 	context.DELETE("/:name", contextHandler.DeleteContextByName)
 	context.PUT("/:name/activate", contextHandler.ActivateContext)
 	context.PUT("/:name/deactivate", contextHandler.DeactivateContext)
+	context.POST("/:name/assign/satellites", contextHandler.AssignSatellites)
 
 	// Audit trail routes
 	audit := r.Echo.Group("/audit-trails")

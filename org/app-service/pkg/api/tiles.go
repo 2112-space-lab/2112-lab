@@ -1,4 +1,4 @@
-package mappers
+package api_mappers
 
 // RawTile represents the raw tile data fetched from a tile server
 type RawTile struct {

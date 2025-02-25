@@ -7,4 +7,5 @@ enum EventType {
   DATA_STORED_IN_REDIS        # Event when data is successfully stored in Redis
   MESSAGE_PUBLISHED_TO_RABBITMQ # Event when a message is published to RabbitMQ
   SATELLITE_TLE_PROPAGATION_REQUESTED
+  REHYDRATE_GAME_CONTEXT
 }

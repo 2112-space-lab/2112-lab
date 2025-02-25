@@ -31,16 +31,11 @@ func NewTaskMonitor(ctx context.Context, dependencies *dependencies.Dependencies
 		return t, err
 	}
 
-	eventEmitter, err := events.NewEventEmitter(ctx, dependencies.Clients.RabbitMQClient)
-	if err != nil {
-		return t, err
-	}
-
 	celestrackTleUpload := handlers.NewCelestrackTleUploadHandler(
 		dependencies.Repositories.SatelliteRepo,
 		dependencies.Repositories.TleRepo,
 		&dependencies.Services.TleService,
-		eventEmitter,
+		dependencies.EventEmitter,
 		eventMonitor,
 	)
 
@@ -69,7 +64,7 @@ func NewTaskMonitor(ctx context.Context, dependencies *dependencies.Dependencies
 	)
 
 	eventDetector, err := handlers.NewEventDetector(
-		ctx, eventEmitter, eventMonitor, dependencies)
+		ctx, dependencies.EventEmitter, eventMonitor, dependencies)
 	if err != nil {
 		return t, err
 	}

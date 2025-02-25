@@ -21,13 +21,13 @@ type ExpectedEvent struct {
 	ToTimeErr                  models_time.TimeCheckpointExpression
 	ProduceCheckpointEventTime string
 	IsReject                   bool
-	AssignRef                  NamedAppEventReference // used to give a known name to matching event for accessing it afterwards
+	AssignRef                  NamedEventReference // used to give a known name to matching event for accessing it afterwards
 	XPathQuery                 string
 	XPathValue                 string
 }
 
 type ReferencedEventExpectedInfo struct {
-	AssignedRef NamedAppEventReference
+	AssignedRef NamedEventReference
 	XPathQuery  string
 	XPathValue  string
 	Description string

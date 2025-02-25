@@ -16,7 +16,7 @@ type AppState struct {
 	AppGlobalPropsScenarioOverrides models_service.GlobalPropKeyValueMap
 	AppServices                     map[models_service.ServiceName]*xtestcontainer.BaseContainer
 	eventLock                       sync.Mutex
-	NamedEventReferences            map[models_service.NamedAppEventReference]models_service.AppEventRawJSON
+	NamedEventReferences            map[models_service.NamedEventReference]models_service.EventRawJSON
 	CallbackResults                 map[string]interface{}
 	V2StreamSubscribersCancel       map[string]context.CancelFunc
 }
@@ -29,7 +29,7 @@ func NewAppState() AppState {
 		AppServices:                     map[models_service.ServiceName]*xtestcontainer.BaseContainer{},
 		CallbackResults:                 map[string]interface{}{},
 		V2StreamSubscribersCancel:       map[string]context.CancelFunc{},
-		NamedEventReferences:            map[models_service.NamedAppEventReference]models_service.AppEventRawJSON{},
+		NamedEventReferences:            map[models_service.NamedEventReference]models_service.EventRawJSON{},
 	}
 }
 
@@ -73,11 +73,11 @@ func (s *AppState) GetAppServiceContainer(ctx context.Context, serviceName model
 	return nil, fmt.Errorf("no App service container registered for service [%s]", serviceName)
 }
 
-func (s *AppState) RegisterAppNamedEventReference(ref models_service.NamedAppEventReference, jsonData models_service.AppEventRawJSON) {
+func (s *AppState) RegisterAppNamedEventReference(ref models_service.NamedEventReference, jsonData models_service.EventRawJSON) {
 	s.NamedEventReferences[ref] = jsonData
 }
 
-func (s *AppState) GetAppNamedEventByReference(ref models_service.NamedAppEventReference) (models_service.AppEventRawJSON, bool) {
+func (s *AppState) GetAppNamedEventByReference(ref models_service.NamedEventReference) (models_service.EventRawJSON, bool) {
 	data, found := s.NamedEventReferences[ref]
 	return data, found
 }

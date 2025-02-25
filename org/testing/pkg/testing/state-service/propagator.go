@@ -20,7 +20,7 @@ type PropagatorState struct {
 	GlobalPropsScenarioOverrides models_service.GlobalPropKeyValueMap
 	eventLock                    sync.Mutex
 	ReceivedEvents               map[models_service.ServiceName][]*models_service.EventRoot
-	NamedEventReferences         map[models_service.NamedAppEventReference]models_service.AppEventRawJSON
+	NamedEventReferences         map[models_service.NamedEventReference]models_service.EventRawJSON
 	CallbackResults              map[string]interface{}
 	StreamSubscribersCancel      map[string]context.CancelFunc
 }
@@ -35,7 +35,7 @@ func NewPropagatorState() PropagatorState {
 		ReceivedEvents:               make(map[models_service.ServiceName][]*models_service.EventRoot),
 		CallbackResults:              make(map[string]interface{}),
 		StreamSubscribersCancel:      make(map[string]context.CancelFunc),
-		NamedEventReferences:         make(map[models_service.NamedAppEventReference]models_service.AppEventRawJSON),
+		NamedEventReferences:         make(map[models_service.NamedEventReference]models_service.EventRawJSON),
 	}
 }
 
@@ -120,14 +120,14 @@ func (s *PropagatorState) GetReceivedEvents(serviceName models_service.ServiceNa
 }
 
 // RegisterNamedEventReference saves an event reference for later retrieval
-func (s *PropagatorState) RegisterNamedEventReference(ref models_service.NamedAppEventReference, jsonData models_service.AppEventRawJSON) {
+func (s *PropagatorState) RegisterNamedEventReference(ref models_service.NamedEventReference, jsonData models_service.EventRawJSON) {
 	s.eventLock.Lock()
 	defer s.eventLock.Unlock()
 	s.NamedEventReferences[ref] = jsonData
 }
 
 // GetNamedEventByReference retrieves a stored event by reference
-func (s *PropagatorState) GetNamedEventByReference(ref models_service.NamedAppEventReference) (models_service.AppEventRawJSON, bool) {
+func (s *PropagatorState) GetNamedEventByReference(ref models_service.NamedEventReference) (models_service.EventRawJSON, bool) {
 	s.eventLock.Lock()
 	defer s.eventLock.Unlock()
 	data, found := s.NamedEventReferences[ref]

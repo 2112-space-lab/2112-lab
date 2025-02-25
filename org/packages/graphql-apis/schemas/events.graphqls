@@ -18,3 +18,10 @@ type SatelliteTlePropagated {
 	intervalSeconds: Int
 }
 
+
+# RehydrateGameContext asks all services to update the given context from database
+type RehydrateGameContext {
+  name: String!
+}
+
+

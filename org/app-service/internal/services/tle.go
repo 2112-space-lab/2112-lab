@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/org/2112-space-lab/org/app-service/internal/api/mappers"
 	"github.com/org/2112-space-lab/org/app-service/internal/domain"
 	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
+	api_mappers "github.com/org/2112-space-lab/org/app-service/pkg/api"
 	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
 	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 )
 
 type celestrackClient interface {
-	FetchTLEFromSatCatByCategory(ctx context.Context, category string) ([]*mappers.RawTLE, error)
-	FetchSatelliteMetadata(ctx context.Context) ([]*mappers.SatelliteMetadata, error)
+	FetchTLEFromSatCatByCategory(ctx context.Context, category string) ([]*api_mappers.RawTLE, error)
+	FetchSatelliteMetadata(ctx context.Context) ([]*api_mappers.SatelliteMetadata, error)
 }
 
 type TleService struct {

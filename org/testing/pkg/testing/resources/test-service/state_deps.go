@@ -31,8 +31,8 @@ type PropagatorClientScenarioState interface {
 type RabbitMqClientScenarioState interface {
 	xtesttime.ScenarioState
 	GetLogger() *slog.Logger
-	RegisterNamedEventReference(ref models_service.NamedAppEventReference, jsonData models_service.AppEventRawJSON)
-	GetNamedEventByReference(ref models_service.NamedAppEventReference) (models_service.AppEventRawJSON, bool)
+	RegisterNamedEventReference(ref models_service.NamedEventReference, jsonData models_service.EventRawJSON)
+	GetNamedEventByReference(ref models_service.NamedEventReference) (models_service.EventRawJSON, bool)
 	GetReceivedEvents(serviceName models_service.ServiceName, from time.Time, to time.Time) []models_service.EventRoot
 	SaveReceivedEvent(event *models_service.EventRoot, serviceName models_service.ServiceName)
 }

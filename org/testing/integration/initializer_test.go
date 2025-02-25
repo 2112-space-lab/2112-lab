@@ -165,7 +165,11 @@ func prepareScenarioInitializer(baseCtx context.Context, runLogger *slog.Logger,
 		})
 
 		steps.RegisterAppDatabaseSteps(sc, scenarioState, resourceManager.AppDatabaseManager)
-		steps.RegisterAppServiceSteps(sc, scenarioState, resourceManager.ServiceContainerManager)
+		err := steps.RegisterAppServiceSteps(sc, scenarioState, resourceManager.ServiceContainerManager)
+		if err != nil {
+			scenarioLogger.Error("failed to register app service steps",
+				slog.Any(xtestlog.AttrErrorKey, err))
+		}
 		steps.RegisterPropagatorServiceSteps(sc, scenarioState, resourceManager.ServiceContainerManager)
 		steps.RegisterTimeCheckpointSteps(sc, scenarioState)
 	}

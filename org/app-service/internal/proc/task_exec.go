@@ -20,7 +20,11 @@ func TaskExec(ctx context.Context, args []string) {
 	taskName := args[0]
 	taskArgs := xutils.ResolveArgs(args[1:])
 
-	deps := dependencies.NewDependencies(config.Env)
+	deps, err := dependencies.NewDependencies(ctx, config.Env)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 	monitor, err := tasks.NewTaskMonitor(ctx, deps)
 	if err != nil {
 		log.Println(err.Error())
@@ -32,4 +36,6 @@ func TaskExec(ctx context.Context, args []string) {
 		log.Println(err.Error())
 		return
 	}
+
+	go deps.EventLoop.StartProcessing(ctx)
 }

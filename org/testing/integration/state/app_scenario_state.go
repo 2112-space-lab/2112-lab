@@ -15,6 +15,7 @@ type ServiceScenarioState struct {
 	stateservice.AppDbState
 	stateservice.AppState
 	stateservice.PropagatorState
+	stateservice.EventDetectorState
 }
 
 func RegisterCleanServiceScenarioState(info models_common.ScenarioInfo, logger *slog.Logger, scenarioFolderPath string) *ServiceScenarioState {
@@ -26,6 +27,7 @@ func RegisterCleanServiceScenarioState(info models_common.ScenarioInfo, logger *
 		AppDbState:          stateservice.NewAppDBState(),
 		AppState:            stateservice.NewAppState(),
 		PropagatorState:     stateservice.NewPropagatorState(),
+		EventDetectorState:  stateservice.NewEventDetectorState(),
 	}
 	return state
 }
