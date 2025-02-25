@@ -1,8 +1,6 @@
 package dependencies
 
 import (
-	"log"
-
 	"github.com/org/2112-space-lab/org/app-service/internal/events"
 	"github.com/org/2112-space-lab/org/app-service/internal/services"
 )
@@ -30,7 +28,7 @@ func NewServices(repos *Repositories, clients *Clients, emitter *events.EventEmi
 // Get retrieves a specific service and panics if it's not set
 func (s *Services) Get(service interface{}) interface{} {
 	if service == nil {
-		log.Panic("Requested service is not initialized")
+		panic("Requested service is not initialized")
 	}
 	return service
 }

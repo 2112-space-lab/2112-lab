@@ -28,17 +28,6 @@ func NewEventEmitter(ctx context.Context, rabbitClient *rabbitmq.RabbitMQClient,
 	}, nil
 }
 
-// PublishEvent sends an event to the local EventProcessor.
-func (e *EventEmitter) PublishEventToProcessorOnly(ctx context.Context, event model.EventRoot) error {
-	ctx, span := tracing.NewSpan(ctx, "PublishEvent")
-	defer span.End()
-
-	e.processor.EmitEvent(ctx, event)
-	log.Tracef("[x] Event processed locally: %s", event.EventType)
-
-	return nil
-}
-
 // PublishEvent sends an event to RabbitMQ and also to the local EventProcessor.
 func (e *EventEmitter) PublishEvent(ctx context.Context, event model.EventRoot) error {
 	ctx, span := tracing.NewSpan(ctx, "PublishEvent")
@@ -54,6 +43,13 @@ func (e *EventEmitter) PublishEvent(ctx context.Context, event model.EventRoot) 
 		log.Errorf("❌ Failed to publish event to RabbitMQ: %v", err)
 		return fmt.Errorf("failed to publish event: %w", err)
 	}
+
+	err = e.processor.BroadcastEvent(ctx, event)
+	if err != nil {
+		log.Errorf("❌ Failed to broadcast event to event loop: %v", err)
+		return fmt.Errorf("failed to broadcast event: %w", err)
+	}
+	log.Tracef("[x] Event processed locally: %s", event.EventType)
 
 	return nil
 }

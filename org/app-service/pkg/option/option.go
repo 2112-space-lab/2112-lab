@@ -137,3 +137,11 @@ func ConvertToFloatPtr(opt Option[float64]) *float64 {
 	}
 	return &opt.Value
 }
+
+// ConvertToStrPtr converts fx.Option[string] to *string
+func ConvertToStrPtr(opt Option[string]) *string {
+	if !opt.HasValue {
+		return nil
+	}
+	return &opt.Value
+}

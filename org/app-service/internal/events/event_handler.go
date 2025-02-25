@@ -12,6 +12,7 @@ import (
 // EventHandler is a non-generic interface that all handlers must implement.
 type EventHandler interface {
 	Run(ctx context.Context, event model.EventRoot) error // Parses the event payload and processes it
+	HandlerName() string                                  // Returns the name of the handler
 }
 
 // BaseHandler provides reusable logic for event handlers (uses generics for payloads).

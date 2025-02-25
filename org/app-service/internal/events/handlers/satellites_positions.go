@@ -41,6 +41,10 @@ func NewSatellitePositionHandler(
 	}
 }
 
+func (h *SatellitePositionHandler) HandlerName() string {
+	return "SatellitePositionHandler"
+}
+
 // Run processes the SATELLITE_TLE_PROPAGATED event.
 func (h *SatellitePositionHandler) Run(ctx context.Context, event model.EventRoot) (err error) {
 	ctx, span := tracing.NewSpan(ctx, "Run")

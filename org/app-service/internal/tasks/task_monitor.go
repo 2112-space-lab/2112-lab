@@ -26,7 +26,10 @@ func NewTaskMonitor(ctx context.Context, dependencies *dependencies.Dependencies
 	ctx, span := tracing.NewSpan(ctx, "TaskMonitor.NewTaskMonitor")
 	defer span.EndWithError(err)
 
-	eventMonitor, err := events.NewEventMonitor(ctx, dependencies.Clients.RabbitMQClient)
+	eventMonitor, err := events.NewEventMonitor(ctx,
+		dependencies.Clients.RabbitMQClient,
+		dependencies.Repositories.EventRepo,
+		dependencies.Repositories.EventHandlerRepo)
 	if err != nil {
 		return t, err
 	}

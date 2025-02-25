@@ -3,8 +3,7 @@ package proc
 import (
 	"context"
 	"fmt"
-	"log"
-
+	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
 	"github.com/org/2112-space-lab/org/app-service/internal/config"
 	"github.com/org/2112-space-lab/org/app-service/internal/dependencies"
 	"github.com/org/2112-space-lab/org/app-service/internal/tasks"
@@ -22,18 +21,18 @@ func TaskExec(ctx context.Context, args []string) {
 
 	deps, err := dependencies.NewDependencies(ctx, config.Env)
 	if err != nil {
-		log.Println(err.Error())
+		log.Error(err.Error())
 		return
 	}
 	monitor, err := tasks.NewTaskMonitor(ctx, deps)
 	if err != nil {
-		log.Println(err.Error())
+		log.Error(err.Error())
 		return
 	}
 
 	err = monitor.Process(ctx, handlers.TaskName(taskName), taskArgs)
 	if err != nil {
-		log.Println(err.Error())
+		log.Error(err.Error())
 		return
 	}
 

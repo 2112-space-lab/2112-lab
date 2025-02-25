@@ -126,6 +126,27 @@ func init() {
 				ValueType   string `gorm:"size:50;not null" json:"value_type"`
 			}
 
+			type Event struct {
+				ID          string    `gorm:"primaryKey;size:255;not null"`
+				EventType   string    `gorm:"size:255;not null;index"`
+				EventUID    string    `gorm:"size:255;not null;unique"`
+				Payload     string    `gorm:"type:json;not null"`
+				PublishedAt time.Time `gorm:"not null;default:CURRENT_TIMESTAMP"`
+				Comment     *string   `gorm:"type:text"`
+			}
+
+			type EventHandler struct {
+				ID          string     `gorm:"primaryKey;size:255;not null"`
+				EventID     string     `gorm:"size:255;not null;index"`
+				Handler     string     `gorm:"size:255;not null"`
+				StartedAt   time.Time  `gorm:"not null;default:CURRENT_TIMESTAMP"`
+				CompletedAt *time.Time `gorm:"null"`
+				Status      string     `gorm:"size:50;not null"` // Status: "STARTED", "COMPLETED", "FAILED"
+				Error       *string    `gorm:"type:text"`        // Optional error message if failed
+
+				Event Event `gorm:"constraint:OnDelete:CASCADE;foreignKey:EventID;references:ID"`
+			}
+
 			// AutoMigrate all tables
 			if err := db.AutoMigrate(
 				&Context{},
@@ -138,6 +159,8 @@ func init() {
 				&ContextTile{},
 				&AuditTrail{},
 				&GlobalProperty{},
+				&Event{},
+				&EventHandler{},
 			); err != nil {
 				return err
 			}
@@ -172,6 +195,8 @@ func init() {
 				"contexts",
 				"audit_trails",
 				"global_configurations",
+				"events",
+				"event_handlers",
 			)
 		},
 	}

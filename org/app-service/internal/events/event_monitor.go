@@ -8,8 +8,13 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/org/2112-space-lab/org/app-service/internal/clients/rabbitmq"
+	"github.com/org/2112-space-lab/org/app-service/internal/domain"
+	domainenum "github.com/org/2112-space-lab/org/app-service/internal/domain/domain-enums"
 	model "github.com/org/2112-space-lab/org/app-service/internal/graphql/models/generated"
+	repository "github.com/org/2112-space-lab/org/app-service/internal/repositories"
 	log "github.com/org/2112-space-lab/org/app-service/pkg/log"
+	fx "github.com/org/2112-space-lab/org/app-service/pkg/option"
+	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
 	"github.com/org/2112-space-lab/org/app-service/pkg/tracing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -18,16 +23,18 @@ const (
 	DefaultEventQueueSize = 100
 )
 
-// EventMonitor handles event subscription and processing.
+// EventMonitor handles event subscription, processing, and persistence.
 type EventMonitor struct {
 	rabbitClient  *rabbitmq.RabbitMQClient
 	eventQueue    chan []byte
 	eventHandlers map[model.EventType][]EventHandler
 	mutex         sync.Mutex
+	eventRepo     repository.EventRepository
+	handlerRepo   repository.EventHandlerRepository
 }
 
-// NewEventMonitor initializes an EventMonitor.
-func NewEventMonitor(ctx context.Context, rabbitClient *rabbitmq.RabbitMQClient) (e *EventMonitor, err error) {
+// NewEventMonitor initializes an EventMonitor with persistence.
+func NewEventMonitor(ctx context.Context, rabbitClient *rabbitmq.RabbitMQClient, eventRepo repository.EventRepository, handlerRepo repository.EventHandlerRepository) (e *EventMonitor, err error) {
 	_, span := tracing.NewSpan(ctx, "EventMonitor.NewEventMonitor")
 	defer span.EndWithError(err)
 
@@ -35,6 +42,8 @@ func NewEventMonitor(ctx context.Context, rabbitClient *rabbitmq.RabbitMQClient)
 		rabbitClient:  rabbitClient,
 		eventQueue:    make(chan []byte, DefaultEventQueueSize),
 		eventHandlers: make(map[model.EventType][]EventHandler),
+		eventRepo:     eventRepo,
+		handlerRepo:   handlerRepo,
 	}, nil
 }
 
@@ -55,7 +64,7 @@ func (m *EventMonitor) RegisterHandler(ctx context.Context, eventType model.Even
 	return nil
 }
 
-// StartMonitoring continuously listens for RabbitMQ messages and dispatches events with automatic reconnection.
+// StartMonitoring continuously listens for RabbitMQ messages and processes events.
 func (m *EventMonitor) StartMonitoring(ctx context.Context, header *rabbitmq.Header) (err error) {
 	ctx, span := tracing.NewSpan(ctx, "StartMonitoring")
 	defer span.EndWithError(err)
@@ -119,28 +128,69 @@ func createBackoff() *backoff.ExponentialBackOff {
 	return b
 }
 
-// processEvents processes events asynchronously from the queue.
+// processEvents processes events asynchronously from the queue and stores them.
 func (m *EventMonitor) processEvents(ctx context.Context) {
 	for msgBody := range m.eventQueue {
-		var event model.EventRoot
-		if err := json.Unmarshal(msgBody, &event); err != nil {
+		var eventRoot model.EventRoot
+		if err := json.Unmarshal(msgBody, &eventRoot); err != nil {
 			log.Errorf("❌ Failed to parse event: %v", err)
 			continue
 		}
 
-		log.Infof("🔹 Received event: %s | UID: %s", event.EventType, event.EventUID)
+		log.Infof("🔹 Received event: %s | UID: %s", eventRoot.EventType, eventRoot.EventUID)
+
+		event, err := ConvertToDomainEvent(eventRoot)
+		if err != nil {
+			log.Errorf("❌ Failed to convert event to domain: %v", err)
+			continue
+		}
+
+		if err := m.eventRepo.Save(ctx, event); err != nil {
+			log.Errorf("❌ Failed to store event in database: %v", err)
+			continue
+		}
 
 		m.mutex.Lock()
-		handlers, exists := m.eventHandlers[model.EventType(event.EventType)]
+		handlers, exists := m.eventHandlers[model.EventType(eventRoot.EventType)]
 		m.mutex.Unlock()
 
 		if !exists {
-			log.Warnf("⚠️ No handler registered for event type: %s", event.EventType)
+			log.Warnf("⚠️ No handler registered for event type: %s", eventRoot.EventType)
 			continue
 		}
 
 		for _, handler := range handlers {
-			go handler.Run(ctx, event)
+			go m.executeHandler(ctx, handler, eventRoot)
 		}
+	}
+}
+
+// executeHandler processes an event with a handler and logs execution.
+func (m *EventMonitor) executeHandler(ctx context.Context, handler EventHandler, event model.EventRoot) {
+	handlerLog := domain.EventHandler{
+		EventID:     event.EventUID,
+		HandlerName: handler.HandlerName(),
+		StartedAt:   xtime.UtcNow(),
+		Status:      domainenum.HandlerStates.Started(),
+	}
+
+	if err := m.handlerRepo.Save(ctx, handlerLog); err != nil {
+		log.Errorf("❌ Failed to log handler start: %v", err)
+	}
+
+	if err := handler.Run(ctx, event); err != nil {
+		log.Errorf("❌ Error processing event %s: %v", event.EventType, err)
+
+		errorMsg := err.Error()
+		handlerLog.Status = domainenum.HandlerStates.Failed()
+		handlerLog.Error = fx.NewValueOption(errorMsg)
+	} else {
+		handlerLog.Status = domainenum.HandlerStates.Completed()
+	}
+
+	handlerLog.CompletedAt = fx.NewValueOption(xtime.UtcNow())
+
+	if err := m.handlerRepo.Save(ctx, handlerLog); err != nil {
+		log.Errorf("❌ Failed to update handler execution log: %v", err)
 	}
 }

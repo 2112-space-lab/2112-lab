@@ -32,6 +32,10 @@ func NewRehydrateGameContextHandler(
 	}
 }
 
+func (h *RehydrateGameContextHandler) HandlerName() string {
+	return "SatellitePositionHandler"
+}
+
 // Run processes the REHYDRATE_GAME_CONTEXT event.
 func (h *RehydrateGameContextHandler) Run(ctx context.Context, event model.EventRoot) (err error) {
 	ctx, span := tracing.NewSpan(ctx, "RunRehydrateEvent")

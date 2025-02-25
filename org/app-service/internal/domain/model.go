@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	xtime "github.com/org/2112-space-lab/org/app-service/pkg/time"
 )
 
 type ModelBase struct {
@@ -31,4 +32,18 @@ func NewModelBase(name string, spaceID string, satType SatelliteType, isFavourit
 		ProcessedAt: &createdAt,
 		IsFavourite: isFavourite,
 	}, nil
+}
+
+func NewModelBaseDefault() ModelBase {
+
+	nowUtc := xtime.UtcNow().Inner()
+	return ModelBase{
+		ID:          uuid.NewString(),
+		CreatedAt:   nowUtc,
+		UpdatedAt:   &nowUtc,
+		DisplayName: "default",
+		IsActive:    true,
+		ProcessedAt: &nowUtc,
+		IsFavourite: false,
+	}
 }

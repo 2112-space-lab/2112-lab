@@ -23,9 +23,9 @@ type Dependencies struct {
 func NewDependencies(ctx context.Context, env *config.SEnv) (*Dependencies, error) {
 	database := data.NewDatabase()
 	clients := NewClients(env)
-	eventLoop := events.NewEventProcessor()
 
 	repositories := NewRepositories(&database, clients)
+	eventLoop := events.NewEventProcessor(repositories.EventRepo, repositories.EventHandlerRepo)
 	eventEmitter, err := events.NewEventEmitter(ctx, clients.RabbitMQClient, eventLoop)
 	if err != nil {
 		return &Dependencies{}, err
