@@ -31,8 +31,8 @@ func NewDependencies(ctx context.Context, env *config.SEnv) (*Dependencies, erro
 		return &Dependencies{}, err
 	}
 	services := NewServices(repositories, clients, eventEmitter)
-	rehydrateGameContextHandler := event_handlers.NewRehydrateGameContextHandler(services.ContextService, eventEmitter, repositories.GlobalPropRepo)
-	eventLoop.RegisterHandler(model.EventTypeRehydrateGameContext, rehydrateGameContextHandler)
+	rehydrateGameContextHandler := event_handlers.NewRehydrateGameContextHandler(services.ContextService, eventEmitter, repositories.GlobalPropRepo, repositories.TleRepo)
+	eventLoop.RegisterHandler(model.EventTypeRehydrateGameContextRequested, rehydrateGameContextHandler)
 
 	return &Dependencies{
 		Clients:      clients,

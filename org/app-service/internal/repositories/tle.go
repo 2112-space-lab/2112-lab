@@ -279,3 +279,42 @@ func (r *TleRepository) publishTleToBroker(ctx context.Context, tle domain.TLE) 
 	log.Debugf("Successfully published TLE update to channel %s\n", channel)
 	return nil
 }
+
+// GetTLEsByContextName retrieves TLEs for satellites assigned to a given context name.
+func (r *TleRepository) GetTLEsByContextName(ctx context.Context, contextName domain.GameContextName) ([]domain.TLE, error) {
+	// Retrieve the context by name
+	var context models.Context
+	if err := r.db.DbHandler.Where("name = ?", contextName).First(&context).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve context '%s': %w", contextName, err)
+	}
+
+	// Retrieve the satellites assigned to this context
+	var contextSatellites []models.ContextSatellite
+	if err := r.db.DbHandler.Where("context_id = ?", context.ID).Find(&contextSatellites).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve satellites for context '%s': %w", contextName, err)
+	}
+
+	if len(contextSatellites) == 0 {
+		return nil, fmt.Errorf("no satellites assigned to context '%s'", contextName)
+	}
+
+	// Extract satellite IDs
+	satelliteIDs := make([]string, len(contextSatellites))
+	for i, cs := range contextSatellites {
+		satelliteIDs[i] = cs.SatelliteID
+	}
+
+	// Retrieve the TLEs for the satellites assigned to this context
+	var tles []models.TLE
+	if err := r.db.DbHandler.Where("space_id IN ?", satelliteIDs).Find(&tles).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve TLEs for satellites in context '%s': %w", contextName, err)
+	}
+
+	// Convert to domain models
+	domainTLEs := make([]domain.TLE, len(tles))
+	for i, tle := range tles {
+		domainTLEs[i] = mapToDomainTLE(tle)
+	}
+
+	return domainTLEs, nil
+}

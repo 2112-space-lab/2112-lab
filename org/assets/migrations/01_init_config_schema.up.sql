@@ -128,6 +128,35 @@ CREATE TABLE config_schema.context_tiles (
     CONSTRAINT fk_context_tile_tile FOREIGN KEY (tile_id) REFERENCES config_schema.tiles(id) ON DELETE CASCADE
 );
 
+-- Create Event Table
+CREATE TABLE config_schema.events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    event_time_utc TIMESTAMP NOT NULL DEFAULT NOW(),
+    event_uid VARCHAR(255) UNIQUE NOT NULL,
+    event_type VARCHAR(255) NOT NULL,
+    payload JSON NOT NULL,
+    comment TEXT,
+    published_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_events_event_type ON config_schema.events(event_type);
+CREATE INDEX idx_events_event_uid ON config_schema.events(event_uid);
+
+-- Create EventHandler Table
+CREATE TABLE config_schema.event_handlers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    event_id UUID NOT NULL,
+    handler_name VARCHAR(255) NOT NULL,
+    started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMP NULL,
+    status VARCHAR(50) NOT NULL,
+    error_message TEXT NULL,
+    FOREIGN KEY (event_id) REFERENCES config_schema.events(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_event_handlers_event_id ON config_schema.event_handlers(event_id);
+CREATE INDEX idx_event_handlers_handler_name ON config_schema.event_handlers(handler_name);
+
 -- Add indexes
 CREATE INDEX idx_tile_satellite_mappings_space_id ON config_schema.tile_satellite_mappings(space_id);
 CREATE INDEX idx_tile_satellite_mappings_tile_id ON config_schema.tile_satellite_mappings(tile_id);

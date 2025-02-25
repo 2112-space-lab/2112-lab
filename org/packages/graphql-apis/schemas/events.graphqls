@@ -20,8 +20,23 @@ type SatelliteTlePropagated {
 
 
 # RehydrateGameContext asks all services to update the given context from database
-type RehydrateGameContext {
+type RehydrateGameContextRequested {
   name: String!
+  triggeredAt: String!
 }
+
+type RehydrateGameContextSuccess {
+  name: String!
+  nbSatellites: Int!
+  completedAt: String!
+}
+
+type RehydrateGameContextFailed {
+  name: String!
+  reason: String!
+  failureCount: Int!
+  failedAt: String!
+}
+
 
 

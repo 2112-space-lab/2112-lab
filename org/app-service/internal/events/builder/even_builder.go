@@ -19,22 +19,65 @@ func generateEventTimestamp() string {
 	return time.Now().UTC().Format(time.RFC3339)
 }
 
-// NewRehydrateEvent creates an EventRoot for a RehydrateGameContext event
-func NewRehydrateEvent(name string, comment *string) (*model.EventRoot, error) {
-	payload := model.RehydrateGameContext{
-		Name: name,
+// NewRehydrateGameContextRequestedEvent creates an EventRoot for a RehydrateGameContextRequested event
+func NewRehydrateGameContextRequestedEvent(name string) (*model.EventRoot, error) {
+	payload := model.RehydrateGameContextRequested{
+		Name:        name,
+		TriggeredAt: generateEventTimestamp(),
 	}
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("failed to serialize rehydrate event payload: %w", err)
+		return nil, fmt.Errorf("failed to serialize rehydrate requested event payload: %w", err)
 	}
 
 	return &model.EventRoot{
 		EventTimeUtc: generateEventTimestamp(),
 		EventUID:     generateEventUID(),
-		EventType:    model.EventTypeRehydrateGameContext.String(),
-		Comment:      comment,
+		EventType:    model.EventTypeRehydrateGameContextRequested.String(),
+		Payload:      string(payloadBytes),
+	}, nil
+}
+
+// NewRehydrateGameContextSuccessEvent creates an EventRoot for a RehydrateGameContextSuccess event
+func NewRehydrateGameContextSuccessEvent(name string, nbSatellites int32) (*model.EventRoot, error) {
+	payload := model.RehydrateGameContextSuccess{
+		Name:         name,
+		NbSatellites: nbSatellites,
+		CompletedAt:  generateEventTimestamp(),
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize rehydrate success event payload: %w", err)
+	}
+
+	return &model.EventRoot{
+		EventTimeUtc: generateEventTimestamp(),
+		EventUID:     generateEventUID(),
+		EventType:    model.EventTypeRehydrateGameContextSuccess.String(),
+		Payload:      string(payloadBytes),
+	}, nil
+}
+
+// NewRehydrateGameContextFailedEvent creates an EventRoot for a RehydrateGameContextFailed event
+func NewRehydrateGameContextFailedEvent(name, reason string, failureCount int32) (*model.EventRoot, error) {
+	payload := model.RehydrateGameContextFailed{
+		Name:         name,
+		Reason:       reason,
+		FailureCount: failureCount,
+		FailedAt:     generateEventTimestamp(),
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize rehydrate failed event payload: %w", err)
+	}
+
+	return &model.EventRoot{
+		EventTimeUtc: generateEventTimestamp(),
+		EventUID:     generateEventUID(),
+		EventType:    model.EventTypeRehydrateGameContextFailed.String(),
 		Payload:      string(payloadBytes),
 	}, nil
 }

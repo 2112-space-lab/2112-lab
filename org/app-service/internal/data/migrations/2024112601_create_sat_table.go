@@ -12,23 +12,28 @@ func init() {
 	m := &gormigrate.Migration{
 		ID: "2025011102_init",
 		Migrate: func(db *gorm.DB) error {
+			// Ensure the schema exists
+			if err := db.Exec("CREATE SCHEMA IF NOT EXISTS config_schema").Error; err != nil {
+				return err
+			}
+
+			// Define tables within the schema
 
 			type AuditTrail struct {
 				models.ModelBase
-				TableName   string    `gorm:"size:255;not null"` // Name of the table affected
-				RecordID    string    `gorm:"size:255;not null"` // ID of the record affected
-				Action      string    `gorm:"size:50;not null"`  // Action performed (e.g., "INSERT", "UPDATE", "DELETE")
-				ChangesJSON string    `gorm:"type:json"`         // JSON representation of the changes
-				PerformedBy string    `gorm:"size:255;not null"` // User or system that performed the action
-				PerformedAt time.Time `gorm:"not null"`          // Timestamp of the action
+				TableName   string    `gorm:"size:255;not null"`
+				RecordID    string    `gorm:"size:255;not null"`
+				Action      string    `gorm:"size:50;not null"`
+				ChangesJSON string    `gorm:"type:json"`
+				PerformedBy string    `gorm:"size:255;not null"`
+				PerformedAt time.Time `gorm:"not null"`
 			}
 
-			// Define the Context table
 			type Context struct {
 				models.ModelBase
-				Name                       string     `gorm:"size:255;unique;not null"` // Context name
-				TenantID                   string     `gorm:"size:255;not null;index"`  // Tenant identifier
-				Description                string     `gorm:"size:1024"`                // Optional description
+				Name                       string     `gorm:"size:255;unique;not null"`
+				TenantID                   string     `gorm:"size:255;not null;index"`
+				Description                string     `gorm:"size:1024"`
 				MaxSatellite               int        `gorm:"not null"`
 				MaxTiles                   int        `gorm:"not null"`
 				ActivatedAt                *time.Time `gorm:"null"`
@@ -38,7 +43,6 @@ func init() {
 				TriggerImportedSatelliteAt *time.Time `gorm:"null"`
 			}
 
-			// Define the Satellite table
 			type Satellite struct {
 				models.ModelBase
 				Name           string     `gorm:"size:255;not null"`
@@ -58,7 +62,6 @@ func init() {
 				OrbitType      string     `gorm:"size:255;not null"`
 			}
 
-			// Define the TLE table
 			type TLE struct {
 				models.ModelBase
 				SpaceID string    `gorm:"not null;index"`
@@ -67,7 +70,6 @@ func init() {
 				Epoch   time.Time `gorm:"not null"`
 			}
 
-			// Define the Tile table
 			type Tile struct {
 				models.ModelBase
 				Quadkey        string  `gorm:"size:256;unique;not null"`
@@ -80,7 +82,6 @@ func init() {
 				SpatialIndex   string  `gorm:"type:geometry(Polygon, 4326);spatialIndex"`
 			}
 
-			// Define the TileSatelliteMapping table
 			type TileSatelliteMapping struct {
 				models.ModelBase
 				SpaceID               string    `gorm:"not null;index"`
@@ -141,62 +142,64 @@ func init() {
 				Handler     string     `gorm:"size:255;not null"`
 				StartedAt   time.Time  `gorm:"not null;default:CURRENT_TIMESTAMP"`
 				CompletedAt *time.Time `gorm:"null"`
-				Status      string     `gorm:"size:50;not null"` // Status: "STARTED", "COMPLETED", "FAILED"
-				Error       *string    `gorm:"type:text"`        // Optional error message if failed
+				Status      string     `gorm:"size:50;not null"`
+				Error       *string    `gorm:"type:text"`
 
 				Event Event `gorm:"constraint:OnDelete:CASCADE;foreignKey:EventID;references:ID"`
 			}
 
-			// AutoMigrate all tables
-			if err := db.AutoMigrate(
-				&Context{},
-				&Satellite{},
-				&TLE{},
-				&Tile{},
-				&TileSatelliteMapping{},
-				&ContextSatellite{},
-				&ContextTLE{},
-				&ContextTile{},
-				&AuditTrail{},
-				&GlobalProperty{},
-				&Event{},
-				&EventHandler{},
-			); err != nil {
+			// AutoMigrate with schema
+			if err := db.Set("gorm:table_options", "SCHEMA=config_schema").
+				AutoMigrate(
+					&Context{},
+					&Satellite{},
+					&TLE{},
+					&Tile{},
+					&TileSatelliteMapping{},
+					&ContextSatellite{},
+					&ContextTLE{},
+					&ContextTile{},
+					&AuditTrail{},
+					&GlobalProperty{},
+					&Event{},
+					&EventHandler{},
+				); err != nil {
 				return err
 			}
 
+			// Unique constraint for contexts
 			if err := db.Exec(`
-			ALTER TABLE contexts
-			ADD CONSTRAINT unique_tenant_context_name
-			UNIQUE (tenant_id, name);
-		`).Error; err != nil {
+				ALTER TABLE config_schema.contexts
+				ADD CONSTRAINT unique_tenant_context_name
+				UNIQUE (tenant_id, name);
+			`).Error; err != nil {
 				return err
 			}
 
 			return nil
 		},
 		Rollback: func(db *gorm.DB) error {
-			// Drop tables in reverse order of dependencies
+			// Drop constraint first
 			if err := db.Exec(`
-				ALTER TABLE contexts
+				ALTER TABLE config_schema.contexts
 				DROP CONSTRAINT IF EXISTS unique_tenant_context_name;
 			`).Error; err != nil {
 				return err
 			}
 
+			// Drop tables in correct order to avoid dependency errors
 			return db.Migrator().DropTable(
-				"context_satellites",
-				"context_tles",
-				"context_tiles",
-				"tile_satellite_mappings",
-				"tiles",
-				"tles",
-				"satellites",
-				"contexts",
-				"audit_trails",
-				"global_configurations",
-				"events",
-				"event_handlers",
+				"config_schema.context_satellites",
+				"config_schema.context_tles",
+				"config_schema.context_tiles",
+				"config_schema.tile_satellite_mappings",
+				"config_schema.tiles",
+				"config_schema.tles",
+				"config_schema.satellites",
+				"config_schema.contexts",
+				"config_schema.audit_trails",
+				"config_schema.events",
+				"config_schema.event_handlers",
 			)
 		},
 	}

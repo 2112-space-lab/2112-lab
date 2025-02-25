@@ -5,115 +5,105 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"time"
 
 	testservicecontainer "github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service-container"
-	"github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service/models"
-	xtime "github.com/org/2112-space-lab/org/testing/pkg/x-time"
+	models_service "github.com/org/2112-space-lab/org/testing/pkg/testing/resources/test-service/models"
+	xtestlog "github.com/org/2112-space-lab/org/testing/pkg/testing/x-test-log"
 )
 
-// AppRestClient manages API calls manually without app_client.
+type AppRestClientRequestDoer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type AppRestClient struct {
-	BaseURL    string
-	HTTPClient *http.Client
+	hostName   string
+	httpClient AppRestClientRequestDoer
 }
 
-// NewAppRestClient initializes a new AppRestClient.
-func NewAppRestClient(ctx context.Context, scenarioState AppClientScenarioState, serviceName models.ServiceName) (*AppRestClient, error) {
-	baseURL, err := getServiceBaseURL(ctx, scenarioState, serviceName)
-	if err != nil {
-		return nil, err
-	}
-	return &AppRestClient{
-		BaseURL:    baseURL,
-		HTTPClient: &http.Client{},
-	}, nil
-}
-
-// getServiceBaseURL determines the service URL dynamically.
-func getServiceBaseURL(ctx context.Context, scenarioState AppClientScenarioState, serviceName models.ServiceName) (string, error) {
+func GetAppRestClient(ctx context.Context, scenarioState AppClientScenarioState, serviceName models_service.ServiceName) (*AppRestClient, error) {
+	logger := scenarioState.GetLogger()
 	cont, err := scenarioState.GetAppServiceContainer(ctx, serviceName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	httpBoundPort, err := cont.GetBoundPort(ctx, testservicecontainer.AppServiceHttpPort)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	hostname, err := cont.GetHostName(ctx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf("http://%s:%s", hostname, httpBoundPort.Port()), nil
+	restClient := &AppRestClient{
+		hostName:   fmt.Sprintf("http://%s:%s", hostname, httpBoundPort.Port()),
+		httpClient: xtestlog.NewRequestClientLogger(&http.Client{}, logger),
+	}
+	return restClient, err
 }
 
-// sendRequest is a helper function to make HTTP requests.
-func (c *AppRestClient) sendRequest(ctx context.Context, method, endpoint string, body interface{}) ([]byte, int, error) {
-	url := fmt.Sprintf("%s%s", c.BaseURL, endpoint)
+// CreateContext sends a request to create a new GameContext.
+func (c *AppRestClient) CreateContext(ctx context.Context, gameContext models_service.GameContext) (*models_service.GameContext, error) {
+	url := fmt.Sprintf("%s/contexts/", c.hostName)
 
-	var reqBody []byte
-	var err error
-	if body != nil {
-		reqBody, err = json.Marshal(body)
-		if err != nil {
-			return nil, 0, fmt.Errorf("failed to marshal request body: %w", err)
-		}
+	reqBody, err := json.Marshal(gameContext)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(reqBody))
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := c.HTTPClient.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, 0, fmt.Errorf("request failed: %w", err)
+		return nil, fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, resp.StatusCode, fmt.Errorf("failed to read response body: %w", err)
+	if resp.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("failed to create context, status code: %d", resp.StatusCode)
 	}
 
-	return respBody, resp.StatusCode, nil
-}
-
-// CreateContext sends a request to create a new models.GameContext.
-func (c *AppRestClient) CreateContext(ctx context.Context, gameContext models.GameContext) (*models.GameContext, error) {
-	respBody, statusCode, err := c.sendRequest(ctx, "POST", "/contexts/", gameContext)
-	if err != nil {
-		return nil, err
-	}
-	if statusCode != http.StatusCreated {
-		return nil, fmt.Errorf("failed to create context, status code: %d", statusCode)
-	}
-
-	var createdContext models.GameContext
-	if err := json.Unmarshal(respBody, &createdContext); err != nil {
+	var createdContext models_service.GameContext
+	if err := json.NewDecoder(resp.Body).Decode(&createdContext); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	return &createdContext, nil
 }
 
-// UpdateContext sends a request to update an existing models.GameContext.
-func (c *AppRestClient) UpdateContext(ctx context.Context, name string, gameContext models.GameContext) (*models.GameContext, error) {
-	respBody, statusCode, err := c.sendRequest(ctx, "PUT", "/contexts/"+name, gameContext)
+// UpdateContext sends a request to update an existing GameContext.
+func (c *AppRestClient) UpdateContext(ctx context.Context, name string, gameContext models_service.GameContext) (*models_service.GameContext, error) {
+	url := fmt.Sprintf("%s/contexts/%s", c.hostName, name)
+
+	reqBody, err := json.Marshal(gameContext)
 	if err != nil {
-		return nil, err
-	}
-	if statusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to update context, status code: %d", statusCode)
+		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	var updatedContext models.GameContext
-	if err := json.Unmarshal(respBody, &updatedContext); err != nil {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to update context, status code: %d", resp.StatusCode)
+	}
+
+	var updatedContext models_service.GameContext
+	if err := json.NewDecoder(resp.Body).Decode(&updatedContext); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
@@ -122,18 +112,32 @@ func (c *AppRestClient) UpdateContext(ctx context.Context, name string, gameCont
 
 // AssignSatellitesToContext assigns satellites to an existing GameContext.
 func (c *AppRestClient) AssignSatellitesToContext(ctx context.Context, contextName string, satelliteNames []string) error {
+	url := fmt.Sprintf("%s/contexts/%s/assign/satellites", c.hostName, contextName)
+
 	payload := map[string]interface{}{
 		"name":           contextName,
 		"satelliteNames": satelliteNames,
 	}
 
-	respBody, statusCode, err := c.sendRequest(ctx, "POST", fmt.Sprintf("/contexts/%s/assign/satellites", contextName), payload)
+	reqBody, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("failed to assign satellites to context: %w", err)
+		return fmt.Errorf("failed to marshal request body: %w", err)
 	}
 
-	if statusCode != http.StatusNoContent {
-		return fmt.Errorf("failed to assign satellites, status code: %d, response: %s", statusCode, string(respBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("failed to assign satellites, status code: %d", resp.StatusCode)
 	}
 
 	return nil
@@ -141,65 +145,95 @@ func (c *AppRestClient) AssignSatellitesToContext(ctx context.Context, contextNa
 
 // ActivateContext activates a GameContext by its unique name.
 func (c *AppRestClient) ActivateContext(ctx context.Context, contextName string) error {
-	respBody, statusCode, err := c.sendRequest(ctx, "PUT", fmt.Sprintf("/contexts/%s/activate", contextName), nil)
+	url := fmt.Sprintf("%s/contexts/%s/activate", c.hostName, contextName)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, nil)
 	if err != nil {
-		return fmt.Errorf("failed to activate context: %w", err)
+		return fmt.Errorf("failed to create request: %w", err)
 	}
-	if statusCode != http.StatusNoContent {
-		return fmt.Errorf("failed to activate context, status code: %d, response: %s", statusCode, string(respBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
 	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("failed to activate context, status code: %d", resp.StatusCode)
+	}
+
 	return nil
 }
 
-// GetContextByName retrieves a models.GameContext by its unique name.
-func (c *AppRestClient) GetContextByName(ctx context.Context, name string) (*models.GameContext, error) {
-	respBody, statusCode, err := c.sendRequest(ctx, "GET", "/contexts/"+name, nil)
+// RehydrateContext triggers a rehydration process for a GameContext.
+func (c *AppRestClient) RehydrateContext(ctx context.Context, contextName string) error {
+	url := fmt.Sprintf("%s/contexts/%s/rehydrate", c.hostName, contextName)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to create request: %w", err)
 	}
-	if statusCode != http.StatusOK {
-		return nil, fmt.Errorf("context not found, status code: %d", statusCode)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusAccepted {
+		return fmt.Errorf("failed to rehydrate context, status code: %d", resp.StatusCode)
 	}
 
-	var gameContext models.GameContext
-	if err := json.Unmarshal(respBody, &gameContext); err != nil {
+	return nil
+}
+
+// GetContextByName retrieves a GameContext by its unique name.
+func (c *AppRestClient) GetContextByName(ctx context.Context, name string) (*models_service.GameContext, error) {
+	url := fmt.Sprintf("%s/contexts/%s", c.hostName, name)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("context not found, status code: %d", resp.StatusCode)
+	}
+
+	var gameContext models_service.GameContext
+	if err := json.NewDecoder(resp.Body).Decode(&gameContext); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	return &gameContext, nil
 }
 
-// DeleteContextByName deletes a models.GameContext by its unique name.
+// DeleteContextByName deletes a GameContext by its unique name.
 func (c *AppRestClient) DeleteContextByName(ctx context.Context, name string) error {
-	_, statusCode, err := c.sendRequest(ctx, "DELETE", "/contexts/"+name, nil)
+	url := fmt.Sprintf("%s/contexts/%s", c.hostName, name)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
-		return err
-	}
-	if statusCode != http.StatusNoContent {
-		return fmt.Errorf("failed to delete context, status code: %d", statusCode)
+		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	return nil
-}
-
-// MapToOptionalTime converts a string to an optional time.Time pointer.
-func MapToOptionalTime(value string) *time.Time {
-	if value != "" {
-		t, err := xtime.FromString(xtime.DateTimeFormat(value))
-		if err != nil {
-			return nil
-		}
-		ti := t.Inner()
-		return &ti
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
 	}
-	return nil
-}
+	defer resp.Body.Close()
 
-// MapToOptionalString converts a string to an optional string pointer.
-func MapToOptionalString(value string) *string {
-	if value != "" {
-		str := fmt.Sprintf("%v", value)
-		return &str
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("failed to delete context, status code: %d", resp.StatusCode)
 	}
+
 	return nil
 }

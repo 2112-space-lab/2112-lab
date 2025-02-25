@@ -14,5 +14,5 @@ type GameSatellitesContext struct {
 }
 
 type SatelliteDefinition struct {
-	Name string `json:"name"`
+	SatelliteName string `json:"SatelliteName"`
 }

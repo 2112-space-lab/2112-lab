@@ -63,7 +63,7 @@ func (r *PublicRouter) registerMiddlewares() {
 		middlewares.LoggerMiddleware(),
 		middlewares.TimeoutMiddleware(),
 		middlewares.ResponseHeadersMiddleware(),
-		middlewares.ClerkMiddleware(),
+		// middlewares.ClerkMiddleware(),
 		middlewares.LogNonGETRequestsMiddleware(r.RouteTableMapping, r.Dependencies.Services.AuditTrailService),
 	}
 

@@ -237,7 +237,7 @@ func (c *ContextService) Rehydrate(ctx context.Context, name domain.GameContextN
 	ctx, span := tracing.NewSpan(ctx, "Rehydrate")
 	defer span.EndWithError(err)
 
-	ev, err := event_builder.NewRehydrateEvent(string(name), nil)
+	ev, err := event_builder.NewRehydrateGameContextRequestedEvent(string(name))
 	if err != nil {
 		return err
 	}

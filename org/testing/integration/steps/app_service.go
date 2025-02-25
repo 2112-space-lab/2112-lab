@@ -16,7 +16,6 @@ import (
 type AppServiceSteps struct {
 	state                       appServiceStepsState
 	appServiceContainerResource appServiceContainerResource
-	restClient                  *testservice.AppRestClient
 }
 
 type appServiceContainerResource interface {
@@ -29,22 +28,18 @@ type appServiceStepsState interface {
 }
 
 func RegisterAppServiceSteps(ctx *godog.ScenarioContext, state appServiceStepsState, containerRsc appServiceContainerResource) error {
-	restClient, err := testservice.NewAppRestClient(context.Background(), state, models_service.ServiceName("localhost"))
-	if err != nil {
-		return err
-	}
 	s := &AppServiceSteps{
 		state:                       state,
 		appServiceContainerResource: containerRsc,
-		restClient:                  restClient,
 	}
 	ctx.Step(`^a App service is created for service "([^"]*)"$`, s.appServiceCreate)
 	ctx.Step(`^a App service is created for service "([^"]*)" with env overrides:$`, s.appServiceCreateWithEnv)
 	ctx.Step(`^I register App service default scenario environment variable overrides:$`, s.registerCommonEnvVars)
-	ctx.Step(`^I subscribes as consumer "([^"]*)" for "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
-	ctx.Step(`^Events are expected for service "([^"]*)":$`, s.verifyEvents)
-	ctx.Step(`^I create a game context "([^"]*)" with the following satellites:$`, s.createGameContextWithSatellites)
-	ctx.Step(`^I activate the game context "([^"]*)"$`, s.activateGameContext)
+	ctx.Step(`^I subscribe as consumer "([^"]*)" for "([^"]*)" with registered callbacks:$`, s.subscribeToEvents)
+	ctx.Step(`^App events are expected for service "([^"]*)":$`, s.verifyEvents)
+	ctx.Step(`^I create for service "([^"]*)" a game context "([^"]*)" with the following satellites:$`, s.createGameContextWithSatellites)
+	ctx.Step(`^I activate for service "([^"]*)" the game context "([^"]*)"$`, s.activateGameContext)
+	ctx.Step(`^I rehydrate for service "([^"]*)" the game context "([^"]*)"$`, s.rehydrateGameContext)
 
 	return nil
 }
@@ -96,35 +91,38 @@ func (steps *AppServiceSteps) verifyEvents(serviceName string, eventTable *godog
 }
 
 // createGameContextWithSatellites creates a new GameContext and assigns satellites.
-func (steps *AppServiceSteps) createGameContextWithSatellites(ctx context.Context, contextName string, satelliteTable *godog.Table) error {
+func (steps *AppServiceSteps) createGameContextWithSatellites(ctx context.Context, serviceName string, contextName string, satelliteTable *godog.Table) error {
+
+	client, err := testservice.GetAppRestClient(ctx, steps.state, models_service.ServiceName(serviceName))
+	if err != nil {
+		return err
+	}
+
 	satellites, err := GodogTableToSlice[models_service.SatelliteDefinition](satelliteTable)
 	if err != nil {
 		log.Printf("Error parsing satellite table: %v", err)
 		return err
 	}
 
-	// Extract satellite names
 	satelliteNames := make([]string, len(satellites))
 	for i, satellite := range satellites {
-		satelliteNames[i] = satellite.Name
+		satelliteNames[i] = satellite.SatelliteName
 	}
 
-	// Create the GameContext
 	gameContext := models_service.GameContext{
 		Name:        contextName,
 		Description: fmt.Sprintf("Context created at: %s", xtime.UtcNow().Inner()),
-		IsActive:    false,
+		IsActive:    true,
 	}
 
-	createdContext, err := steps.restClient.CreateContext(ctx, gameContext)
+	createdContext, err := client.CreateContext(ctx, gameContext)
 	if err != nil {
 		return fmt.Errorf("failed to create game context: %w", err)
 	}
 
 	log.Printf("Created GameContext: %+v", createdContext)
 
-	// Assign satellites
-	err = steps.restClient.AssignSatellitesToContext(ctx, contextName, satelliteNames)
+	err = client.AssignSatellitesToContext(ctx, contextName, satelliteNames)
 	if err != nil {
 		return fmt.Errorf("failed to assign satellites: %w", err)
 	}
@@ -134,12 +132,44 @@ func (steps *AppServiceSteps) createGameContextWithSatellites(ctx context.Contex
 }
 
 // activateGameContext activates a GameContext.
-func (steps *AppServiceSteps) activateGameContext(ctx context.Context, contextName string) error {
-	err := steps.restClient.ActivateContext(ctx, contextName)
+func (steps *AppServiceSteps) activateGameContext(ctx context.Context, serviceName string, contextName string) error {
+
+	client, err := testservice.GetAppRestClient(ctx, steps.state, models_service.ServiceName(serviceName))
+	if err != nil {
+		return err
+	}
+
+	err = client.ActivateContext(ctx, contextName)
 	if err != nil {
 		return fmt.Errorf("failed to activate game context: %w", err)
 	}
 
 	log.Printf("GameContext '%s' activated successfully", contextName)
+	return nil
+}
+
+// rehydrateGameContext triggers the rehydration of a game context.
+func (steps *AppServiceSteps) rehydrateGameContext(ctx context.Context, serviceName string, contextName string) error {
+
+	client, err := testservice.GetAppRestClient(ctx, steps.state, models_service.ServiceName(serviceName))
+	if err != nil {
+		return err
+	}
+
+	gameContext, err := client.GetContextByName(ctx, contextName)
+	if err != nil {
+		return fmt.Errorf("failed to fetch game context: %w", err)
+	}
+
+	if !gameContext.IsActive {
+		return fmt.Errorf("game context '%s' is not active, cannot rehydrate", contextName)
+	}
+
+	err = client.RehydrateContext(ctx, contextName)
+	if err != nil {
+		return fmt.Errorf("failed to rehydrate game context: %w", err)
+	}
+
+	log.Printf("GameContext '%s' rehydration process triggered successfully", contextName)
 	return nil
 }

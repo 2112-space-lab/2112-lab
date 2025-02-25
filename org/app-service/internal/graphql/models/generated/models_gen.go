@@ -47,8 +47,22 @@ type PropagationRequestInput struct {
 type Query struct {
 }
 
-type RehydrateGameContext struct {
-	Name string `json:"name"`
+type RehydrateGameContextFailed struct {
+	Name         string `json:"name"`
+	Reason       string `json:"reason"`
+	FailureCount int32  `json:"failureCount"`
+	FailedAt     string `json:"failedAt"`
+}
+
+type RehydrateGameContextRequested struct {
+	Name        string `json:"name"`
+	TriggeredAt string `json:"triggeredAt"`
+}
+
+type RehydrateGameContextSuccess struct {
+	Name         string `json:"name"`
+	NbSatellites int32  `json:"nbSatellites"`
+	CompletedAt  string `json:"completedAt"`
 }
 
 type SatellitePosition struct {
@@ -118,7 +132,9 @@ const (
 	EventTypeDataStoredInRedis                EventType = "DATA_STORED_IN_REDIS"
 	EventTypeMessagePublishedToRabbitmq       EventType = "MESSAGE_PUBLISHED_TO_RABBITMQ"
 	EventTypeSatelliteTlePropagationRequested EventType = "SATELLITE_TLE_PROPAGATION_REQUESTED"
-	EventTypeRehydrateGameContext             EventType = "REHYDRATE_GAME_CONTEXT"
+	EventTypeRehydrateGameContextRequested    EventType = "REHYDRATE_GAME_CONTEXT_REQUESTED"
+	EventTypeRehydrateGameContextSuccess      EventType = "REHYDRATE_GAME_CONTEXT_SUCCESS"
+	EventTypeRehydrateGameContextFailed       EventType = "REHYDRATE_GAME_CONTEXT_FAILED"
 )
 
 var AllEventType = []EventType{
@@ -130,12 +146,14 @@ var AllEventType = []EventType{
 	EventTypeDataStoredInRedis,
 	EventTypeMessagePublishedToRabbitmq,
 	EventTypeSatelliteTlePropagationRequested,
-	EventTypeRehydrateGameContext,
+	EventTypeRehydrateGameContextRequested,
+	EventTypeRehydrateGameContextSuccess,
+	EventTypeRehydrateGameContextFailed,
 }
 
 func (e EventType) IsValid() bool {
 	switch e {
-	case EventTypeSatelliteTlePropagated, EventTypeSatellitePositionUpdated, EventTypeSatelliteVisibilityChecked, EventTypeSatelliteOrbitPredicted, EventTypeSystemHealthChecked, EventTypeDataStoredInRedis, EventTypeMessagePublishedToRabbitmq, EventTypeSatelliteTlePropagationRequested, EventTypeRehydrateGameContext:
+	case EventTypeSatelliteTlePropagated, EventTypeSatellitePositionUpdated, EventTypeSatelliteVisibilityChecked, EventTypeSatelliteOrbitPredicted, EventTypeSystemHealthChecked, EventTypeDataStoredInRedis, EventTypeMessagePublishedToRabbitmq, EventTypeSatelliteTlePropagationRequested, EventTypeRehydrateGameContextRequested, EventTypeRehydrateGameContextSuccess, EventTypeRehydrateGameContextFailed:
 		return true
 	}
 	return false
